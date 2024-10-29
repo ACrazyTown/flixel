@@ -634,6 +634,13 @@ class FlxGraphic implements IFlxDestroyable
 			bitmap = value;
 			width = bitmap.width;
 			height = bitmap.height;
+
+			#if !flash
+			if (width > FlxG.bitmap.maxTextureSize || height > FlxG.bitmap.maxTextureSize)
+			{
+				FlxG.log.warn('Graphic with size ${width}x${height} larger than maximum size (${FlxG.bitmap.maxTextureSize}x${FlxG.bitmap.maxTextureSize}). This may result in rendering errors.');
+			}
+			#end
 		}
 
 		return value;
