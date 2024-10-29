@@ -8,6 +8,7 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
 import openfl.Assets;
+import flixel.util.FlxSignal.FlxTypedSignal;
 #if !flash
 import lime.graphics.opengl.GL;
 #end
@@ -31,6 +32,16 @@ class BitmapFrontEnd
 	 * Useful for drawing colored rectangles of all sizes in FlxG.renderTile mode.
 	 */
 	public var whitePixel(get, never):FlxFrame;
+
+	/**
+	 * A signal that gets dispatched right before a graphic gets added to the cache.
+	 */
+	public var preGraphicAdded(default, null):FlxTypedSignal<FlxGraphic->Void> = new FlxTypedSignal<FlxGraphic->Void>();
+
+	/**
+	 * A signal that gets dispatched right before a graphic gets removed from the cache.
+	 */
+	public var preGraphicRemoved(default, null):FlxTypedSignal<FlxGraphic->Void> = new FlxTypedSignal<FlxGraphic->Void>();
 
 	@:allow(flixel.system.frontEnds.BitmapLogFrontEnd)
 	var _cache:Map<String, FlxGraphic>;
@@ -167,6 +178,7 @@ class BitmapFrontEnd
 	 */
 	public inline function addGraphic(graphic:FlxGraphic):FlxGraphic
 	{
+		preGraphicAdded.dispatch(graphic);
 		_cache.set(graphic.key, graphic);
 		return graphic;
 	}
@@ -349,6 +361,7 @@ class BitmapFrontEnd
 	{
 		if (key != null)
 		{
+			preGraphicRemoved.dispatch(get(key));
 			Assets.cache.removeBitmapData(key);
 			_cache.remove(key);
 		}
