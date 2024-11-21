@@ -175,17 +175,6 @@ class FlxTouchManager implements IFlxInputManager
 		var touch:Null<FlxTouch> = _touchesCache.get(FlashEvent.touchPointID);
 		if (touch != null)
 		{
-			// Compute the velocity if the touch is released (or null)
-			if (touch.released)
-			{
-				// Y
-				final computedVelocityY:Float = FlxVelocity.computeVelocity(velocityY, 0, 100, 0, FlxG.elapsed);
-				velocityY = (_velocityYCap == 1) ? (computedVelocityY > _velocityYCap ? computedVelocityY : 0) : (computedVelocityY < _velocityYCap ? computedVelocityY : 0);
-				
-				// X
-				final computedVelocityX:Float = FlxVelocity.computeVelocity(velocityX, 0, 100, 0, FlxG.elapsed);
-				velocityX = (_velocityXCap == 1) ? (computedVelocityX > _velocityXCap ? computedVelocityX : 0) : (computedVelocityX < _velocityXCap ? computedVelocityX : 0);
-			}
 			touch.setXY(Std.int(FlashEvent.stageX), Std.int(FlashEvent.stageY));
 			touch.pressure = FlashEvent.pressure;
 		}
@@ -218,9 +207,45 @@ class FlxTouchManager implements IFlxInputManager
 
 		if (touch != null)
 		{
+			calculateVelocity(touch);
 			touch.setXY(Std.int(FlashEvent.stageX), Std.int(FlashEvent.stageY));
 			touch.pressure = FlashEvent.pressure;
 		}
+	}
+
+	// TODO: Make this function more flexible and customizable.
+	function calculateVelocity(touch:FlxTouch):Void
+	{
+		if (touch == null || !touch?.pressed)
+			return;
+			
+		if (Math.abs(touch.deltaY) <= 15)
+		{
+			velocityY = 0;
+			return;
+		}
+		
+		if (Math.abs(touch.deltaX) <= 15)
+		{
+			velocityX = 0;
+			return;
+		}
+		
+		// A bit messy.
+		// The time in seconds.
+		final _deltaTime:Float = touch.ticksDeltaSincePress / 1000;
+		
+		// Y
+		velocityY = touch.deltaY / _deltaTime;
+		_velocityYCap = (velocityY < -1) ? -1 : 1;
+		
+		velocityY = FlxMath.clamp(velocityY, -100, 100);
+		
+		// X
+		velocityX = touch.deltaX / _deltaTime;
+		_velocityXCap = (velocityX < -1) ? -1 : 1;
+		
+		velocityX = FlxMath.clamp(velocityX, -100, 100);
 	}
 
 	/**
@@ -264,30 +289,16 @@ class FlxTouchManager implements IFlxInputManager
 	{
 		var i:Int = list.length - 1;
 		var touch:FlxTouch = list[i];
-		// A bit messy.
-		if (touch != null || touch.pressed)
+		// Compute the velocity if the touch is released (or null)
+		if (touch != null || touch?.released)
 		{
-			// Calculate the starting velocity if the touch is pre-existing.
-			// The time in seconds.
-			final _deltaTime:Float = touch.ticksDeltaSincePress / 1000;
-			
 			// Y
-			velocityY = touch.deltaY / _deltaTime;
-			_velocityYCap = (velocityY < -1) ? -1 : 1;
+			final computedVelocityY:Float = FlxVelocity.computeVelocity(velocityY, 0, 100, 0, FlxG.elapsed);
+			velocityY = (_velocityYCap == 1) ? (computedVelocityY > _velocityYCap ? computedVelocityY : 0) : (computedVelocityY < _velocityYCap ? computedVelocityY : 0);
 			
-			velocityY = FlxMath.clamp(velocityY, -100, 100);
-			
-			if (Math.abs(touch.deltaY) <= 25)
-				velocityY = 0;
-				
 			// X
-			velocityX = touch.deltaX / _deltaTime;
-			_velocityXCap = (velocityX < -1) ? -1 : 1;
-			
-			velocityX = FlxMath.clamp(velocityX, -100, 100);
-			
-			if (Math.abs(touch.deltaX) <= 25)
-				velocityX = 0;
+			final computedVelocityX:Float = FlxVelocity.computeVelocity(velocityX, 0, 100, 0, FlxG.elapsed);
+			velocityX = (_velocityXCap == 1) ? (computedVelocityX > _velocityXCap ? computedVelocityX : 0) : (computedVelocityX < _velocityXCap ? computedVelocityX : 0);
 		}
 
 
