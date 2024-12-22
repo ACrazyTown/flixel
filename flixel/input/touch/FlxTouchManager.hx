@@ -27,7 +27,9 @@ class FlxTouchManager implements IFlxInputManager
 	/**
 	 * The FlxFlick class responsible for managing flicks.
 	 */
+	#if FLX_POINTER_INPUT
 	public var flickManager:FlxFlick = new FlxFlick();
+	#end
 
 	/**
 	 * The threshold to surpass for a movement check to be returned as true.
@@ -69,6 +71,9 @@ class FlxTouchManager implements IFlxInputManager
 		_touchesCache.clear();
 		FlxDestroyUtil.destroyArray(list);
 		FlxDestroyUtil.destroyArray(_inactiveTouches);
+		#if FLX_POINTER_INPUT
+		flickManager.destroy();
+		#end
 	}
 
 	/**
@@ -242,20 +247,10 @@ class FlxTouchManager implements IFlxInputManager
 	 */
 	function update():Void
 	{
-		for (touch in list)
-		{
-			if (touch.pressed)
-			{
-				flickManager.destroy();
-				continue;
-			}
-			
-			if (touch.justReleased)
-				flickManager.initFlick(touch.touchPointID, touch.velocity);
-		}
-		
+		#if FLX_POINTER_INPUT
 		flickManager.update(FlxG.elapsed);
-			
+		#end
+
 		var i:Int = list.length - 1;
 
 
