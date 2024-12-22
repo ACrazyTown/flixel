@@ -242,6 +242,20 @@ class FlxTouchManager implements IFlxInputManager
 	 */
 	function update():Void
 	{
+		for (touch in list)
+		{
+			if (touch.pressed)
+			{
+				flickManager.destroy();
+				continue;
+			}
+			
+			if (touch.justReleased)
+				flickManager.initFlick(touch.touchPointID, touch.velocity);
+		}
+		
+		flickManager.update(FlxG.elapsed);
+			
 		var i:Int = list.length - 1;
 
 
@@ -263,19 +277,6 @@ class FlxTouchManager implements IFlxInputManager
 
 			i--;
 		}
-		for (touch in list)
-		{
-			if (touch.pressed)
-			{
-				flickManager.destroy();
-				continue;
-			}
-			
-			if (touch.justReleased)
-				flickManager.initFlick(touch.touchPointID, touch.velocity);
-		}
-		
-		flickManager.update(FlxG.elapsed);
 	}
 
 	function onFocus():Void {}
