@@ -36,7 +36,7 @@ class FlxTouchManager implements IFlxInputManager
 	 * On by default.
 	 */
 	public var invertX:Bool = true;
-	
+
 	/**
 	 * Inverts movement checks for the Y axis.
 	 * On by default.
@@ -186,7 +186,7 @@ class FlxTouchManager implements IFlxInputManager
 		var touch:Null<FlxTouch> = _touchesCache.get(FlashEvent.touchPointID);
 		if (touch != null)
 		{
-			touch.setXY(Std.int(FlashEvent.stageX), Std.int(FlashEvent.stageY));
+			touch.setXY(Std.int(FlashEvent.stageX), Std.int(FlashEvent.stageY), true);
 			touch.pressure = FlashEvent.pressure;
 		}
 		else
