@@ -143,6 +143,7 @@ class FlxG
 
 	public static var renderMethod(default, null):FlxRenderMethod;
 
+	@:deprecated
 	public static var renderBlit(default, null):Bool;
 	public static var renderTile(default, null):Bool;
 
@@ -584,25 +585,27 @@ class FlxG
 
 	static function initRenderMethod():Void
 	{
-		#if !flash
-		renderMethod = switch (stage.window.context.type)
-		{
-			case OPENGL, OPENGLES, WEBGL: DRAW_TILES;
-			default: BLITTING;
-		}
-		#else
-		#if web
-		renderMethod = BLITTING;
-		#else
+		// #if !flash
+		// renderMethod = switch (stage.window.context.type)
+		// {
+		// 	case OPENGL, OPENGLES, WEBGL: DRAW_TILES;
+		// 	default: BLITTING;
+		// }
+		// #else
+		// #if web
+		// renderMethod = BLITTING;
+		// #else
+		// renderMethod = DRAW_TILES;
+		// #end
+		// #end
+
+		// #if air
+		// renderMethod = BLITTING;
+		// #end
+
+		// renderBlit = renderMethod == BLITTING;
+
 		renderMethod = DRAW_TILES;
-		#end
-		#end
-
-		#if air
-		renderMethod = BLITTING;
-		#end
-
-		renderBlit = renderMethod == BLITTING;
 		renderTile = renderMethod == DRAW_TILES;
 
 		FlxObject.defaultPixelPerfectPosition = renderBlit;
