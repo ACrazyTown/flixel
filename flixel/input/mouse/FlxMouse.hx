@@ -635,10 +635,8 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		if (!pressed)
 			return;
 
-		var _deltaTime:Float = ticksDeltaSincePress / 1000;
-
-		velocity.y = (deltaY != 0) ? FlxMath.roundDecimal(deltaY / _deltaTime, 3) : 0;
-		velocity.x = (deltaY != 0) ? FlxMath.roundDecimal((deltaX != 0) ? deltaX : 1 / _deltaTime, 3) : 0;
+		velocity.x = deltaViewX;
+		velocity.y = deltaViewY;
 	}
 
 	/**

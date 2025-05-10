@@ -100,12 +100,12 @@ class FlxFlick implements IFlxDestroyable
 	{
 		if (flickThreshold == null)
 		{
-			flickThreshold = FlxPoint.get(100, 100);
+			flickThreshold = FlxPoint.get(10, 10);
 		}
 
 		if (maxVelocity == null)
 		{
-			maxVelocity = FlxPoint.get(1000, 1000);
+			maxVelocity = FlxPoint.get(100, 100);
 		}
 	}
 
@@ -136,12 +136,12 @@ class FlxFlick implements IFlxDestroyable
 				continue;
 			}
 
-			if (Math.abs(touch.deltaX) <= 25)
+			if (Math.abs(touch.deltaViewX) <= 10)
 			{
 				velocity.x = 0;
 			}
 
-			if (Math.abs(touch.deltaY) <= 25)
+			if (Math.abs(touch.deltaViewY) <= 10)
 			{
 				velocity.y = 0;
 			}
@@ -162,7 +162,7 @@ class FlxFlick implements IFlxDestroyable
 			return;
 		}
 
-		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 25)
+		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 1)
 		{
 			destroy();
 			return;
@@ -176,7 +176,7 @@ class FlxFlick implements IFlxDestroyable
 		{
 			#if FLX_TOUCH
 			if (FlxG.touches.invertX)
-				modifiedDistance = -_currentDistance.x;
+				modifiedDistance *= -1;
 			#end
 
 			if (modifiedDistance < 0)
@@ -196,7 +196,7 @@ class FlxFlick implements IFlxDestroyable
 		{
 			#if FLX_TOUCH
 			if (FlxG.touches.invertY)
-				modifiedDistance = -_currentDistance.y;
+				modifiedDistance *= -1;
 			#end
 
 			if (modifiedDistance < 0)
@@ -219,24 +219,19 @@ class FlxFlick implements IFlxDestroyable
 	@:noCompletion
 	function updateMotion(elapsed:Float):Void
 	{
-		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 25)
-		{
-			destroy();
-			return;
-		}
-
 		var framerateAmp = 60 / (FlxG.updateFramerate > 60 ? FlxG.updateFramerate : 60) - 0.05;
 		if (framerateAmp > 0.45) framerateAmp = 0.45;
 
-		var newVelocity = FlxVelocity.computeVelocity(velocity.x, 0, drag.x, maxVelocity.x, elapsed);
-		var avgVelocity = 0.5 * (velocity.x + newVelocity);
-		velocity.x = newVelocity;
-		_currentDistance.x += (avgVelocity * elapsed) / framerateAmp;
+		// Apple's magic number / math for smooth scrolling momentum
+		var newVelX = Math.min(velocity.x * 0.95, maxVelocity.x);
+		var avgVelX = 0.5 * (velocity.x + newVelX);
+		velocity.x = newVelX;
+		_currentDistance.x += (avgVelX * elapsed) / framerateAmp;
 
-		newVelocity = FlxVelocity.computeVelocity(velocity.y, 0, drag.y, maxVelocity.y, elapsed);
-		avgVelocity = 0.5 * (velocity.y + newVelocity);
-		velocity.y = newVelocity;
-		_currentDistance.y += (avgVelocity * elapsed) / framerateAmp;
+		var newVelY = Math.min(velocity.y * 0.95, maxVelocity.y);
+		var avgVelY = 0.5 * (velocity.y + newVelY);
+		velocity.y = newVelY;
+		_currentDistance.y += (avgVelY * elapsed) / framerateAmp;
 	}
 
 	/**
