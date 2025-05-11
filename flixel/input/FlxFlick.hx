@@ -2,7 +2,7 @@ package flixel.input;
 
 import flixel.FlxG;
 import flixel.math.FlxPoint;
-import flixel.math.FlxVelocity;
+import flixel.math.FlxMath;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxStringUtil;
 
@@ -213,12 +213,19 @@ class FlxFlick implements IFlxDestroyable
 
 	/**
 	 * Updates the motion of the flick.
-     * Uses a framerate dependent calculation.
+	 * Uses a framerate and dpi dependent calculation.
 	 * @param elapsed Time elapsed
 	 */
 	@:noCompletion
 	function updateMotion(elapsed:Float):Void
 	{
+		var dpiScale = FlxG.stage.window.display.dpi / 160; // 160 is baseline "medium" DPI
+		
+		// Clamp the scale to avoid extreme differences
+		FlxMath.clamp(dpiScale, 0.5, 2);
+		
+		dpiScale *= 3.5;
+
 		var framerateAmp = 60 / (FlxG.updateFramerate > 60 ? FlxG.updateFramerate : 60) - 0.05;
 		if (framerateAmp > 0.45) framerateAmp = 0.45;
 
@@ -226,12 +233,12 @@ class FlxFlick implements IFlxDestroyable
 		var newVelX = Math.min(velocity.x * 0.95, maxVelocity.x);
 		var avgVelX = 0.5 * (velocity.x + newVelX);
 		velocity.x = newVelX;
-		_currentDistance.x += (avgVelX * elapsed) / framerateAmp;
+		_currentDistance.x += (avgVelX * elapsed) / framerateAmp / dpiScale;
 
 		var newVelY = Math.min(velocity.y * 0.95, maxVelocity.y);
 		var avgVelY = 0.5 * (velocity.y + newVelY);
 		velocity.y = newVelY;
-		_currentDistance.y += (avgVelY * elapsed) / framerateAmp;
+		_currentDistance.y += (avgVelY * elapsed) / framerateAmp / dpiScale;
 	}
 
 	/**
