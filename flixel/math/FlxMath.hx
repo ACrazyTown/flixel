@@ -604,12 +604,4 @@ class FlxMath
 		b = Math.abs(b);
 		return a - b * Math.floor(a / b);
 	}
-
-	/**
-	 * Returns the given value to be within the range of min and max.
-	 */
-	public static inline function clamp(value:Float, min:Float, max:Float):Float
-	{
-		return Math.max(min, Math.min(max, value));
-	}
 }
