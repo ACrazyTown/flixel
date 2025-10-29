@@ -27,7 +27,7 @@ class FlxStringUtil
 	 * @param	EndTicks	The second timestamp from the system.
 	 * @return	A String containing the formatted time elapsed information.
 	 */
-	public static inline function formatTicks(StartTicks:Int, EndTicks:Int):String
+	public static inline function formatTicks(StartTicks:Float, EndTicks:Float):String
 	{
 		return (Math.abs(EndTicks - StartTicks) / 1000) + "s";
 	}
