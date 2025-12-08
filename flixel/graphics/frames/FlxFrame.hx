@@ -279,12 +279,6 @@ class FlxFrame implements IFlxDestroyable
 	 */
 	public function prepareMatrix(mat:FlxMatrix, rotation:FlxFrameAngle = FlxFrameAngle.ANGLE_0, flipX:Bool = false, flipY:Bool = false):FlxMatrix
 	{
-		if (FlxG.renderBlit)
-		{
-			mat.identity();
-			return mat;
-		}
-
 		tileMatrix.copyTo(mat);
 
 		var doFlipX = flipX != this.flipX;

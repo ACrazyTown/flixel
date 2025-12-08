@@ -63,20 +63,10 @@ class FlxSubState extends FlxState
 	override public function draw():Void
 	{
 		// Draw background
-		if (FlxG.renderBlit)
+		if (_bgSprite != null && _bgSprite.visible)
 		{
-			for (camera in getCamerasLegacy())
-			{
-				camera.fill(bgColor);
-			}
-		}
-		else // FlxG.renderTile
-		{
-			if (_bgSprite != null && _bgSprite.visible)
-			{
-				_bgSprite.cameras = getCameras();
-				_bgSprite.draw();
-			}
+			_bgSprite.cameras = getCameras();
+			_bgSprite.draw();
 		}
 
 		// Now draw all children

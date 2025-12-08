@@ -235,16 +235,9 @@ class FlxBitmapText extends FlxSprite
 
 		this.font = (font == null) ? FlxBitmapFont.getDefaultFont() : font;
 
-		if (FlxG.renderBlit)
-		{
-			pixels = new BitmapData(1, 1, true, FlxColor.TRANSPARENT);
-		}
-		else
-		{
-			textData = [];
-			textDrawData = [];
-			borderDrawData = [];
-		}
+		textData = [];
+		textDrawData = [];
+		borderDrawData = [];
 		
 		this.text = text;
 	}
@@ -284,10 +277,6 @@ class FlxBitmapText extends FlxSprite
 		}
 		pendingTextBitmapChange = pendingTextBitmapChange || Force;
 		checkPendingChanges(false);
-		if (FlxG.renderBlit)
-		{
-			super.drawFrame(Force);
-		}
 	}
 	
 	override function updateHitbox()
@@ -298,11 +287,6 @@ class FlxBitmapText extends FlxSprite
 
 	function checkPendingChanges(useTiles:Bool = false):Void
 	{
-		if (FlxG.renderBlit)
-		{
-			useTiles = false;
-		}
-
 		if (pendingTextChange)
 		{
 			updateText();
@@ -329,130 +313,122 @@ class FlxBitmapText extends FlxSprite
 	static final frameDrawHelper = new ReusableFrame();
 	override function draw()
 	{
-		if (FlxG.renderBlit)
-		{
-			checkPendingChanges(false);
-			super.draw();
-		}
-		else
-		{
-			checkPendingChanges(true);
-			
-			final colorHelper = Std.int(alpha * 0xFF) << 24 | this.color.rgb;
-			
-			final textColorTransform = textColorTransformDrawHelper.reset();
-			textColorTransform.setMultipliers(colorHelper);
-			if (useTextColor)
-				textColorTransform.scaleMultipliers(textColor);
-			
-			final borderColorTransform = borderColorTransformDrawHelper.reset();
-			borderColorTransform.setMultipliers(borderColor).scaleMultipliers(colorHelper);
-			
-			final scaleX:Float = scale.x * _facingHorizontalMult;
-			final scaleY:Float = scale.y * _facingVerticalMult;
-			
-			final originX:Float = _facingHorizontalMult != 1 ? frameWidth - origin.x : origin.x;
-			final originY:Float = _facingVerticalMult != 1 ? frameHeight - origin.y : origin.y;
-			
-			final clippedFrameRect = FlxRect.get(0, 0, frameWidth, frameHeight);
+		checkPendingChanges(true);
+		
+		final colorHelper = Std.int(alpha * 0xFF) << 24 | this.color.rgb;
+		
+		final textColorTransform = textColorTransformDrawHelper.reset();
+		textColorTransform.setMultipliers(colorHelper);
+		if (useTextColor)
+			textColorTransform.scaleMultipliers(textColor);
+		
+		final borderColorTransform = borderColorTransformDrawHelper.reset();
+		borderColorTransform.setMultipliers(borderColor).scaleMultipliers(colorHelper);
+		
+		final scaleX:Float = scale.x * _facingHorizontalMult;
+		final scaleY:Float = scale.y * _facingVerticalMult;
+		
+		final originX:Float = _facingHorizontalMult != 1 ? frameWidth - origin.x : origin.x;
+		final originY:Float = _facingVerticalMult != 1 ? frameHeight - origin.y : origin.y;
+		
+		final clippedFrameRect = FlxRect.get(0, 0, frameWidth, frameHeight);
 
-			if (clipRect != null)
-				clippedFrameRect.clipTo(clipRect);
+		if (clipRect != null)
+			clippedFrameRect.clipTo(clipRect);
 
-			if (clippedFrameRect.isEmpty)
-				return;
-			
-			final charClipHelper = FlxRect.get();
-			final charClippedFrame = frameDrawHelper;
-			final screenPos = FlxPoint.get();
-			
-			final cameras = getCamerasLegacy();
-			for (camera in cameras)
+		if (clippedFrameRect.isEmpty)
+			return;
+		
+		final charClipHelper = FlxRect.get();
+		final charClippedFrame = frameDrawHelper;
+		final screenPos = FlxPoint.get();
+		
+		final cameras = getCamerasLegacy();
+		for (camera in cameras)
+		{
+			if (!camera.visible || !camera.exists || !isOnScreen(camera))
 			{
-				if (!camera.visible || !camera.exists || !isOnScreen(camera))
+				continue;
+			}
+
+			getScreenPosition(screenPos, camera).subtract(offset);
+
+			if (isPixelPerfectRender(camera))
+			{
+				screenPos.floor();
+			}
+
+			updateTrig();
+
+			if (background)
+			{
+				// backround tile transformations
+				final matrix = matrixDrawHelper;
+				matrix.identity();
+				matrix.scale(0.1 * clippedFrameRect.width, 0.1 * clippedFrameRect.height);
+				matrix.translate(clippedFrameRect.x - originX, clippedFrameRect.y - originY);
+				matrix.scale(scaleX, scaleY);
+
+				if (angle != 0)
 				{
-					continue;
+					matrix.rotateWithTrig(_cosAngle, _sinAngle);
 				}
 
-				getScreenPosition(screenPos, camera).subtract(offset);
-
-				if (isPixelPerfectRender(camera))
-				{
-					screenPos.floor();
-				}
-
-				updateTrig();
-
-				if (background)
-				{
-					// backround tile transformations
-					final matrix = matrixDrawHelper;
-					matrix.identity();
-					matrix.scale(0.1 * clippedFrameRect.width, 0.1 * clippedFrameRect.height);
-					matrix.translate(clippedFrameRect.x - originX, clippedFrameRect.y - originY);
-					matrix.scale(scaleX, scaleY);
-
-					if (angle != 0)
-					{
-						matrix.rotateWithTrig(_cosAngle, _sinAngle);
-					}
-
-					matrix.translate(screenPos.x + originX, screenPos.y + originY);
-					final colorTransform = bgColorTransformDrawHelper.reset();
-					colorTransform.setMultipliers(colorHelper).scaleMultipliers(backgroundColor);
-					camera.drawPixels(FlxG.bitmap.whitePixel, null, matrix, colorTransform, blend, antialiasing);
-				}
-				
-				final hasColorOffsets = (colorTransform != null && colorTransform.hasRGBAOffsets());
-				final drawItem = camera.startQuadBatch(font.parent, true, hasColorOffsets, blend, antialiasing, shader);
-				function addQuad(charCode:Int, x:Float, y:Float, color:ColorTransform)
-				{
-					var frame = font.getCharFrame(charCode);
-					if (clipRect != null)
-					{
-						charClipHelper.copyFrom(clippedFrameRect).offset(-x, -y);
-						if (!frame.isContained(charClipHelper))
-							frame = frame.clipTo(charClipHelper, charClippedFrame);
-					}
-					
-					final matrix = matrixDrawHelper;
-					frame.prepareMatrix(matrix);
-					matrix.translate(x - originX, y - originY);
-					matrix.scale(scaleX, scaleY);
-					if (angle != 0)
-					{
-						matrix.rotateWithTrig(_cosAngle, _sinAngle);
-					}
-					
-					matrix.translate(screenPos.x + originX, screenPos.y + originY);
-					drawItem.addQuad(frame, matrix, color);
-				}
-				
-				borderDrawData.forEach(addQuad.bind(_, _, _, borderColorTransform));
-				textDrawData.forEach(addQuad.bind(_, _, _, textColorTransform));
-				#if FLX_DEBUG
-				FlxBasic.visibleCount++;
-				#end
+				matrix.translate(screenPos.x + originX, screenPos.y + originY);
+				final colorTransform = bgColorTransformDrawHelper.reset();
+				colorTransform.setMultipliers(colorHelper).scaleMultipliers(backgroundColor);
+				camera.drawPixels(FlxG.bitmap.whitePixel, null, matrix, colorTransform, blend, antialiasing);
 			}
 			
-			// dispose helpers
-			charClipHelper.put();
-			clippedFrameRect.put();
-			screenPos.put();
+			final hasColorOffsets = (colorTransform != null && colorTransform.hasRGBAOffsets());
+			final drawItem = camera.startQuadBatch(font.parent, true, hasColorOffsets, blend, antialiasing, shader);
+			function addQuad(charCode:Int, x:Float, y:Float, color:ColorTransform)
+			{
+				var frame = font.getCharFrame(charCode);
+				if (clipRect != null)
+				{
+					charClipHelper.copyFrom(clippedFrameRect).offset(-x, -y);
+					if (!frame.isContained(charClipHelper))
+						frame = frame.clipTo(charClipHelper, charClippedFrame);
+				}
+				
+				final matrix = matrixDrawHelper;
+				frame.prepareMatrix(matrix);
+				matrix.translate(x - originX, y - originY);
+				matrix.scale(scaleX, scaleY);
+				if (angle != 0)
+				{
+					matrix.rotateWithTrig(_cosAngle, _sinAngle);
+				}
+				
+				matrix.translate(screenPos.x + originX, screenPos.y + originY);
+				drawItem.addQuad(frame, matrix, color);
+			}
 			
+			borderDrawData.forEach(addQuad.bind(_, _, _, borderColorTransform));
+			textDrawData.forEach(addQuad.bind(_, _, _, textColorTransform));
 			#if FLX_DEBUG
-			if (FlxG.debugger.drawDebug)
-			{
-				drawDebug();
-			}
+			FlxBasic.visibleCount++;
 			#end
 		}
+		
+		// dispose helpers
+		charClipHelper.put();
+		clippedFrameRect.put();
+		screenPos.put();
+		
+		#if FLX_DEBUG
+		if (FlxG.debugger.drawDebug)
+		{
+			drawDebug();
+		}
+		#end
 	}
 	
 	override function set_clipRect(Rect:FlxRect):FlxRect
 	{
 		super.set_clipRect(Rect);
-		if (!FlxG.renderBlit)
+		if (FlxG.renderTile)
 		{
 			pendingTextBitmapChange = true;
 		}
@@ -462,20 +438,12 @@ class FlxBitmapText extends FlxSprite
 	override function set_color(Color:FlxColor):FlxColor
 	{
 		super.set_color(Color);
-		if (FlxG.renderBlit)
-		{
-			pendingTextBitmapChange = true;
-		}
 		return color;
 	}
 
 	override function set_alpha(value:Float):Float
 	{
 		super.set_alpha(value);
-		if (FlxG.renderBlit)
-		{
-			pendingTextBitmapChange = true;
-		}
 		return value;
 	}
 
@@ -484,10 +452,6 @@ class FlxBitmapText extends FlxSprite
 		if (textColor != value)
 		{
 			textColor = value;
-			if (FlxG.renderBlit)
-			{
-				pendingPixelsChange = true;
-			}
 		}
 
 		return value;
@@ -498,10 +462,6 @@ class FlxBitmapText extends FlxSprite
 		if (useTextColor != value)
 		{
 			useTextColor = value;
-			if (FlxG.renderBlit)
-			{
-				pendingPixelsChange = true;
-			}
 		}
 
 		return value;
@@ -512,10 +472,6 @@ class FlxBitmapText extends FlxSprite
 		if (FlxG.renderTile)
 		{
 			drawFrame(RunOnCpp);
-		}
-		else
-		{
-			super.calcFrame(RunOnCpp);
 		}
 	}
 
@@ -1001,11 +957,6 @@ class FlxBitmapText extends FlxSprite
 	{
 		computeTextSize();
 
-		if (FlxG.renderBlit)
-		{
-			useTiles = false;
-		}
-
 		if (!useTiles)
 		{
 			textBitmap = FlxDestroyUtil.disposeIfNotEqual(textBitmap, frameWidth, frameHeight);
@@ -1069,11 +1020,6 @@ class FlxBitmapText extends FlxSprite
 
 	function drawLine(line:UnicodeString, posX:Int, posY:Int, useTiles:Bool = false):Void
 	{
-		if (FlxG.renderBlit)
-		{
-			useTiles = false;
-		}
-
 		if (useTiles)
 		{
 			tileLine(line, posX, posY);
@@ -1172,44 +1118,28 @@ class FlxBitmapText extends FlxSprite
 		var colorForFill:Int = background ? backgroundColor : FlxColor.TRANSPARENT;
 		var bitmap:BitmapData = null;
 
-		if (FlxG.renderBlit)
+		if (!useTiles)
 		{
-			if (pixels == null || (frameWidth != pixels.width || frameHeight != pixels.height))
+			if (framePixels == null || (frameWidth != framePixels.width || frameHeight != framePixels.height))
 			{
-				pixels = new BitmapData(frameWidth, frameHeight, true, colorForFill);
+				framePixels = FlxDestroyUtil.dispose(framePixels);
+				framePixels = new BitmapData(frameWidth, frameHeight, true, colorForFill);
 			}
 			else
 			{
-				pixels.fillRect(graphic.bitmap.rect, colorForFill);
+				framePixels.fillRect(framePixels.rect, colorForFill);
 			}
 
-			bitmap = pixels;
+			bitmap = framePixels;
 		}
 		else
 		{
-			if (!useTiles)
-			{
-				if (framePixels == null || (frameWidth != framePixels.width || frameHeight != framePixels.height))
-				{
-					framePixels = FlxDestroyUtil.dispose(framePixels);
-					framePixels = new BitmapData(frameWidth, frameHeight, true, colorForFill);
-				}
-				else
-				{
-					framePixels.fillRect(framePixels.rect, colorForFill);
-				}
-
-				bitmap = framePixels;
-			}
-			else
-			{
-				textDrawData.clear();
-				borderDrawData.clear();
-			}
-
-			if (autoBounds)
-				autoAdjustBounds();
+			textDrawData.clear();
+			borderDrawData.clear();
 		}
+
+		if (autoBounds)
+			autoAdjustBounds();
 
 		if (!useTiles)
 		{
@@ -1222,11 +1152,6 @@ class FlxBitmapText extends FlxSprite
 		if (!useTiles)
 		{
 			bitmap.unlock();
-		}
-
-		if (FlxG.renderBlit)
-		{
-			dirty = true;
 		}
 
 		if (pendingPixelsChange)
@@ -1319,11 +1244,6 @@ class FlxBitmapText extends FlxSprite
 	
 	function drawText(posX:Int, posY:Int, isFront:Bool = true, ?bitmap:BitmapData, useTiles:Bool = false):Void
 	{
-		if (FlxG.renderBlit)
-		{
-			useTiles = false;
-		}
-
 		if (useTiles)
 		{
 			tileText(posX, posY, isFront);
@@ -1553,10 +1473,6 @@ class FlxBitmapText extends FlxSprite
 		if (background != value)
 		{
 			background = value;
-			if (FlxG.renderBlit)
-			{
-				pendingPixelsChange = true;
-			}
 		}
 
 		return value;
@@ -1567,10 +1483,6 @@ class FlxBitmapText extends FlxSprite
 		if (backgroundColor != value)
 		{
 			backgroundColor = value;
-			if (FlxG.renderBlit)
-			{
-				pendingPixelsChange = true;
-			}
 		}
 
 		return value;
@@ -1592,10 +1504,6 @@ class FlxBitmapText extends FlxSprite
 		if (borderColor != value)
 		{
 			borderColor = value;
-			if (FlxG.renderBlit)
-			{
-				pendingPixelsChange = true;
-			}
 		}
 
 		return value;

@@ -380,7 +380,7 @@ class FlxSprite extends FlxObject
 	{
 		super(X, Y);
 
-		useFramePixels = FlxG.renderBlit;
+		useFramePixels = false;
 		if (SimpleGraphic != null)
 			loadGraphic(SimpleGraphic);
 	}
@@ -762,12 +762,6 @@ class FlxSprite extends FlxObject
 		}
 
 		centerOrigin();
-
-		if (FlxG.renderBlit)
-		{
-			dirty = true;
-			updateFramePixels();
-		}
 	}
 
 	override public function update(elapsed:Float):Void
@@ -821,10 +815,7 @@ class FlxSprite extends FlxObject
 			if (!camera.visible || !camera.exists || !isOnScreen(camera))
 				continue;
 			
-			if (isSimpleRender(camera))
-				drawSimple(camera);
-			else
-				drawComplex(camera);
+			drawComplex(camera);
 			
 			#if FLX_DEBUG
 			FlxBasic.visibleCount++;
@@ -857,6 +848,7 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
+	@:deprecated
 	function drawSimple(camera:FlxCamera):Void
 	{
 		getScreenPosition(_point, camera).subtract(offset);
@@ -918,35 +910,16 @@ class FlxSprite extends FlxObject
 
 		var bitmapData:BitmapData = Brush.framePixels;
 
-		if (isSimpleRenderBlit()) // simple render
+		_matrix.identity();
+		_matrix.translate(-Brush.origin.x, -Brush.origin.y);
+		_matrix.scale(Brush.scale.x, Brush.scale.y);
+		if (Brush.angle != 0)
 		{
-			_flashPoint.x = X + frame.frame.x;
-			_flashPoint.y = Y + frame.frame.y;
-			_flashRect2.width = bitmapData.width;
-			_flashRect2.height = bitmapData.height;
-			graphic.bitmap.copyPixels(bitmapData, _flashRect2, _flashPoint, null, null, true);
-			_flashRect2.width = graphic.bitmap.width;
-			_flashRect2.height = graphic.bitmap.height;
+			_matrix.rotate(Brush.angle * FlxAngle.TO_RAD);
 		}
-		else // complex render
-		{
-			_matrix.identity();
-			_matrix.translate(-Brush.origin.x, -Brush.origin.y);
-			_matrix.scale(Brush.scale.x, Brush.scale.y);
-			if (Brush.angle != 0)
-			{
-				_matrix.rotate(Brush.angle * FlxAngle.TO_RAD);
-			}
-			_matrix.translate(X + frame.frame.x + Brush.origin.x, Y + frame.frame.y + Brush.origin.y);
-			var brushBlend:BlendMode = Brush.blend;
-			graphic.bitmap.draw(bitmapData, _matrix, null, brushBlend, null, Brush.antialiasing);
-		}
-
-		if (FlxG.renderBlit)
-		{
-			dirty = true;
-			calcFrame();
-		}
+		_matrix.translate(X + frame.frame.x + Brush.origin.x, Y + frame.frame.y + Brush.origin.y);
+		var brushBlend:BlendMode = Brush.blend;
+		graphic.bitmap.draw(bitmapData, _matrix, null, brushBlend, null, Brush.antialiasing);
 	}
 
 	/**
@@ -957,19 +930,8 @@ class FlxSprite extends FlxObject
 	 */
 	public function drawFrame(Force:Bool = false):Void
 	{
-		if (FlxG.renderBlit)
-		{
-			if (Force || dirty)
-			{
-				dirty = true;
-				calcFrame();
-			}
-		}
-		else
-		{
-			dirty = true;
-			calcFrame(true);
-		}
+		dirty = true;
+		calcFrame(true);
 	}
 
 	/**
@@ -1251,11 +1213,6 @@ class FlxSprite extends FlxObject
 			framePixels = _frame.paintRotatedAndFlipped(framePixels, _flashPointZero, FlxFrameAngle.ANGLE_0, doFlipX, doFlipY, false, true);
 		}
 		
-		if (FlxG.renderBlit && hasColorTransform())
-		{
-			framePixels.colorTransform(_flashRect, colorTransform);
-		}
-		
 		if (FlxG.renderTile && useFramePixels)
 		{
 			// recreate _frame for native target, so it will use modified framePixels
@@ -1322,33 +1279,6 @@ class FlxSprite extends FlxObject
 			camera = getDefaultCamera();
 		
 		return camera.containsRect(getScreenBounds(_rect, camera));
-	}
-
-	/**
-	 * Returns the result of `isSimpleRenderBlit()` if `FlxG.renderBlit` is
-	 * `true`, or `false` if `FlxG.renderTile` is `true`.
-	 */
-	public function isSimpleRender(?camera:FlxCamera):Bool
-	{
-		if (FlxG.renderTile)
-			return false;
-
-		return isSimpleRenderBlit(camera);
-	}
-
-	/**
-	 * Determines the function used for rendering in blitting:
-	 * `copyPixels()` for simple sprites, `draw()` for complex ones.
-	 * Sprites are considered simple when they have an `angle` of `0`, a `scale` of `1`,
-	 * don't use `blend` and `pixelPerfectRender` is `true`.
-	 *
-	 * @param   camera   If a camera is passed its `pixelPerfectRender` flag is taken into account
-	 */
-	public function isSimpleRenderBlit(?camera:FlxCamera):Bool
-	{
-		var result:Bool = (angle == 0 || bakedRotationAngle > 0) && scale.x == 1 && scale.y == 1 && blend == null;
-		result = result && (camera != null ? isPixelPerfectRender(camera) : pixelPerfectRender);
-		return result;
 	}
 
 	/**

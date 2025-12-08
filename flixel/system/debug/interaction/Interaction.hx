@@ -379,12 +379,6 @@ class Interaction extends Window
 
 	public function getDebugGraphics():Graphics
 	{
-		if (FlxG.renderBlit)
-		{
-			FlxSpriteUtil.flashGfx.clear();
-			return FlxSpriteUtil.flashGfx;
-		}
-
 		#if FLX_DEBUG
 		return FlxG.camera.debugLayer.graphics;
 		#end
@@ -409,10 +403,6 @@ class Interaction extends Window
 				gfx.drawRect(member.x - scroll.x - margin, member.y - scroll.y - margin, member.width + margin*2, member.height + margin*2);
 			}
 		}
-
-		// Draw the debug info to the main camera buffer.
-		if (FlxG.renderBlit)
-			FlxG.camera.buffer.draw(FlxSpriteUtil.flashGfxSprite);
 	}
 
 	/**
@@ -792,17 +782,15 @@ class Interaction extends Window
 	{
 		if (FlxG.renderTile)
 			return camera.canvas.localToGlobal(new Point(worldX, 0)).x;
-		else
-			@:privateAccess
-			return camera._flashBitmap.localToGlobal(new Point(worldX, 0)).x;
+
+		return 0;
 	}
 	
 	public function toDebugY(worldY:Float, camera:FlxCamera)
 	{
 		if (FlxG.renderTile)
 			return camera.canvas.localToGlobal(new Point(0, worldY)).y;
-		else
-			@:privateAccess
-			return camera._flashBitmap.localToGlobal(new Point(0, worldY)).y;
+
+		return 0;
 	}
 }

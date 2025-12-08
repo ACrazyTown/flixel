@@ -60,11 +60,6 @@ class FlxTilemapBuffer implements IFlxDestroyable
 	 */
 	public var pixelPerfectRender:Null<Bool>;
 
-	/**
-	 * The actual buffer BitmapData. (Only used if FlxG.renderBlit == true)
-	 */
-	public var pixels(default, null):BitmapData;
-
 	public var blend:BlendMode;
 	public var antialiasing:Bool = false;
 
@@ -116,41 +111,14 @@ class FlxTilemapBuffer implements IFlxDestroyable
 	{
 		updateColumns(tileWidth, widthInTiles, scaleX, camera);
 		updateRows(tileHeight, heightInTiles, scaleY, camera);
-
-		if (FlxG.renderBlit)
-		{
-			final newWidth = Std.int(columns * tileWidth);
-			final newHeight = Std.int(rows * tileHeight);
-			
-			if (pixels == null)
-			{
-				pixels = new BitmapData(newWidth, newHeight, true, 0);
-				_flashRect = new Rectangle(0, 0, newWidth, newHeight);
-				_matrix = new FlxMatrix();
-				dirty = true;
-			}
-			else if (pixels.width != newWidth || pixels.height != newHeight)
-			{
-				FlxDestroyUtil.dispose(pixels);
-				pixels = new BitmapData(newWidth, newHeight, true, 0);
-				_flashRect.setTo(0, 0, newWidth, newHeight);
-				dirty = true;
-			}
-		}
 	}
 	
 	/**
 	 * Clean up memory.
 	 */
+	@:deprecated
 	public function destroy():Void
 	{
-		if (FlxG.renderBlit)
-		{
-			pixels = FlxDestroyUtil.dispose(pixels);
-			blend = null;
-			_matrix = null;
-			_flashRect = null;
-		}
 	}
 	
 	/**
@@ -159,12 +127,9 @@ class FlxTilemapBuffer implements IFlxDestroyable
 	 *
 	 * @param   color  What color to fill with, in 0xAARRGGBB hex format.
 	 */
+	@:deprecated
 	public function fill(color = FlxColor.TRANSPARENT):Void
 	{
-		if (FlxG.renderBlit)
-		{
-			pixels.fillRect(_flashRect, color);
-		}
 	}
 	
 	/**
@@ -180,23 +145,10 @@ class FlxTilemapBuffer implements IFlxDestroyable
 			flashPoint.x = Math.floor(flashPoint.x);
 			flashPoint.y = Math.floor(flashPoint.y);
 		}
-		
-		if (isPixelPerfectRender(camera) && (scaleX == 1.0 && scaleY == 1.0) && blend == null)
-		{
-			camera.copyPixels(pixels, _flashRect, flashPoint, null, null, true);
-		}
-		else
-		{
-			_matrix.identity();
-			_matrix.scale(scaleX, scaleY);
-			_matrix.translate(flashPoint.x, flashPoint.y);
-			camera.drawPixels(pixels, _matrix, null, blend, antialiasing);
-		}
 	}
 	
 	public function colorTransform(transform:ColorTransform):Void
 	{
-		pixels.colorTransform(_flashRect, transform);
 	}
 	
 	@:access(flixel.FlxCamera.viewWidth)

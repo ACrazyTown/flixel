@@ -239,10 +239,6 @@ class Transform extends Tool
 		
 		drawSelection(gfx, target.getDefaultCamera());
 		Marker.draw(target.x + target.origin.x, target.y + target.origin.y, false, gfx);
-		
-		// Draw the debug info to the main camera buffer.
-		if (FlxG.renderBlit)
-			FlxG.camera.buffer.draw(FlxSpriteUtil.flashGfxSprite);
 	}
 	
 	function drawSelection(gfx:Graphics, camera:FlxCamera)

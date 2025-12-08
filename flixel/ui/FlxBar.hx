@@ -172,16 +172,7 @@ class FlxBar extends FlxSprite
 
 		_filledBarPoint = new Point();
 		_filledBarRect = new Rectangle();
-		if (FlxG.renderBlit)
-		{
-			_zeroOffset = new Point();
-			_emptyBarRect = new Rectangle();
-			makeGraphic(width, height, FlxColor.TRANSPARENT, true);
-		}
-		else
-		{
-			_filledFlxRect = FlxRect.get();
-		}
+		_filledFlxRect = FlxRect.get();
 
 		if (parentRef != null)
 		{
@@ -742,13 +733,9 @@ class FlxBar extends FlxSprite
 	/**
 	 * Stamps health bar background on its pixels
 	 */
+	@:deprecated
 	public function updateEmptyBar():Void
 	{
-		if (FlxG.renderBlit)
-		{
-			pixels.copyPixels(_emptyBar, _emptyBarRect, _zeroOffset);
-			dirty = true;
-		}
 	}
 
 	/**
@@ -806,26 +793,14 @@ class FlxBar extends FlxSprite
 					_filledBarPoint.y = Std.int((barHeight - _filledBarRect.height) / 2);
 			}
 
-			if (FlxG.renderBlit)
+			if (frontFrames != null)
 			{
-				pixels.copyPixels(_filledBar, _filledBarRect, _filledBarPoint, null, null, true);
-			}
-			else
-			{
-				if (frontFrames != null)
+				_filledFlxRect.copyFromFlash(_filledBarRect).round();
+				if (Std.int(percent) > 0)
 				{
-					_filledFlxRect.copyFromFlash(_filledBarRect).round();
-					if (Std.int(percent) > 0)
-					{
-						_frontFrame = frontFrames.frame.clipTo(_filledFlxRect, _frontFrame);
-					}
+					_frontFrame = frontFrames.frame.clipTo(_filledFlxRect, _frontFrame);
 				}
 			}
-		}
-
-		if (FlxG.renderBlit)
-		{
-			dirty = true;
 		}
 	}
 

@@ -304,9 +304,6 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		debugBoundingBoxColorSolid = FlxColor.GREEN;
 		debugBoundingBoxColorPartial = FlxColor.PINK;
 		debugBoundingBoxColorNotSolid = FlxColor.TRANSPARENT;
-
-		if (FlxG.renderBlit)
-			FlxG.debugger.drawDebugChanged.add(onDrawDebugChanged);
 		#end
 	}
 
@@ -320,21 +317,8 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 
 		_tileObjects = FlxDestroyUtil.destroyArray(_tileObjects);
 		_buffers = FlxDestroyUtil.destroyArray(_buffers);
-
-		if (FlxG.renderBlit)
-		{
-			#if FLX_DEBUG
-			_debugRect = null;
-			_debugTileNotSolid = FlxDestroyUtil.dispose(_debugTileNotSolid);
-			_debugTilePartial = FlxDestroyUtil.dispose(_debugTilePartial);
-			_debugTileSolid = FlxDestroyUtil.dispose(_debugTileSolid);
-			#end
-		}
-		else
-		{
-			_helperPoint = null;
-			_matrix = null;
-		}
+		_helperPoint = null;
+		_matrix = null;
 
 		frames = null;
 		graphic = null;
@@ -349,11 +333,6 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		FlxG.cameras.cameraAdded.remove(onCameraChanged);
 		FlxG.cameras.cameraRemoved.remove(onCameraChanged);
 		FlxG.cameras.cameraResized.remove(onCameraChanged);
-
-		#if FLX_DEBUG
-		if (FlxG.renderBlit)
-			FlxG.debugger.drawDebugChanged.remove(onDrawDebugChanged);
-		#end
 
 		shader = null;
 
@@ -529,11 +508,6 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 
 	override function updateMap():Void
 	{
-		#if FLX_DEBUG
-		if (FlxG.renderBlit)
-			_debugRect = new Rectangle(0, 0, tileWidth, tileHeight);
-		#end
-
 		var numTiles:Int = _tileObjects.length;
 		for (i in 0...numTiles)
 			updateTile(i);
@@ -656,18 +630,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 
 			buffer = _buffers[i];
 
-			if (FlxG.renderBlit)
-			{
-				if (buffer.isDirty(this, camera))
-					drawTilemap(buffer, camera);
-
-				getScreenPosition(_point, camera).subtract(offset).add(buffer.x, buffer.y).copyTo(_flashPoint);
-				buffer.draw(camera, _flashPoint, scale.x, scale.y);
-			}
-			else
-			{
-				drawTilemap(buffer, camera);
-			}
+			drawTilemap(buffer, camera);
 
 			#if FLX_DEBUG
 			FlxBasic.visibleCount++;
@@ -1214,23 +1177,16 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		var scaledHeight:Float = 0;
 		var drawItem = null;
 
-		if (FlxG.renderBlit)
-		{
-			buffer.fill();
-		}
-		else
-		{
-			getScreenPosition(_point, camera).subtract(offset).copyTo(_helperPoint);
+		getScreenPosition(_point, camera).subtract(offset).copyTo(_helperPoint);
 
-			_helperPoint.x = isPixelPerfectRender(camera) ? Math.floor(_helperPoint.x) : _helperPoint.x;
-			_helperPoint.y = isPixelPerfectRender(camera) ? Math.floor(_helperPoint.y) : _helperPoint.y;
+		_helperPoint.x = isPixelPerfectRender(camera) ? Math.floor(_helperPoint.x) : _helperPoint.x;
+		_helperPoint.y = isPixelPerfectRender(camera) ? Math.floor(_helperPoint.y) : _helperPoint.y;
 
-			scaledWidth = scaledTileWidth;
-			scaledHeight = scaledTileHeight;
+		scaledWidth = scaledTileWidth;
+		scaledHeight = scaledTileHeight;
 
-			var hasColorOffsets:Bool = (colorTransform != null && colorTransform.hasRGBAOffsets());
-			drawItem = camera.startQuadBatch(graphic, isColored, hasColorOffsets, blend, antialiasing, shader);
-		}
+		var hasColorOffsets:Bool = (colorTransform != null && colorTransform.hasRGBAOffsets());
+		drawItem = camera.startQuadBatch(graphic, isColored, hasColorOffsets, blend, antialiasing, shader);
 
 		// Copy tile images into the tile buffer
 		_point.x = (camera.scroll.x * scrollFactor.x) - x - offset.x + camera.viewMarginX; // modified from getScreenPosition()
@@ -1268,74 +1224,33 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 				{
 					frame = tile.frame;
 
-					if (FlxG.renderBlit)
+					drawX = _helperPoint.x + (columnIndex % widthInTiles) * scaledWidth;
+					drawY = _helperPoint.y + Math.floor(columnIndex / widthInTiles) * scaledHeight;
+
+					_matrix.identity();
+
+					if (frame.angle != FlxFrameAngle.ANGLE_0)
 					{
-						frame.paint(buffer.pixels, _flashPoint, true);
-
-						#if FLX_DEBUG
-						if (FlxG.debugger.drawDebug && !ignoreDrawDebug)
-						{
-							if (tile.allowCollisions <= NONE)
-							{
-								debugTile = _debugTileNotSolid;
-							}
-							else if (tile.allowCollisions != ANY)
-							{
-								debugTile = _debugTilePartial;
-							}
-							else
-							{
-								debugTile = _debugTileSolid;
-							}
-
-							offset.addToFlash(_flashPoint);
-							buffer.pixels.copyPixels(debugTile, _debugRect, _flashPoint, null, null, true);
-							offset.subtractFromFlash(_flashPoint);
-						}
-						#end
+						frame.prepareMatrix(_matrix);
 					}
-					else
-					{
-						drawX = _helperPoint.x + (columnIndex % widthInTiles) * scaledWidth;
-						drawY = _helperPoint.y + Math.floor(columnIndex / widthInTiles) * scaledHeight;
 
-						_matrix.identity();
+					var scaleX:Float = scale.x;
+					var scaleY:Float = scale.y;
 
-						if (frame.angle != FlxFrameAngle.ANGLE_0)
-						{
-							frame.prepareMatrix(_matrix);
-						}
+					_matrix.scale(scaleX, scaleY);
+					_matrix.translate(drawX, drawY);
 
-						var scaleX:Float = scale.x;
-						var scaleY:Float = scale.y;
-
-						_matrix.scale(scaleX, scaleY);
-						_matrix.translate(drawX, drawY);
-
-						drawItem.addQuad(frame, _matrix, colorTransform);
-					}
+					drawItem.addQuad(frame, _matrix, colorTransform);
 				}
-
-				if (FlxG.renderBlit)
-					_flashPoint.x += tileWidth;
 
 				columnIndex++;
 			}
 
-			if (FlxG.renderBlit)
-				_flashPoint.y += tileHeight;
 			rowIndex += widthInTiles;
 		}
 
 		buffer.x = screenXInTiles * scaledTileWidth;
 		buffer.y = screenYInTiles * scaledTileHeight;
-
-		if (FlxG.renderBlit)
-		{
-			if (isColored)
-				buffer.colorTransform(colorTransform);
-			buffer.blend = blend;
-		}
 
 		buffer.dirty = false;
 	}
