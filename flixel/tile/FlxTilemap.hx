@@ -569,7 +569,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 					if (color != null)
 					{
 						final colStr = color.toHexString();
-						drawDebugBoundingBoxColor(camera.debugLayer.graphics, rect, color);
+						drawDebugBoundingBoxColor(camera.viewTiles.debugLayer.graphics, rect, color);
 					}
 				}
 			}
@@ -1186,7 +1186,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		scaledHeight = scaledTileHeight;
 
 		var hasColorOffsets:Bool = (colorTransform != null && colorTransform.hasRGBAOffsets());
-		drawItem = camera.startQuadBatch(graphic, isColored, hasColorOffsets, blend, antialiasing, shader);
+		drawItem = camera.viewTiles.startQuadBatch(graphic, isColored, hasColorOffsets, blend, antialiasing, shader);
 
 		// Copy tile images into the tile buffer
 		_point.x = (camera.scroll.x * scrollFactor.x) - x - offset.x + camera.viewMarginX; // modified from getScreenPosition()

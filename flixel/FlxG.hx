@@ -609,8 +609,6 @@ class FlxG
 
 		renderBlit = renderMethod == BLITTING;
 		renderTile = renderMethod == DRAW_TILES;
-
-		FlxObject.defaultPixelPerfectPosition = renderBlit;
 	}
 
 	#if FLX_SAVE

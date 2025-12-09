@@ -319,7 +319,7 @@ class FlxTypedBasePath<TTarget:FlxBasic> extends FlxBasic implements IFlxDestroy
 	public function drawDebugOnCamera(camera:FlxCamera):Void
 	{
 		// Set up our global flash graphics object to draw out the path
-		var gfx:Graphics = camera.debugLayer.graphics;
+		var gfx:Graphics = camera.viewTiles.debugLayer.graphics;
 		
 		final length = nodes.length;
 		// Then fill up the object with node and path graphics
@@ -371,7 +371,6 @@ class FlxTypedBasePath<TTarget:FlxBasic> extends FlxBasic implements IFlxDestroy
 			result.y -= camera.scroll.y * object.scrollFactor.y;
 		}
 		
-		camera.transformPoint(result);
 		return result;
 	}
 	

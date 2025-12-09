@@ -133,10 +133,10 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		setParameterValue(shader.hasTransform, true);
 		setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
 
-		camera.canvas.graphics.overrideBlendMode(blend);
-		camera.canvas.graphics.beginShaderFill(shader);
-		camera.canvas.graphics.drawQuads(rects, null, transforms);
-		camera.canvas.graphics.endFill();
+		camera.viewTiles.canvas.graphics.overrideBlendMode(blend);
+		camera.viewTiles.canvas.graphics.beginShaderFill(shader);
+		camera.viewTiles.canvas.graphics.drawQuads(rects, null, transforms);
+		camera.viewTiles.canvas.graphics.endFill();
 		super.render(camera);
 	}
 

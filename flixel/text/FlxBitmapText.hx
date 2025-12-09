@@ -381,7 +381,7 @@ class FlxBitmapText extends FlxSprite
 			}
 			
 			final hasColorOffsets = (colorTransform != null && colorTransform.hasRGBAOffsets());
-			final drawItem = camera.startQuadBatch(font.parent, true, hasColorOffsets, blend, antialiasing, shader);
+			final drawItem = camera.viewTiles.startQuadBatch(font.parent, true, hasColorOffsets, blend, antialiasing, shader);
 			function addQuad(charCode:Int, x:Float, y:Float, color:ColorTransform)
 			{
 				var frame = font.getCharFrame(charCode);

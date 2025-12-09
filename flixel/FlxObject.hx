@@ -1298,7 +1298,7 @@ class FlxObject extends FlxBasic
 
 	inline function beginDrawDebug(camera:FlxCamera):Graphics
 	{
-		return camera.debugLayer.graphics;
+		return camera.viewTiles.debugLayer.graphics;
 	}
 
 	@:deprecated
@@ -1313,7 +1313,7 @@ class FlxObject extends FlxBasic
 		getScreenPosition(_point, camera);
 
 		_rect.set(_point.x, _point.y, width, height);
-		_rect = camera.transformRect(_rect);
+
 
 		if (isPixelPerfectRender(camera))
 		{

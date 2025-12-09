@@ -380,7 +380,7 @@ class Interaction extends Window
 	public function getDebugGraphics():Graphics
 	{
 		#if FLX_DEBUG
-		return FlxG.camera.debugLayer.graphics;
+		return FlxG.camera.viewTiles.debugLayer.graphics;
 		#end
 
 		return null;
@@ -781,7 +781,7 @@ class Interaction extends Window
 	public function toDebugX(worldX:Float, camera:FlxCamera)
 	{
 		if (FlxG.renderTile)
-			return camera.canvas.localToGlobal(new Point(worldX, 0)).x;
+			return camera.viewTiles.canvas.localToGlobal(new Point(worldX, 0)).x;
 
 		return 0;
 	}
@@ -789,7 +789,7 @@ class Interaction extends Window
 	public function toDebugY(worldY:Float, camera:FlxCamera)
 	{
 		if (FlxG.renderTile)
-			return camera.canvas.localToGlobal(new Point(0, worldY)).y;
+			return camera.viewTiles.canvas.localToGlobal(new Point(0, worldY)).y;
 
 		return 0;
 	}
