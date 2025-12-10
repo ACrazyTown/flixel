@@ -26,6 +26,7 @@ import flixel.math.FlxRect;
 
 using flixel.util.FlxColorTransformUtil;
 
+@:access(flixel.FlxCamera)
 class FlxTilesView extends FlxCameraView
 {
     public var flashSprite:Sprite;
@@ -124,8 +125,32 @@ class FlxTilesView extends FlxCameraView
 
     override public function unlock():Void
     {
-        drawFX();
+        camera.drawFX();
     }
+
+	override public function drawDebugRect(x:Float, y:Float, width:Float, height:Float, color:FlxColor, thickness:Float = 1.0):Void
+	{
+		final gfx = debugLayer.graphics;
+		gfx.lineStyle(thickness, color.rgb, color.alphaFloat, false, null, null, MITER, 255);
+		gfx.drawRect(x, y, width, height);
+	}
+
+	override public function drawDebugFilledRect(x:Float, y:Float, width:Float, height:Float, color:FlxColor):Void
+	{
+		final gfx = debugLayer.graphics;
+		gfx.lineStyle();
+		gfx.beginFill(color.rgb, color.alphaFloat);
+		gfx.drawRect(x, y, width, height);
+		gfx.endFill();
+	}
+
+	override public function drawDebugLine(x1:Float, y1:Float, x2:Float, y2:Float, color:FlxColor, thickness:Float = 1.0):Void
+	{
+		final gfx = debugLayer.graphics;
+		gfx.lineStyle(thickness, color.rgb, color.alphaFloat, false, null, null, MITER, 255);
+		gfx.moveTo(x1, x2);
+		gfx.lineTo(x2, y2);
+	}
 
     override public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false, ?shader:FlxShader):Void 
     {
@@ -167,17 +192,23 @@ class FlxTilesView extends FlxCameraView
 		drawItem.addTriangles(vertices, indices, uvtData, colors, position, cameraBounds, transform);
     }
 
-    override public function fill(color:FlxColor, fxAlpha:Float = 1.0):Void
+    override public function fill(color:FlxColor, alpha:Float = 1.0):Void
     {
         final targetGraphics = canvas.graphics; //(graphics == null) ? canvas.graphics : graphics;
 
         targetGraphics.overrideBlendMode(null);
-        targetGraphics.beginFill(color, fxAlpha);
+        targetGraphics.beginFill(color, alpha);
         // i'm drawing rect with these parameters to avoid light lines at the top and left of the camera,
         // which could appear while cameras fading
         targetGraphics.drawRect(viewMarginLeft - 1, viewMarginTop - 1, viewWidth + 2, viewHeight + 2);
         targetGraphics.endFill();
     }
+
+	override public function offsetView(x:Float, y:Float):Void
+	{
+		flashSprite.x += x;
+		flashSprite.y += y;
+	}
 
     override public function updatePosition():Void
     {

@@ -233,22 +233,22 @@ class Transform extends Tool
 				target;
 		}
 		
-		final gfx = _brain.getDebugGraphics();
-		if (gfx == null)
-			return;
-		
-		drawSelection(gfx, target.getDefaultCamera());
+		drawSelection(target.getDefaultCamera());
 		Marker.draw(target.x + target.origin.x, target.y + target.origin.y, false, gfx);
 	}
 	
-	function drawSelection(gfx:Graphics, camera:FlxCamera)
+	function drawSelection(camera:FlxCamera)
 	{
-		gfx.lineStyle(1.0, FlxColor.MAGENTA, 1.0, false, LineScaleMode.NORMAL, CapsStyle.SQUARE);
-		
 		// draw lines
-		gfx.moveTo(markers[3].x, markers[3].y);
+		var prevX = markers[3].x;
+		var prevY = markers[3].y;
 		for (marker in markers)
-			gfx.lineTo(marker.x, marker.y);
+		{
+			camera.drawDebugLine(prevX, prevY, marker.x, marker.y, FlxColor.MAGENTA);
+
+			prevX = marker.x;
+			prevY = marker.y;
+		}
 		
 		// draw markers
 		for (marker in markers)

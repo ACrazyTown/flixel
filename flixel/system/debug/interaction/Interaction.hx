@@ -377,21 +377,8 @@ class Interaction extends Window
 			drawItemsSelection();
 	}
 
-	public function getDebugGraphics():Graphics
-	{
-		#if FLX_DEBUG
-		return FlxG.camera.viewTiles.debugLayer.graphics;
-		#end
-
-		return null;
-	}
-
 	function drawItemsSelection():Void
 	{
-		var gfx:Graphics = getDebugGraphics();
-		if (gfx == null)
-			return;
-
 		for (member in selectedItems)
 		{
 			if (member != null && member.scrollFactor != null && member.isOnScreen())
@@ -399,8 +386,7 @@ class Interaction extends Window
 				final margin = 0.5;
 				final scroll = FlxG.camera.scroll;
 				// Render a white rectangle centered at the selected item
-				gfx.lineStyle(1.0, 0xFFFFFF, 0.75);
-				gfx.drawRect(member.x - scroll.x - margin, member.y - scroll.y - margin, member.width + margin*2, member.height + margin*2);
+				FlxG.camera.drawDebugRect(member.x - scroll.x - margin, member.y - scroll.y - margin, member.width + margin*2, member.height + margin*2, 0xBFFFFFFF);
 			}
 		}
 	}

@@ -1247,31 +1247,32 @@ class FlxObject extends FlxBasic
 			return;
 
 		final rect = getBoundingBox(camera);
-		if (FlxG.renderTile)
-		{
-			final PAD = 2;
-			final view = camera.getViewMarginRect();
-			view.left -= PAD;
-			view.top -= PAD;
-			view.right += PAD;
-			view.bottom += PAD;
-			rect.clipTo(view);
-			view.put();
-		}
+
+		final PAD = 2;
+		final view = camera.getViewMarginRect();
+		view.left -= PAD;
+		view.top -= PAD;
+		view.right += PAD;
+		view.bottom += PAD;
+		rect.clipTo(view);
+		view.put();
 		
 		if (rect.width > 0 && rect.height > 0)
 		{
-			final gfx = beginDrawDebug(camera);
-			drawDebugBoundingBox(gfx, rect, allowCollisions, immovable);
-			endDrawDebug(camera);
+			drawDebugBoundingBox(camera, rect, allowCollisions);
 		}
 	}
 
-	function drawDebugBoundingBox(gfx:Graphics, rect:FlxRect, allowCollisions:FlxDirectionFlags, partial:Bool)
+	inline function drawDebugBoundingBox(camera:FlxCamera, rect:FlxRect, allowCollisions:FlxDirectionFlags)
 	{
 		// Find the color to use
 		final color = getDebugBoundingBoxColor(allowCollisions);
-		drawDebugBoundingBoxColor(gfx, rect, color);
+		camera.drawDebugRect(rect.x, rect.y, rect.width, rect.height, color);
+	}
+
+	inline function drawDebugBoundingBoxColor(camera:FlxCamera, rect:FlxRect, color:FlxColor)
+	{
+		camera.drawDebugRect(rect.x, rect.y, rect.width, rect.height, color);
 	}
 	
 	function getDebugBoundingBoxColor(allowCollisions:FlxDirectionFlags)
@@ -1288,23 +1289,6 @@ class FlxObject extends FlxBasic
 		return debugBoundingBoxColorPartial;
 		
 	}
-	
-	function drawDebugBoundingBoxColor(gfx:Graphics, rect:FlxRect, color:FlxColor)
-	{
-		// fill static graphics object with square shape
-		gfx.lineStyle(1, color, 0.75, false, null, null, MITER, 255);
-		gfx.drawRect(rect.x + 0.5, rect.y + 0.5, rect.width - 1.0, rect.height - 1.0);
-	}
-
-	inline function beginDrawDebug(camera:FlxCamera):Graphics
-	{
-		return camera.viewTiles.debugLayer.graphics;
-	}
-
-	@:deprecated
-	inline function endDrawDebug(camera:FlxCamera)
-	{
-	}
 	#end
 
 	@:access(flixel.FlxCamera)
@@ -1313,7 +1297,6 @@ class FlxObject extends FlxBasic
 		getScreenPosition(_point, camera);
 
 		_rect.set(_point.x, _point.y, width, height);
-
 
 		if (isPixelPerfectRender(camera))
 		{

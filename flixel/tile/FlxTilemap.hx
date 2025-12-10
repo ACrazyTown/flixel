@@ -569,7 +569,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 					if (color != null)
 					{
 						final colStr = color.toHexString();
-						drawDebugBoundingBoxColor(camera.viewTiles.debugLayer.graphics, rect, color);
+						drawDebugBoundingBoxColor(camera, rect, color);
 					}
 				}
 			}

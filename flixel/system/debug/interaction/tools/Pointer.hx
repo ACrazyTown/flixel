@@ -132,11 +132,7 @@ class Pointer extends Tool
 	}
 	
 	override public function draw():Void
-	{
-		var gfx:Graphics = _brain.getDebugGraphics();
-		if (gfx == null)
-			return;
-		
+	{	
 		switch state
 		{
 			case IDLE | PRESS(_, _):
@@ -144,8 +140,7 @@ class Pointer extends Tool
 				final rect = FlxRect.get();
 				setAbsRect(rect, startX, startY, _brain.flixelPointer.x, _brain.flixelPointer.y);
 				// Render the selection rectangle
-				gfx.lineStyle(0.9, 0xbb0000);
-				gfx.drawRect(FlxG.camera.scroll.x + rect.x, FlxG.camera.scroll.y + rect.y, rect.width, rect.height);
+				FlxG.camera.drawDebugRect(FlxG.camera.scroll.x + rect.x, FlxG.camera.scroll.y + rect.y, rect.width, rect.height, 0xFFBB0000, 0.9)
 				rect.put();
 		}
 	}

@@ -9,6 +9,7 @@ import openfl.Vector;
 import openfl.display.ShaderParameter;
 import openfl.geom.ColorTransform;
 
+@:haxe.warning("-WDeprecated")
 class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 {
 	static inline var VERTICES_PER_QUAD = 4;

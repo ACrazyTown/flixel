@@ -175,9 +175,13 @@ class FlxCameraView implements IFlxDestroyable
 	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
 			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader):Void {}
 
-    public function drawFX():Void {}
+	public function drawDebugRect(x:Float, y:Float, width:Float, height:Float, color:FlxColor, thickness:Float = 1.0):Void {}
 
-    public function fill(color:FlxColor, fxAlpha:Float = 1.0):Void {}
+	public function drawDebugFilledRect(x:Float, y:Float, width:Float, height:Float, color:FlxColor):Void {}
+
+	public function drawDebugLine(x1:Float, y1:Float, x2:Float, y2:Float, color:FlxColor, thickness:Float = 1.0):Void {}
+
+    public function fill(color:FlxColor, alpha:Float = 1.0):Void {}
 
 	public function updateScale():Void 
 	{
@@ -193,6 +197,8 @@ class FlxCameraView implements IFlxDestroyable
 		_flashOffset.x = camera.width * 0.5 * FlxG.scaleMode.scale.x * camera.initialZoom;
 		_flashOffset.y = camera.height * 0.5 * FlxG.scaleMode.scale.y * camera.initialZoom;
 	}
+
+	public function offsetView(x:Float, y:Float):Void {}
 
 	public function updateScrollRect():Void {}
 

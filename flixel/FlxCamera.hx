@@ -1,22 +1,17 @@
 package flixel;
 
+import flixel.graphics.tile.FlxDrawTrianglesItem;
 import flixel.render.FlxCameraView;
 import flixel.render.context3d.FlxContext3DView;
 import flixel.render.tiles.FlxTilesView;
 
-import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.DisplayObject;
-import openfl.display.Graphics;
-import openfl.display.Sprite;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
-import flixel.graphics.tile.FlxDrawBaseItem;
-import flixel.graphics.tile.FlxDrawQuadsItem;
-import flixel.graphics.tile.FlxDrawTrianglesItem;
 import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
@@ -25,8 +20,6 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
-import flixel.util.FlxSpriteUtil;
-import openfl.Vector;
 import openfl.display.BlendMode;
 import openfl.filters.BitmapFilter;
 
@@ -430,6 +423,24 @@ class FlxCamera extends FlxBasic
 			view.render();
 	}
 
+	public function drawDebugRect(x:Float, y:Float, width:Float, height:Float, color:FlxColor, thickness:Float = 1.0):Void
+	{
+		if (view != null)
+			view.drawDebugRect(x, y, width, height, color, thickness);
+	}
+
+	public function drawDebugFilledRect(x:Float, y:Float, width:Float, height:Float, color:FlxColor):Void 
+	{
+		if (view != null)
+			view.drawDebugFilledRect(x, y, width, height, color);
+	}
+
+	public function drawDebugLine(x1:Float, y1:Float, x2:Float, y2:Float, color:FlxColor, thickness:Float = 1.0):Void 
+	{
+		if (view != null)
+			view.drawDebugLine(x1, y1, x2, y2, color, thickness);
+	}
+
 	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
 			?shader:FlxShader):Void
 	{
@@ -744,7 +755,6 @@ class FlxCamera extends FlxBasic
 			_fxFadeComplete();
 	}
 
-	// TODO!
 	function updateShake(elapsed:Float):Void
 	{
 		if (_fxShakeDuration > 0)
@@ -759,6 +769,9 @@ class FlxCamera extends FlxBasic
 			}
 			else
 			{
+				var offsetX:Float = 0;
+				var offsetY:Float = 0;
+
 				final pixelPerfect = pixelPerfectShake == null ? pixelPerfectRender : pixelPerfectShake;
 				if (_fxShakeAxes.x)
 				{
@@ -766,7 +779,7 @@ class FlxCamera extends FlxBasic
 					if (pixelPerfect)
 						shakePixels = Math.round(shakePixels);
 					
-					viewTiles.flashSprite.x += shakePixels * zoom * FlxG.scaleMode.scale.x;
+					offsetX = shakePixels * zoom * FlxG.scaleMode.scale.x;
 				}
 				
 				if (_fxShakeAxes.y)
@@ -775,40 +788,12 @@ class FlxCamera extends FlxBasic
 					if (pixelPerfect)
 						shakePixels = Math.round(shakePixels);
 					
-					viewTiles.flashSprite.y += shakePixels * zoom * FlxG.scaleMode.scale.y;
+					offsetY = shakePixels * zoom * FlxG.scaleMode.scale.y;
 				}
+
+				view.offsetView(offsetX, offsetY);
 			}
 		}
-	}
-
-	/**
-	 * Recalculates `_flashOffset` point, which is used for positioning flashSprite in the game.
-	 * It's called every time you resize the camera or the game.
-	 */
-	function updateFlashOffset():Void
-	{
-		if (view != null)
-			view.updateOffset();
-	}
-
-	/**
-	 * Updates `_scrollRect` sprite to crop graphics of the camera:
-	 * 1) `scrollRect` property of this sprite
-	 * 2) position of this sprite inside `flashSprite`
-	 *
-	 * It takes camera's size and game's scale into account.
-	 * It's called every time you resize the camera or the game.
-	 */
-	function updateScrollRect():Void
-	{
-		if (view != null)
-			view.updateScrollRect();
-	}
-
-	function updateInternalPositions():Void	
-	{
-		if (view != null)
-			view.updateInternals();
 	}
 
 	/**
@@ -1026,10 +1011,10 @@ class FlxCamera extends FlxBasic
 	 * @param   Color        The color to fill with in `0xAARRGGBB` hex format.
 	 * @param   BlendAlpha   Whether to blend the alpha value or just wipe the previous contents. Default is `true`.
 	 */
-	public function fill(color:FlxColor, blendAlpha:Bool = true, fxAlpha:Float = 1.0, ?graphics:Graphics):Void
+	public function fill(color:FlxColor, alpha:Float = 1.0):Void
 	{
 		if (view != null)
-			view.fill(color, fxAlpha);
+			view.fill(color, alpha);
 	}
 
 	/**
@@ -1042,14 +1027,14 @@ class FlxCamera extends FlxBasic
 		if (_fxFlashAlpha > 0.0)
 		{
 			final alpha = _fxFlashColor.alphaFloat * _fxFlashAlpha;
-			fill(_fxFlashColor.rgb, true, alpha, viewTiles.canvas.graphics);
+			view.fill(_fxFlashColor.rgb, alpha);
 		}
 		
 		// Draw the "fade" special effect onto the buffer
 		if (_fxFadeAlpha > 0.0)
 		{
 			final alpha = _fxFadeColor.alphaFloat * _fxFadeAlpha;
-			fill(_fxFadeColor.rgb, true, alpha, viewTiles.canvas.graphics);
+			view.fill(_fxFadeColor.rgb, alpha);
 		}
 	}
 
@@ -1139,19 +1124,6 @@ class FlxCamera extends FlxBasic
 		FlxG.cameras.cameraResized.dispatch(this);
 	}
 
-	// TODO: move down
-	function updateScale():Void
-	{
-		if (view != null)
-			view.updateScale();
-	}
-
-	function updateViewPosition():Void
-	{
-		if (view != null)
-			view.updatePosition();
-	}
-
 	/**
 	 * Called by camera front end every time you resize the game.
 	 * It triggers reposition of camera's internal display objects.
@@ -1198,6 +1170,48 @@ class FlxCamera extends FlxBasic
 			&& (rect.bottom > viewMarginTop) && (rect.y < viewMarginBottom);
 		rect.putWeak();
 		return contained;
+	}
+
+	/**
+	 * Recalculates the offset point, which is used for positioning the camera in the game.
+	 * It's called every time you resize the camera or the game.
+	 */
+	function updateFlashOffset():Void
+	{
+		if (view != null)
+			view.updateOffset();
+	}
+
+	/**
+	 * Updates the scroll rect to crop graphics of the camera.
+	 * It takes camera's size and game's scale into account.
+	 * It's called every time you resize the camera or the game.
+	 */
+	function updateScrollRect():Void
+	{
+		if (view != null)
+			view.updateScrollRect();
+	}
+
+	// TODO ant: documentation?
+	function updateInternalPositions():Void	
+	{
+		if (view != null)
+			view.updateInternals();
+	}
+
+	// TODO ant: documentation?
+	function updateScale():Void
+	{
+		if (view != null)
+			view.updateScale();
+	}
+
+	// TODO ant: documentation?
+	function updateViewPosition():Void
+	{
+		if (view != null)
+			view.updatePosition();
 	}
 
 	function set_width(Value:Int):Int
@@ -1261,15 +1275,6 @@ class FlxCamera extends FlxBasic
 	function set_color(Color:FlxColor):FlxColor
 	{
 		color = Color;
-		var colorTransform:ColorTransform;
-
-		colorTransform = viewTiles.canvas.transform.colorTransform;
-
-		colorTransform.redMultiplier = color.redFloat;
-		colorTransform.greenMultiplier = color.greenFloat;
-		colorTransform.blueMultiplier = color.blueFloat;
-
-		// canvas.transform.colorTransform = colorTransform;
 
 		if (view != null)
 			view.color = Color;

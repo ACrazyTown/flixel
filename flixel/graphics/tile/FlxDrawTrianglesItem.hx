@@ -18,6 +18,7 @@ typedef DrawData<T> = openfl.Vector<T>;
 /**
  * @author Zaphod
  */
+@:haxe.warning("-WDeprecated")
 class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 {
 	static inline final INDICES_PER_QUAD = 6;
