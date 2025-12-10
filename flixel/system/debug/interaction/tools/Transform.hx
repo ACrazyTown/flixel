@@ -234,7 +234,7 @@ class Transform extends Tool
 		}
 		
 		drawSelection(target.getDefaultCamera());
-		Marker.draw(target.x + target.origin.x, target.y + target.origin.y, false, gfx);
+		Marker.draw(target.x + target.origin.x, target.y + target.origin.y, false);
 	}
 	
 	function drawSelection(camera:FlxCamera)
@@ -255,7 +255,7 @@ class Transform extends Tool
 		{
 			final x = marker.x;
 			final y = marker.y;
-			Marker.draw(x, y, marker.type == ROTATE, gfx);
+			Marker.draw(x, y, marker.type == ROTATE);
 		}
 	}
 }
@@ -294,14 +294,12 @@ private class Marker
 		rot.put();
 	}
 	
-	public static function draw(screenX:Float, screenY:Float, circle:Bool, gfx:Graphics)
+	public static function draw(screenX:Float, screenY:Float, circle:Bool)
 	{
-		gfx.beginFill(FlxColor.MAGENTA);
 		if (circle)
-			gfx.drawCircle(screenX, screenY, CIRCLE_RADIUS);
+			FlxG.camera.drawDebugCircle(screenX, screenY, CIRCLE_RADIUS, FlxColor.MAGENTA);
 		else
-			gfx.drawRect(screenX - RECT_MARGIN, screenY - RECT_MARGIN, RECT_SIZE, RECT_SIZE);
-		gfx.endFill();
+			FlxG.camera.drawDebugFilledRect(screenX - RECT_MARGIN, screenY - RECT_MARGIN, RECT_SIZE, RECT_SIZE, FlxColor.MAGENTA);
 	}
 }
 

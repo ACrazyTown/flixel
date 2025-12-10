@@ -140,7 +140,7 @@ class Pointer extends Tool
 				final rect = FlxRect.get();
 				setAbsRect(rect, startX, startY, _brain.flixelPointer.x, _brain.flixelPointer.y);
 				// Render the selection rectangle
-				FlxG.camera.drawDebugRect(FlxG.camera.scroll.x + rect.x, FlxG.camera.scroll.y + rect.y, rect.width, rect.height, 0xFFBB0000, 0.9)
+				FlxG.camera.drawDebugRect(FlxG.camera.scroll.x + rect.x, FlxG.camera.scroll.y + rect.y, rect.width, rect.height, 0xFFBB0000, 0.9);
 				rect.put();
 		}
 	}

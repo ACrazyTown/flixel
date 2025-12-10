@@ -144,6 +144,14 @@ class FlxTilesView extends FlxCameraView
 		gfx.endFill();
 	}
 
+	override public function drawDebugCircle(x:Float, y:Float, radius:Float, color:FlxColor):Void
+	{
+		final gfx = debugLayer.graphics;
+		gfx.beginFill(color.rgb, color.alphaFloat);
+		gfx.drawCircle(x, y, radius);
+		gfx.endFill();
+	}
+
 	override public function drawDebugLine(x1:Float, y1:Float, x2:Float, y2:Float, color:FlxColor, thickness:Float = 1.0):Void
 	{
 		final gfx = debugLayer.graphics;

@@ -143,8 +143,6 @@ class FlxG
 
 	public static var renderMethod(default, null):FlxRenderMethod;
 
-	@:deprecated
-	public static var renderBlit(default, null):Bool;
 	public static var renderTile(default, null):Bool;
 
 	/**
@@ -607,7 +605,6 @@ class FlxG
 		renderMethod = BLITTING;
 		#end
 
-		renderBlit = renderMethod == BLITTING;
 		renderTile = renderMethod == DRAW_TILES;
 	}
 

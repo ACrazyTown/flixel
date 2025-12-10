@@ -381,7 +381,6 @@ class FlxBar extends FlxSprite
 			}
 
 			_emptyBarRect.setTo(0, 0, barWidth, barHeight);
-			updateEmptyBar();
 		}
 
 		return this;
@@ -523,7 +522,6 @@ class FlxBar extends FlxSprite
 			}
 
 			_emptyBarRect.setTo(0, 0, barWidth, barHeight);
-			updateEmptyBar();
 		}
 
 		return this;
@@ -647,8 +645,6 @@ class FlxBar extends FlxSprite
 				{
 					makeGraphic(barWidth, barHeight, FlxColor.TRANSPARENT, true);
 				}
-
-				updateEmptyBar();
 			}
 		}
 		else
@@ -726,16 +722,7 @@ class FlxBar extends FlxSprite
 	 */
 	public function updateBar():Void
 	{
-		updateEmptyBar();
 		updateFilledBar();
-	}
-
-	/**
-	 * Stamps health bar background on its pixels
-	 */
-	@:deprecated
-	public function updateEmptyBar():Void
-	{
 	}
 
 	/**
