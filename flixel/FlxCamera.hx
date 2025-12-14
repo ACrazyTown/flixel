@@ -1,27 +1,27 @@
 package flixel;
 
-import flixel.graphics.tile.FlxDrawTrianglesItem;
+import flixel.graphics.FlxGraphic;
+import flixel.graphics.FlxMaterial;
+import flixel.graphics.frames.FlxFrame;
 import flixel.render.FlxCameraView;
 import flixel.render.context3d.FlxContext3DView;
 import flixel.render.tiles.FlxTilesView;
-
-import openfl.display.BitmapData;
-import openfl.display.DisplayObject;
-import openfl.geom.ColorTransform;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxFrame;
+import flixel.graphics.shader.FlxShader;
+import flixel.graphics.tile.FlxDrawTrianglesItem;
 import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
+import openfl.display.BitmapData;
 import openfl.display.BlendMode;
+import openfl.display.DisplayObject;
 import openfl.filters.BitmapFilter;
+import openfl.geom.ColorTransform;
+import openfl.geom.Point;
+import openfl.geom.Rectangle;
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -447,18 +447,17 @@ class FlxCamera extends FlxBasic
 			view.drawDebugLine(x1, y1, x2, y2, color, thickness);
 	}
 
-	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
-			?shader:FlxShader):Void
+	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void
 	{
 		if (view != null)
-			view.drawPixels(frame, pixels, matrix, transform, blend, smoothing, shader);
+			view.drawPixels(frame, pixels, material, matrix, transform);
 	}
 
-	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
-			?smoothing:Bool = false, ?shader:FlxShader):Void
+	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point,
+			?transform:ColorTransform):Void
 	{
 		if (view != null)
-			view.copyPixels(frame, pixels, sourceRect, destPoint, transform, blend, smoothing, shader);
+			view.copyPixels(frame, pixels, material, sourceRect, destPoint, transform);
 	}
 
 	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,

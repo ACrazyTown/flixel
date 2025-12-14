@@ -1,5 +1,6 @@
 package flixel.tile;
 
+import flixel.graphics.FlxMaterial;
 import openfl.display.BitmapData;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
@@ -60,8 +61,7 @@ class FlxTilemapBuffer implements IFlxDestroyable
 	 */
 	public var pixelPerfectRender:Null<Bool>;
 
-	public var blend:BlendMode;
-	public var antialiasing:Bool = false;
+	public var material:FlxMaterial;
 
 	var _flashRect:Rectangle;
 	var _matrix:FlxMatrix;
@@ -119,6 +119,7 @@ class FlxTilemapBuffer implements IFlxDestroyable
 	@:deprecated
 	public function destroy():Void
 	{
+		material = FlxDestroyUtil.destroy(material);
 	}
 	
 	/**

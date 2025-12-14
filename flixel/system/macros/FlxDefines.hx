@@ -66,6 +66,11 @@ private enum UserDefines
 	 * Used to make the debug windows bigger
 	 */
 	FLX_DEBUGGER_SCALE;
+
+	/**
+	 * Forces the use of the legacy tiles render method.
+	 */
+	FLX_RENDER_TILES;
 }
 
 /**
@@ -91,7 +96,6 @@ private enum HelperDefines
 	FLX_JOYSTICK_API;
 	FLX_GAMEINPUT_API;
 	FLX_ACCELEROMETER;
-	FLX_DRAW_QUADS;
 	FLX_POINT_POOL;
 	FLX_PITCH;
 	/* Used in HaxeFlixel CI, should have no effect on personal projects */
@@ -115,6 +119,8 @@ private enum HelperDefines
 	/** The normalized, absolute path of `FLX_CUSTOM_ASSETS_DIRECTORY`, used internally */
 	FLX_CUSTOM_ASSETS_DIRECTORY_ABS;
 	FLX_NO_DEFAULT_SOUND_EXT;
+	/** The new Context3D based renderer **/
+	FLX_RENDER_CONTEXT3D;
 }
 
 class FlxDefines
@@ -266,11 +272,6 @@ class FlxDefines
 
 		if (defined("mobile") || defined("js"))
 			define(FLX_ACCELEROMETER);
-
-		// #if (openfl >= "8.0.0")
-		// should always be defined as of 5.5.1 and, therefore, deprecated
-		define(FLX_DRAW_QUADS);
-		// #end
 		
 		if (defined(FLX_TRACK_POOLS) && !defined("debug"))
 			abort("Can only define FLX_TRACK_POOLS on debug mode", (macro null).pos);
@@ -283,6 +284,18 @@ class FlxDefines
 		if (defined(FLX_NO_UNIT_TEST))
 			define(FLX_OPENGL_AVAILABLE);
 		#end
+
+		// Use Context3D renderer if the target supports it and if drawTiles is not requested
+		if (defined(FLX_OPENGL_AVAILABLE) && !defined(FLX_RENDER_TILES))
+		{
+			trace("Using CONTEXT3D renderer");
+			define(FLX_RENDER_CONTEXT3D);
+		}
+		else
+		{
+			trace("Using DRAW_TILES renderer");
+			define(FLX_RENDER_TILES);
+		}
 		
 		defineInversion(FLX_TRACK_GRAPHICS, FLX_NO_TRACK_GRAPHICS);
 		

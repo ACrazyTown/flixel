@@ -11,6 +11,7 @@ import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
+import flixel.graphics.shader.FlxShader;
 
 /**
  * `BitmapData` wrapper which is used for rendering.

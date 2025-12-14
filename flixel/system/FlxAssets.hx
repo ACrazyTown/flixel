@@ -114,7 +114,7 @@ abstract FlxJsonAsset<T>(OneOfTwo<T, String>) from T from String
 	}
 }
 
-typedef FlxShader = #if nme Dynamic #else flixel.render.shader.FlxGraphicsShader #end;
+typedef FlxShader = #if nme Dynamic #else flixel.graphics.shader.FlxGraphicsShader #end;
 #end
 
 class FlxAssets

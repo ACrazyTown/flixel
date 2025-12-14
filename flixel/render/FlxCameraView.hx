@@ -18,20 +18,27 @@ import flixel.graphics.FlxGraphic;
 import openfl.display.BlendMode;
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import openfl.geom.ColorTransform;
-import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shader.FlxShader;
 import flixel.util.FlxSpriteUtil;
 import flixel.math.FlxRect;
 import openfl.display.DisplayObject;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
+import flixel.graphics.FlxMaterial;
 
 class FlxCameraView implements IFlxDestroyable
 {
+	public static inline final VERTICES_PER_QUAD = 4;
+	
+	public static inline final QUADS_PER_BATCH:Int = 2000;
+
     public static function create(camera:FlxCamera):FlxCameraView
     {
-        // TODO: type
-        return new flixel.render.tiles.FlxTilesView(camera);
+		#if FLX_RENDER_CONTEXT3D
+		return new flixel.render.context3d.FlxContext3DView(camera);
+		#else
+		return new flixel.render.tiles.FlxTilesView(camera);
+		#end
     }
 
     public static var totalDrawCalls:Int = 0;
@@ -166,11 +173,10 @@ class FlxCameraView implements IFlxDestroyable
 
     public function unlock():Void {}
 
-	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false,
-			?shader:FlxShader):Void {}
+	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void {}
 
-	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
-			smoothing:Bool = false, ?shader:FlxShader):Void {}
+	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point,
+		?transform:ColorTransform):Void {}
 
 	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
 			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader):Void {}

@@ -807,7 +807,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	{
 		if (exists && blend != Value)
 			transformChildren(blendTransform, Value);
-		return blend = Value;
+		return super.set_blend(Value);
 	}
 
 	override function set_clipRect(rect:FlxRect):FlxRect

@@ -13,10 +13,11 @@ import flixel.util.FlxColor;
 import openfl.display.Sprite;
 import openfl.display.Sprite;
 import flixel.render.FlxCameraView;
+import flixel.graphics.FlxMaterial;
 
 import flixel.graphics.FlxGraphic;
 import openfl.display.BlendMode;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shader.FlxShader;
 import flixel.graphics.tile.FlxDrawBaseItem;
 import flixel.graphics.tile.FlxDrawQuadsItem;
 import flixel.graphics.tile.FlxDrawTrianglesItem;
@@ -33,19 +34,26 @@ class FlxTilesView extends FlxCameraView
     public var canvas:Sprite;
     public var debugLayer:Sprite;
 
+	// draw commands
+	// var quads:FlxDrawQuadsCommand = new FlxDrawQuadsCommand();
+
+	// used when !material.batchable
+	// var singlequads:FlxDrawQuadsCommand;
+
     var _scrollRect:Sprite;
 
     var _helperMatrix:FlxMatrix = new FlxMatrix();
 	var _helperPoint:Point = new Point();
+	var _bounds:FlxRect = FlxRect.get();
+	static var drawVertices:Vector<Float> = new Vector<Float>();
+	static var renderRect:FlxRect = FlxRect.get();
+
 	var _currentDrawItem:FlxDrawBaseItem<Dynamic>;
 	var _headOfDrawStack:FlxDrawBaseItem<Dynamic>;
 	var _headTiles:FlxDrawQuadsItem;
 	var _headTriangles:FlxDrawTrianglesItem;
-	var _bounds:FlxRect = FlxRect.get();
 	static var _storageTilesHead:FlxDrawQuadsItem;
 	static var _storageTrianglesHead:FlxDrawTrianglesItem;
-	static var drawVertices:Vector<Float> = new Vector<Float>();
-	static var renderRect:FlxRect = FlxRect.get();
 
     public function new(camera:FlxCamera)
     {
@@ -160,7 +168,7 @@ class FlxTilesView extends FlxCameraView
 		gfx.lineTo(x2, y2);
 	}
 
-    override public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false, ?shader:FlxShader):Void 
+    override public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void 
     {
         var isColored = (transform != null #if !html5 && transform.hasRGBMultipliers() #end);
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
@@ -168,12 +176,12 @@ class FlxTilesView extends FlxCameraView
 		#if FLX_RENDER_TRIANGLE
 		final drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend, hasColorOffsets, shader);
 		#else
-		final drawItem:FlxDrawQuadsItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
+		final drawItem:FlxDrawQuadsItem = startQuadBatch(frame.parent, material, isColored, hasColorOffsets);
 		#end
 		drawItem.addQuad(frame, matrix, transform);
     }
 
-    override function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false, ?shader:FlxShader) 
+    override public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform):Void
     {
         _helperMatrix.identity();
 		_helperMatrix.translate(destPoint.x + frame.offset.x, destPoint.y + frame.offset.y);
@@ -184,7 +192,7 @@ class FlxTilesView extends FlxCameraView
 		#if FLX_RENDER_TRIANGLE
 		final drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend, hasColorOffsets, shader);
 		#else
-		final drawItem:FlxDrawQuadsItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
+		final drawItem:FlxDrawQuadsItem = startQuadBatch(frame.parent, material, isColored, hasColorOffsets);
 		#end
 		drawItem.addQuad(frame, _helperMatrix, transform);
     }
@@ -276,7 +284,7 @@ class FlxTilesView extends FlxCameraView
     // TEMP OLD TILES STUFF
     @:noCompletion
     @:deprecated
-	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
+	public function startQuadBatch(graphic:FlxGraphic, material:FlxMaterial, colored:Bool, hasColorOffsets:Bool = false)
 	{
 		#if FLX_RENDER_TRIANGLE
 		return startTrianglesBatch(graphic, smooth, colored, blend);
@@ -288,9 +296,9 @@ class FlxTilesView extends FlxCameraView
 			&& _headTiles.graphics == graphic
 			&& _headTiles.colored == colored
 			&& _headTiles.hasColorOffsets == hasColorOffsets
-			&& _headTiles.blend == blend
-			&& _headTiles.antialiasing == smooth
-			&& _headTiles.shader == shader)
+			&& _headTiles.blend == material.blendMode
+			&& _headTiles.antialiasing == material.antialiasing
+			&& _headTiles.shader == material.shader)
 		{
 			return _headTiles;
 		}
@@ -312,11 +320,11 @@ class FlxTilesView extends FlxCameraView
 			throw 'Cannot queue ${graphic.key}. This sprite was destroyed.';
 
 		itemToReturn.graphics = graphic;
-		itemToReturn.antialiasing = smooth;
+		itemToReturn.antialiasing = material.antialiasing;
 		itemToReturn.colored = colored;
 		itemToReturn.hasColorOffsets = hasColorOffsets;
-		itemToReturn.blend = blend;
-		itemToReturn.shader = shader;
+		itemToReturn.blend = material.blendMode;
+		itemToReturn.shader = material.shader;
 
 		itemToReturn.nextTyped = _headTiles;
 		_headTiles = itemToReturn;

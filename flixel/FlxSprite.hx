@@ -1,5 +1,6 @@
 package flixel;
 
+import flixel.graphics.FlxMaterial;
 import flixel.FlxBasic.IFlxBasic;
 import flixel.animation.FlxAnimationController;
 import flixel.graphics.FlxGraphic;
@@ -12,7 +13,7 @@ import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shader.FlxShader;
 import flixel.util.FlxBitmapDataUtil;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -136,6 +137,11 @@ class FlxSprite extends FlxObject
 	public static var defaultAntialiasing:Bool = false;
 	
 	/**
+	 * TODO ant: document
+	 */
+	public var material:FlxMaterial = new FlxMaterial();
+
+	/**
 	 * Class that handles adding and playing animations on this sprite.
 	 * @see https://snippets.haxeflixel.com/sprites/animation/
 	 */
@@ -158,7 +164,7 @@ class FlxSprite extends FlxObject
 	/**
 	 * Controls whether the object is smoothed when rotated, affects performance.
 	 */
-	public var antialiasing(default, set):Bool = defaultAntialiasing;
+	public var antialiasing(get, set):Bool;
 
 	/**
 	 * Set this flag to true to force the sprite to update during the `draw()` call.
@@ -257,7 +263,7 @@ class FlxSprite extends FlxObject
 	/**
 	 * Blending modes, just like Photoshop or whatever, e.g. "multiply", "screen", etc.
 	 */
-	public var blend(default, set):BlendMode;
+	public var blend(get, set):BlendMode;
 	
 	/**
 	 * Multiplies this sprite's image by the given red, green and blue components, alpha is ignored.
@@ -288,7 +294,7 @@ class FlxSprite extends FlxObject
 	 * GLSL shader for this sprite. Avoid changing it frequently as this is a costly operation.
 	 * @since 4.1.0
 	 */
-	public var shader:FlxShader;
+	public var shader(get, set):FlxShader;
 
 	/**
 	 * The actual frame used for sprite rendering
@@ -380,7 +386,8 @@ class FlxSprite extends FlxObject
 	{
 		super(X, Y);
 
-		useFramePixels = false;
+		material.antialiasing = FlxSprite.defaultAntialiasing;
+
 		if (SimpleGraphic != null)
 			loadGraphic(SimpleGraphic);
 	}
@@ -434,14 +441,13 @@ class FlxSprite extends FlxObject
 		_flashRect2 = null;
 		_flashPointZero = null;
 		_matrix = null;
-		blend = null;
 
 		frames = null;
 		graphic = null;
 		_frame = FlxDestroyUtil.destroy(_frame);
 		_frameGraphic = FlxDestroyUtil.destroy(_frameGraphic);
 
-		shader = null;
+		material = FlxDestroyUtil.destroy(material);
 	}
 
 	public function clone():FlxSprite
@@ -848,18 +854,6 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
-	@:deprecated
-	function drawSimple(camera:FlxCamera):Void
-	{
-		getScreenPosition(_point, camera).subtract(offset);
-		if (isPixelPerfectRender(camera))
-			_point.floor();
-
-		_point.copyTo(_flashPoint);
-		camera.copyPixels(_frame, framePixels, _flashRect, _flashPoint, colorTransform, blend, antialiasing);
-	}
-
-	@:noCompletion
 	function drawComplex(camera:FlxCamera):Void
 	{
 		drawFrameComplex(_frame, camera);
@@ -890,7 +884,7 @@ class FlxSprite extends FlxObject
 			matrix.ty = Math.floor(matrix.ty);
 		}
 		
-		camera.drawPixels(frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
+		camera.drawPixels(frame, framePixels, material, matrix, colorTransform);
 	}
 
 	/**
@@ -1503,9 +1497,27 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
+	function get_blend():BlendMode
+	{
+		return material.blendMode;
+	}
+
+	@:noCompletion
 	function set_blend(Value:BlendMode):BlendMode
 	{
-		return blend = Value;
+		return material.blendMode = Value;
+	}
+	
+	@:noCompletion
+	function get_shader():FlxShader
+	{
+		return material.shader;
+	}
+	
+	@:noCompletion
+	function set_shader(value:FlxShader):FlxShader
+	{
+		return material.shader = value;
 	}
 
 	/**
@@ -1607,9 +1619,15 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
+	function get_antialiasing():Bool
+	{
+		return material.antialiasing;
+	}
+
+	@:noCompletion
 	function set_antialiasing(value:Bool):Bool
 	{
-		return antialiasing = value;
+		return material.antialiasing = value;
 	}
 
 	@:noCompletion

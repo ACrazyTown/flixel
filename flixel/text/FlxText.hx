@@ -1025,17 +1025,6 @@ class FlxText extends FlxSprite
 		super.draw();
 	}
 	
-	override function drawSimple(camera:FlxCamera):Void
-	{
-		// same as super but checks _graphicOffset
-		getScreenPosition(_point, camera).subtract(offset).subtract(_graphicOffset);
-		if (isPixelPerfectRender(camera))
-			_point.floor();
-		
-		_point.copyTo(_flashPoint);
-		camera.copyPixels(_frame, framePixels, _flashRect, _flashPoint, colorTransform, blend, antialiasing);
-	}
-	
 	override function drawComplex(camera:FlxCamera):Void
 	{
 		_frame.prepareMatrix(_matrix, ANGLE_0, checkFlipX(), checkFlipY());
@@ -1061,7 +1050,7 @@ class FlxText extends FlxSprite
 			_matrix.ty = Math.floor(_matrix.ty);
 		}
 		
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
+		camera.drawPixels(_frame, framePixels, material, _matrix, colorTransform);
 	}
 
 	/**
@@ -1304,7 +1293,7 @@ class FlxText extends FlxSprite
 
 		_regen = true;
 
-		return antialiasing = value;
+		return super.set_antialiasing(value);
 	}
 }
 

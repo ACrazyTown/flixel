@@ -377,11 +377,11 @@ class FlxBitmapText extends FlxSprite
 				matrix.translate(screenPos.x + originX, screenPos.y + originY);
 				final colorTransform = bgColorTransformDrawHelper.reset();
 				colorTransform.setMultipliers(colorHelper).scaleMultipliers(backgroundColor);
-				camera.drawPixels(FlxG.bitmap.whitePixel, null, matrix, colorTransform, blend, antialiasing);
+				camera.drawPixels(FlxG.bitmap.whitePixel, null, material, matrix, colorTransform);
 			}
 			
 			final hasColorOffsets = (colorTransform != null && colorTransform.hasRGBAOffsets());
-			final drawItem = camera.viewTiles.startQuadBatch(font.parent, true, hasColorOffsets, blend, antialiasing, shader);
+			final drawItem = camera.viewTiles.startQuadBatch(font.parent, material, true, hasColorOffsets);
 			function addQuad(charCode:Int, x:Float, y:Float, color:ColorTransform)
 			{
 				var frame = font.getCharFrame(charCode);

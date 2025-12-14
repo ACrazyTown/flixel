@@ -1,4 +1,4 @@
-package flixel.render.shader;
+package flixel.graphics.shader;
 
 import openfl.display.GraphicsShader;
 

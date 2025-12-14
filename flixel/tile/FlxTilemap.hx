@@ -1,5 +1,6 @@
 package flixel.tile;
 
+import flixel.graphics.FlxMaterial;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -14,7 +15,7 @@ import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shader.FlxShader;
 import flixel.system.FlxAssets.FlxTilemapGraphicAsset;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -175,7 +176,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	 * 
 	 * @see FlxSprite.defaultAntialiasing
 	 */
-	public var antialiasing(default, set):Bool = FlxSprite.defaultAntialiasing;
+	public var antialiasing(get, set):Bool;
 
 	/**
 	 * Use to offset the drawing position of the tilemap,
@@ -187,6 +188,11 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	 * Rendering variables.
 	 */
 	public var frames(default, set):FlxFramesCollection;
+
+	/**
+	 * The material for the tilemap. Holds information about antialiasing, shaders, blends etc.
+	 */
+	public var material(default, set):FlxMaterial = new FlxMaterial();
 
 	public var graphic(default, set):FlxGraphic;
 
@@ -206,7 +212,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	/**
 	 * Blending modes, just like Photoshop or whatever, e.g. "multiply", "screen", etc.
 	 */
-	public var blend(default, set):BlendMode = null;
+	public var blend(get, set):BlendMode;
 
 	/**
 	 * The unscaled width of a single tile.
@@ -292,6 +298,8 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 			_matrix = new FlxMatrix();
 		}
 
+		antialiasing = FlxSprite.defaultAntialiasing;
+
 		scale = new FlxCallbackPoint(setScaleXCallback, setScaleYCallback, setScaleXYCallback);
 		scale.set(1, 1);
 
@@ -322,6 +330,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 
 		frames = null;
 		graphic = null;
+		material = FlxDestroyUtil.destroy(material);
 
 		// need to destroy FlxCallbackPoints
 		scale = FlxDestroyUtil.destroy(scale);
@@ -333,8 +342,6 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		FlxG.cameras.cameraAdded.remove(onCameraChanged);
 		FlxG.cameras.cameraRemoved.remove(onCameraChanged);
 		FlxG.cameras.cameraResized.remove(onCameraChanged);
-
-		shader = null;
 
 		super.destroy();
 	}
@@ -1186,7 +1193,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		scaledHeight = scaledTileHeight;
 
 		var hasColorOffsets:Bool = (colorTransform != null && colorTransform.hasRGBAOffsets());
-		drawItem = camera.viewTiles.startQuadBatch(graphic, isColored, hasColorOffsets, blend, antialiasing, shader);
+		drawItem = camera.viewTiles.startQuadBatch(graphic, material, isColored, hasColorOffsets);
 
 		// Copy tile images into the tile buffer
 		_point.x = (camera.scroll.x * scrollFactor.x) - x - offset.x + camera.viewMarginX; // modified from getScreenPosition()
@@ -1308,15 +1315,26 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	{
 		var buffer = new FlxTilemapBuffer(tileWidth, tileHeight, widthInTiles, heightInTiles, camera, scale.x, scale.y);
 		buffer.pixelPerfectRender = pixelPerfectRender;
-		buffer.antialiasing = antialiasing;
+		buffer.material = material;
 		return buffer;
+	}
+
+	function set_material(value:FlxMaterial):FlxMaterial
+	{
+		for (buffer in _buffers)
+			buffer.material = value;
+			
+		return material = value;
+	}
+	
+	function get_antialiasing():Bool
+	{
+		return material.antialiasing;
 	}
 
 	function set_antialiasing(value:Bool):Bool
 	{
-		for (buffer in _buffers)
-			buffer.antialiasing = value;
-		return antialiasing = value;
+		return material.antialiasing = value;
 	}
 
 	/**
@@ -1381,10 +1399,15 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		setDirty();
 	}
 
+	function get_blend():BlendMode
+	{
+		return material.blendMode;
+	}
+
 	function set_blend(value:BlendMode):BlendMode
 	{
 		setDirty();
-		return blend = value;
+		return material.blendMode = value;
 	}
 
 	function setScaleXYCallback(scale:FlxPoint):Void
