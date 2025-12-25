@@ -1379,7 +1379,11 @@ class FlxObject extends FlxBasic
 		}
 		else
 		{
+			#if FLX_RENDER_QUADS
 			return camera.viewQuad.debugLayer.graphics;
+			#else
+			return null;
+			#end
 		}
 	}
 

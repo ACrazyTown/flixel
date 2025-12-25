@@ -84,6 +84,9 @@ private enum UserDefine
 	 * `NOTICE`, `NORMAL` or `NONE`. Ignored if `FLX_NO_DEBUG` is defined. If undefined, `NOTICE` is used.
 	 */
 	FLX_LOG_OPEN_CONSOLE;
+
+	/** Optionally enables the experimental OpenGL renderer. */
+	FLX_RENDER_GL;
 }
 
 /**
@@ -109,7 +112,6 @@ private enum HelperDefine
 	FLX_JOYSTICK_API;
 	FLX_GAMEINPUT_API;
 	FLX_ACCELEROMETER;
-	FLX_DRAW_QUADS;
 	FLX_POINT_POOL;
 	FLX_PITCH;
 	/* Used in HaxeFlixel CI, should have no effect on personal projects */
@@ -135,6 +137,8 @@ private enum HelperDefine
 	FLX_NO_DEFAULT_SOUND_EXT;
 	/** Enables audio streaming related APIs */
 	FLX_STREAM_SOUND;
+	/** Enables the legacy DRAW_TILES (quads) renderer */
+	FLX_RENDER_QUADS;
 }
 
 class FlxDefines
@@ -286,11 +290,6 @@ class FlxDefines
 
 		if (defined("mobile") || defined("js"))
 			define(FLX_ACCELEROMETER);
-
-		// #if (openfl >= "8.0.0")
-		// should always be defined as of 5.5.1 and, therefore, deprecated
-		define(FLX_DRAW_QUADS);
-		// #end
 		
 		if (defined(FLX_TRACK_POOLS) && !defined("debug"))
 			abort("Can only define FLX_TRACK_POOLS on debug mode", (macro null).pos);
@@ -302,6 +301,13 @@ class FlxDefines
 		// FlxG.stage.window.context.attributes.hardware is not always defined during unit tests
 		if (defined(FLX_NO_UNIT_TEST))
 			define(FLX_OPENGL_AVAILABLE);
+		#end
+
+		#if FLX_RENDER_GL
+		if (!defined(FLX_OPENGL_AVAILABLE))
+			abort("Missing required dependencies for OpenGL renderer", (macro null).pos);
+		#else
+		define(FLX_RENDER_QUADS)
 		#end
 		
 		defineInversion(FLX_TRACK_GRAPHICS, FLX_NO_TRACK_GRAPHICS);

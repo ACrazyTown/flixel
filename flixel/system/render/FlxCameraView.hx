@@ -41,7 +41,12 @@ class FlxCameraView implements IFlxDestroyable
 	{
 		if (FlxG.renderTile)
 		{
+			// TODO ant -- Don't check renderTile here, make some new property
+			#if FLX_RENDER_GL
+			return cast new flixel.system.render.gl.FlxGLView(camera);
+			#else
 			return cast new flixel.system.render.quad.FlxQuadView(camera);
+			#end
 		}
 		else
 		{

@@ -6,12 +6,12 @@ import flixel.graphics.tile.FlxDrawBaseItem.FlxDrawItemType;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;
 import openfl.display.Graphics;
 import openfl.display.ShaderParameter;
 import openfl.display.TriangleCulling;
 import openfl.geom.ColorTransform;
+import flixel.system.render.quad.FlxGraphicsShader;
 
 typedef DrawData<T> = openfl.Vector<T>;
 
@@ -24,7 +24,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 	static var point:FlxPoint = FlxPoint.get();
 	static var rect:FlxRect = FlxRect.get();
 
-	public var shader:FlxShader;
+	public var shader:FlxGraphicsShader;
 	var alphas:Array<Float>;
 	var colorMultipliers:Array<Float>;
 	var colorOffsets:Array<Float>;
@@ -51,9 +51,10 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 
 	override public function render(camera:FlxCamera):Void
 	{
+		#if FLX_RENDER_QUADS
 		if (numTriangles <= 0)
 			return;
-
+		
 		#if !flash
 		var shader = shader != null ? shader : graphics.shader;
 		shader.bitmap.input = graphics.bitmap;
@@ -92,6 +93,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 			gfx.lineStyle(1, FlxColor.BLUE, 0.5);
 			gfx.drawTriangles(vertices, indices, uvtData);
 		}
+		#end
 		#end
 
 		super.render(camera);

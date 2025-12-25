@@ -1,5 +1,6 @@
 package flixel;
 
+import openfl.events.RenderEvent;
 import flixel.system.render.FlxCameraView;
 import flixel.system.FlxSplash;
 import flixel.util.FlxArrayUtil;
@@ -344,6 +345,9 @@ class FlxGame extends Sprite
 
 		// Finally, set up an event for the actual game loop stuff.
 		stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		#if FLX_RENDER_GL
+		stage.addEventListener(RenderEvent.RENDER_OPENGL, onRenderGL);
+		#end
 
 		// We need to listen for resize event which means new context
 		// it means that we need to recreate BitmapDatas of dumped tilesheets
@@ -484,7 +488,9 @@ class FlxGame extends Sprite
 					// to game objects (e.g. moving things around).
 					if (debugger.interaction.isActive())
 					{
+						#if !FLX_RENDER_GL
 						draw();
+						#end
 					}
 					#end
 					return;
@@ -511,7 +517,9 @@ class FlxGame extends Sprite
 			FlxBasic.visibleCount = 0;
 			#end
 
+			#if !FLX_RENDER_GL
 			draw();
+			#end
 
 			#if FLX_DEBUG
 			debugger.stats.visibleObjects(FlxBasic.visibleCount);
@@ -519,6 +527,15 @@ class FlxGame extends Sprite
 			#end
 		}
 	}
+
+	#if FLX_RENDER_GL
+	function onRenderGL(event:RenderEvent):Void
+	{
+		var renderer:openfl.display.OpenGLRenderer = cast event.renderer;
+		flixel.system.render.gl.FlxGLView.context = renderer.gl;
+		draw();
+	}
+	#end
 
 	/**
 	 * Internal method to create a new instance of `_initialState` and reset the game.

@@ -3,16 +3,12 @@ package flixel;
 import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
-import flixel.graphics.tile.FlxDrawBaseItem;
-import flixel.graphics.tile.FlxDrawQuadsItem;
-import flixel.graphics.tile.FlxDrawTrianglesItem;
 import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.FlxCameraView;
-import flixel.system.render.quad.FlxQuadView;
 import flixel.system.render.blit.FlxBlitView;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
@@ -29,6 +25,16 @@ import openfl.filters.BitmapFilter;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
+import flixel.graphics.tile.FlxDrawBaseItem;
+import flixel.graphics.tile.FlxDrawQuadsItem;
+import flixel.graphics.tile.FlxDrawTrianglesItem;
+#if FLX_RENDER_QUADS
+import flixel.system.render.quad.FlxQuadView;
+#end
+
+#if FLX_RENDER_GL
+import flixel.system.render.gl.FlxGLView;
+#end
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -102,12 +108,23 @@ class FlxCamera extends FlxBasic
 	 */
 	public var view(default, null):FlxCameraView;
 
+	#if FLX_RENDER_GL
+	/**
+	 * This camera's `view`, typed as a `FlxGLView`
+	 * 
+	 * **NOTE**: May be null depending on the render implementation used.
+	 */
+	public var viewGL(default, null):Null<FlxGLView>;
+	#end
+
+	#if FLX_RENDER_QUAD
 	/**
 	 * This camera's `view`, typed as a `FlxQuadView`.
 	 * 
 	 * **NOTE**: May be null depending on the render implementation used.
 	 */
 	public var viewQuad(default, null):Null<FlxQuadView>;
+	#end
 
 	/**
 	 * This camera's `view`, typed as a `FlxBlitView`.
@@ -225,12 +242,12 @@ class FlxCamera extends FlxBasic
 	public var flashSprite(get, set):Sprite;
 	inline function set_flashSprite(value:Sprite):Sprite
 	{
-		var sprite = FlxG.renderTile ? viewQuad.flashSprite : viewBlit.flashSprite;
+		var sprite = #if FLX_RENDER_QUADS FlxG.renderTile ? viewQuad.flashSprite : #end viewBlit.flashSprite;
 		return sprite = value;
 	}
 	inline function get_flashSprite():Sprite
 	{
-		return FlxG.renderTile ? viewQuad.flashSprite : viewBlit.flashSprite;
+		return #if FLX_RENDER_QUADS FlxG.renderTile ? viewQuad.flashSprite : #end viewBlit.flashSprite;
 	}
 
 	/**
@@ -559,11 +576,11 @@ class FlxCamera extends FlxBasic
 	var _scrollRect(get, set):Sprite;
 	inline function get__scrollRect():Sprite
 	{
-		return FlxG.renderTile ? viewQuad._scrollRect : viewBlit._scrollRect;
+		return #if FLX_RENDER_QUADS FlxG.renderTile ? viewQuad._scrollRect : #end viewBlit._scrollRect;
 	}
 	inline function set__scrollRect(value:Sprite):Sprite 
 	{
-		var scrollRect = FlxG.renderTile ? viewQuad._scrollRect : viewBlit._scrollRect;
+		var scrollRect = #if FLX_RENDER_QUADS FlxG.renderTile ? viewQuad._scrollRect : #end viewBlit._scrollRect;
 		return scrollRect = value;
 	}
 
@@ -574,14 +591,15 @@ class FlxCamera extends FlxBasic
 	var _bounds(get, set):FlxRect;
 	inline function get__bounds():FlxRect 
 	{
-		return FlxG.renderTile ? viewQuad._bounds : viewBlit._bounds;
+		return #if FLX_RENDER_QUADS FlxG.renderTile ? viewQuad._bounds : #end viewBlit._bounds;
 	}
 	inline function set__bounds(value:FlxRect):FlxRect 
 	{
-		var bounds = FlxG.renderTile ? viewQuad._bounds : viewBlit._bounds;
+		var bounds = #if FLX_RENDER_QUADS FlxG.renderTile ? viewQuad._bounds : #end viewBlit._bounds;
 		return bounds = value;
 	}
 
+	#if FLX_RENDER_QUADS
 	/**
 	 * Sprite used for actual rendering in tile render mode (instead of `_flashBitmap` for blitting).
 	 * Its graphics is used as a drawing surface for `drawTriangles()` and `drawTiles()` methods.
@@ -605,16 +623,17 @@ class FlxCamera extends FlxBasic
 	inline function set_debugLayer(value:Sprite):Sprite return viewQuad.debugLayer;
 	inline function get_debugLayer():Sprite return viewQuad.debugLayer;
 	#end
+	#end
 
 	@:deprecated("_helperMatrix is deprecated, use camera.viewQuad._helperMatrix/camera.viewBlit._helperMatrix, instead")
 	var _helperMatrix(get, set):FlxMatrix;
 	inline function get__helperMatrix():FlxMatrix
 	{
-		return FlxG.renderTile ? viewQuad._helperMatrix : viewBlit._helperMatrix;
+		return #if FLX_RENDER_QUADS FlxG.renderTile ? viewQuad._helperMatrix : #end viewBlit._helperMatrix;
 	}
 	inline function set__helperMatrix(value:FlxMatrix):FlxMatrix 
 	{
-		var mat = FlxG.renderTile ? viewQuad._helperMatrix : viewBlit._helperMatrix;
+		var mat = #if FLX_RENDER_QUADS FlxG.renderTile ? viewQuad._helperMatrix : #end viewBlit._helperMatrix;
 		return mat = value;
 	}
 
@@ -623,6 +642,7 @@ class FlxCamera extends FlxBasic
 	inline function get__helperPoint():Point return viewBlit._helperPoint;
 	inline function set__helperPoint(value:Point):Point return viewBlit._helperPoint = value;
 
+	#if FLX_RENDER_QUADS
 	/**
 	 * Currently used draw stack item
 	 */
@@ -670,6 +690,7 @@ class FlxCamera extends FlxBasic
 	static var _storageTrianglesHead(get, set):FlxDrawTrianglesItem;
 	static inline function get__storageTrianglesHead():FlxDrawTrianglesItem return FlxQuadView._storageTrianglesHead;
 	static inline function set__storageTrianglesHead(value:FlxDrawTrianglesItem):FlxDrawTrianglesItem return FlxQuadView._storageTrianglesHead = value;
+	#end
 
 	/**
 	 * Internal variable, used for visibility checks to minimize `drawTriangles()` calls.
@@ -702,27 +723,45 @@ class FlxCamera extends FlxBasic
 	static inline function set_renderRect(value:FlxRect):FlxRect return FlxBlitView.renderRect = value;
 
 	@:noCompletion
+	@:deprecated("startQuadBatch is deprecated")
 	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
 	{
+		#if FLX_RENDER_QUADS
 		return viewQuad.startQuadBatch(graphic, colored, hasColorOffsets, blend, smooth, shader);
+		#else
+		return null;
+		#end
 	}
 
 	@:noCompletion
+	@:deprecated("startTrianglesBatch is deprecated")
 	public function startTrianglesBatch(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxShader):FlxDrawTrianglesItem
 	{
+		#if FLX_RENDER_QUADS
 		return viewQuad.startTrianglesBatch(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
+		#else
+		return null;
+		#end
 	}
 
 	@:noCompletion
+	@:deprecated("getNewDrawTrianglesItem is deprecated")
 	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxShader):FlxDrawTrianglesItem
 	{
+		#if FLX_RENDER_QUADS
 		return viewQuad.getNewDrawTrianglesItem(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
+		#else
+		return null;
+		#end
 	}
 
 	@:allow(flixel.system.frontEnds.CameraFrontEnd)
+	@:deprecated("clearDrawStack is deprecated")
 	function clearDrawStack():Void
 	{
+		#if FLX_RENDER_QUADS
 		viewQuad.clearDrawStack();
+		#end
 	}
 
 	@:allow(flixel.system.frontEnds.CameraFrontEnd)
@@ -871,9 +910,15 @@ class FlxCamera extends FlxBasic
 		this.height = height;
 
 		view = FlxCameraView.create(this);
+		#if FLX_RENDER_GL
+		if (view is FlxGLView)
+			viewGL = cast view;
+		#end
+		#if FLX_RENDER_QUADS
 		if (view is FlxQuadView)
 			viewQuad = cast view;
-		else if (view is FlxBlitView)
+		#end
+		if (view is FlxBlitView)
 			viewBlit = cast view;
 
 		pixelPerfectRender = FlxG.renderBlit;

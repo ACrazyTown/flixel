@@ -387,7 +387,7 @@ class Interaction extends Window
 			return FlxSpriteUtil.flashGfx;
 		}
 
-		#if FLX_DEBUG
+		#if (FLX_DEBUG && FLX_RENDER_QUADS)
 		return FlxG.camera.debugLayer.graphics;
 		#end
 
@@ -790,19 +790,29 @@ class Interaction extends Window
 	
 	public function toDebugX(worldX:Float, camera:FlxCamera)
 	{
+		// TODO ant
+		#if FLX_RENDER_QUADS
 		if (FlxG.renderTile)
 			return camera.viewQuad.canvas.localToGlobal(new Point(worldX, 0)).x;
 		else
 			@:privateAccess
 			return camera.viewBlit._flashBitmap.localToGlobal(new Point(worldX, 0)).x;
+		#end
+
+		return worldX;
 	}
 	
 	public function toDebugY(worldY:Float, camera:FlxCamera)
 	{
+		// TODO ant
+		#if FLX_RENDER_QUADS
 		if (FlxG.renderTile)
 			return camera.viewQuad.canvas.localToGlobal(new Point(0, worldY)).y;
 		else
 			@:privateAccess
 			return camera.viewBlit._flashBitmap.localToGlobal(new Point(0, worldY)).y;
+		#end
+
+		return worldY;
 	}
 }
