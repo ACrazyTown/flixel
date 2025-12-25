@@ -55,9 +55,8 @@ class FlxQuadView extends FlxCameraView
 	 * Its position is modified by `updateScrollRect()` method, which is called on camera's resize and scale events.
 	 */
 	var _scrollRect:Sprite = new Sprite();
-
 	var targetGraphics:Graphics;
-	
+
 	@:allow(flixel.system.render.FlxCameraView)
 	function new(camera:FlxCamera)
 	{

@@ -16,8 +16,9 @@ import flixel.util.FlxBitmapDataUtil;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDirectionFlags;
-import openfl.display.BitmapData;
 import openfl.display.BlendMode;
+import flixel.graphics.FlxMaterial;
+import openfl.display.BitmapData;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
@@ -155,9 +156,15 @@ class FlxSprite extends FlxObject
 	public var useFramePixels(default, set):Bool = true;
 
 	/**
+	 * This sprite's material, holds data about visual effects such as blend modes and shaders.
+	 */
+	public var material:FlxMaterial = new FlxMaterial();
+
+	/**
 	 * Controls whether the object is smoothed when rotated, affects performance.
 	 */
-	public var antialiasing(default, set):Bool = defaultAntialiasing;
+	@:isVar
+	public var antialiasing(get, set):Bool;
 
 	/**
 	 * Set this flag to true to force the sprite to update during the `draw()` call.
@@ -256,7 +263,8 @@ class FlxSprite extends FlxObject
 	/**
 	 * Blending modes, just like Photoshop or whatever, e.g. "multiply", "screen", etc.
 	 */
-	public var blend(default, set):BlendMode;
+	@:isVar
+	public var blend(get, set):BlendMode;
 	
 	/**
 	 * Multiplies this sprite's image by the given red, green and blue components, alpha is ignored.
@@ -292,7 +300,7 @@ class FlxSprite extends FlxObject
 	 * GLSL shader for this sprite. Avoid changing it frequently as this is a costly operation.
 	 * @since 4.1.0
 	 */
-	public var shader:FlxShader;
+	public var shader(get, set):FlxShader;
 
 	/**
 	 * The actual frame used for sprite rendering
@@ -384,6 +392,7 @@ class FlxSprite extends FlxObject
 	{
 		super(X, Y);
 
+		material.smoothing = defaultAntialiasing;
 		useFramePixels = FlxG.renderer.method == BLITTING;
 		if (SimpleGraphic != null)
 			loadGraphic(SimpleGraphic);
@@ -1011,7 +1020,8 @@ class FlxSprite extends FlxObject
 			_point.floor();
 
 		_point.copyTo(_flashPoint);
-		FlxG.renderer.copyPixels(_frame, framePixels, _flashRect, _flashPoint, colorTransform, blend, antialiasing);
+		
+		FlxG.renderer.copyPixels(_frame, framePixels, material, _flashRect, _flashPoint, colorTransform);
 	}
 
 	@:noCompletion
@@ -1027,7 +1037,7 @@ class FlxSprite extends FlxObject
 		final matrix = drawComplexMatrix; // TODO: Just use local?
 		prepareComplexMatrix(matrix, frame, camera);
 		
-		FlxG.renderer.drawPixels(frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
+		FlxG.renderer.drawPixels(frame, framePixels, material, matrix, colorTransform);
 	}
 	
 	function prepareComplexMatrix(matrix:FlxMatrix, frame:FlxFrame, camera:FlxCamera)
@@ -1922,9 +1932,15 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
-	function set_blend(Value:BlendMode):BlendMode
+	function get_blend():BlendMode
 	{
-		return blend = Value;
+		return material.blendMode;
+	}
+	
+	@:noCompletion
+	function set_blend(value:BlendMode):BlendMode
+	{
+		return material.blendMode = value;
 	}
 
 	/**
@@ -2026,9 +2042,27 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
+	function get_antialiasing():Bool
+	{
+		return material.smoothing;
+	}
+
+	@:noCompletion
 	function set_antialiasing(value:Bool):Bool
 	{
-		return antialiasing = value;
+		return material.smoothing = value;
+	}
+	
+	@:noCompletion
+	function get_shader():FlxShader
+	{
+		return material.shader;
+	}
+	
+	@:noCompletion
+	function set_shader(value:FlxShader):FlxShader
+	{
+		return material.shader = value;
 	}
 
 	@:noCompletion

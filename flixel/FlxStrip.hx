@@ -32,7 +32,7 @@ class FlxStrip extends FlxSprite
 
 	public var colors:DrawData<Int> = new DrawData<Int>();
 
-	public var repeat:Bool = false;
+	public var repeat(get, set):Bool;
 
 	override public function destroy():Void
 	{
@@ -58,8 +58,19 @@ class FlxStrip extends FlxSprite
 
 			getScreenPosition(_point, camera);
 			_point -= offset;
+
 			FlxG.renderer.begin(camera);
-			FlxG.renderer.drawTriangles(graphic, vertices, indices, uvtData, colors, _point, blend, repeat, antialiasing, colorTransform, shader);
+			FlxG.renderer.drawTriangles(graphic, vertices, indices, uvtData, colors, _point, material, colorTransform);
 		}
+	}
+
+	function get_repeat():Bool
+	{
+		return material.repeat;
+	}
+
+	function set_repeat(value:Bool):Bool
+	{
+		return material.repeat = value;
 	}
 }

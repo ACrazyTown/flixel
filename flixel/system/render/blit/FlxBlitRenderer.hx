@@ -1,5 +1,6 @@
 package flixel.system.render.blit;
 
+import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
@@ -115,25 +116,23 @@ class FlxBlitRenderer extends FlxRenderer
 		view.screen.dirty = true;
 	}
 	
-	override function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false,
-			?shader:FlxShader):Void
+	override function drawPixelsInternal(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void
 	{
 		_helperMatrix.copyFrom(matrix);
 		
 		if (view._useBlitMatrix)
 		{
 			_helperMatrix.concat(view._blitMatrix);
-			view.buffer.draw(pixels, _helperMatrix, null, null, null, (smoothing || camera.antialiasing));
+			view.buffer.draw(pixels, _helperMatrix, null, null, null, (material.smoothing || camera.antialiasing));
 		}
 		else
 		{
 			_helperMatrix.translate(-camera.viewMarginLeft, -camera.viewMarginTop);
-			view.buffer.draw(pixels, _helperMatrix, null, blend, null, (smoothing || camera.antialiasing));
+			view.buffer.draw(pixels, _helperMatrix, null, material.blendMode, null, (material.smoothing || camera.antialiasing));
 		}
 	}
 	
-	override function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
-			smoothing:Bool = false, ?shader:FlxShader)
+	override function copyPixelsInternal(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform):Void
 	{
 		if (pixels != null)
 		{
@@ -142,7 +141,7 @@ class FlxBlitRenderer extends FlxRenderer
 				_helperMatrix.identity();
 				_helperMatrix.translate(destPoint.x, destPoint.y);
 				_helperMatrix.concat(view._blitMatrix);
-				view.buffer.draw(pixels, _helperMatrix, null, null, null, (smoothing || camera.antialiasing));
+				view.buffer.draw(pixels, _helperMatrix, null, null, null, (material.smoothing || camera.antialiasing));
 			}
 			else
 			{
@@ -158,8 +157,8 @@ class FlxBlitRenderer extends FlxRenderer
 		}
 	}
 	
-	override function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader)
+	override function drawTrianglesInternal(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
+			?position:FlxPoint, material:FlxMaterial, ?transform:ColorTransform):Void
 	{
 		final cameraBounds = _bounds.set(camera.viewMarginLeft, camera.viewMarginTop, camera.viewWidth, camera.viewHeight);
 		
@@ -203,7 +202,7 @@ class FlxBlitRenderer extends FlxRenderer
 		else
 		{
 			trianglesSprite.graphics.clear();
-			trianglesSprite.graphics.beginBitmapFill(graphic.bitmap, null, repeat, smoothing);
+			trianglesSprite.graphics.beginBitmapFill(graphic.bitmap, null, material.repeat, material.smoothing);
 			trianglesSprite.graphics.drawTriangles(drawVertices, indices, uvtData);
 			trianglesSprite.graphics.endFill();
 			

@@ -33,7 +33,7 @@ class FlxBGSprite extends FlxSprite
 			_matrix.translate(camera.viewMarginLeft, camera.viewMarginTop);
 
 			FlxG.renderer.begin(camera);
-			FlxG.renderer.drawPixels(frame, _matrix, colorTransform);
+			FlxG.renderer.drawPixels(frame, null, material, _matrix, colorTransform);
 
 			#if FLX_DEBUG
 			FlxBasic.visibleCount++;

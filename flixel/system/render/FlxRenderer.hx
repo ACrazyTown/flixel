@@ -1,13 +1,14 @@
 package flixel.system.render;
 
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.FlxMaterial;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;
-import flixel.util.FlxDestroyUtil.IFlxDestroyable;
+import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
@@ -98,6 +99,11 @@ class FlxRenderer implements IFlxDestroyable
      */
     public var camera(default, null):FlxCamera;
 
+	/**
+	 * Internal, used when any of the legacy drawing commands are called.
+	 */
+	var _helperMaterial:FlxMaterial = new FlxMaterial();
+
     public function new() 
     {
         maxTextureSize = -1;
@@ -106,6 +112,7 @@ class FlxRenderer implements IFlxDestroyable
     public function destroy():Void 
     {
         camera = null;
+		_helperMaterial = FlxDestroyUtil.destroy(_helperMaterial);   
     }
 
     // ------------------------ RENDERING ------------------------
@@ -145,9 +152,62 @@ class FlxRenderer implements IFlxDestroyable
      * @param   smoothing   Whether to use smoothing (anti-aliasing) when drawing.
      * @param   shader      The shader to use, optional (used only with the DRAW_TILES renderer).
      */
-    public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false,
-		?shader:FlxShader):Void {}
+	overload extern public inline function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
+			smoothing:Bool = false, ?shader:FlxShader):Void
+	{
+		_helperMaterial.blendMode = blend;
+		_helperMaterial.smoothing = smoothing;
+		_helperMaterial.shader = shader;
+		_helperMaterial.repeat = false; // Can't determine repeat, assume false!
+		
+		drawPixelsInternal(frame, pixels, _helperMaterial, matrix, transform);
+	}
 	
+	/**
+	 * Draws `frame` or `pixels` (depends on the renderer backend) onto the current render target.
+	 * 
+	 * @param   frame       The frame to draw (used only with the DRAW_TILES renderer).
+	 * @param   pixels      The pixels to draw (used only with the BLITTING renderer).
+	 * @param   material    The material to use.
+	 * @param   matrix      The transformation matrix to use.
+	 * @param   transform   The color transform to use, optional.
+	 */
+	overload extern public inline function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix,
+			?transform:ColorTransform):Void
+	{
+		drawPixelsInternal(frame, pixels, material, matrix, transform);
+	}
+	
+	// TODO ant: handle these internal implementations differently
+	// make them abstract functions, and FlxRenderer an abstract class?
+	
+	/* For internal use only */
+	function drawPixelsInternal(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform) {}
+	
+	/**
+	 * Draws `frame` or `pixels` (depends on the renderer backend) onto the current render target.
+	 * 
+	 * Unlike `drawPixels()`, this method does not use a matrix. This means that complex transformations
+	 * are not supported with this method. The `destPoint` argument is used to determine the position to draw to.
+	 * 
+	 * @param   frame        The frame to draw (used only with the DRAW_TILES renderer).
+	 * @param   pixels       The pixels to draw (used only with the BLITTING renderer).
+	 * @param   material     The material to use.
+	 * @param   sourceRect   A rectangle that defines the area of the pixels to use (used only with the BLITTING renderer).
+	 * @param   destPoint    A point representing the top-left position to draw to.
+	 * @param   transform    The color transform to use, optional.
+	 */
+	overload extern public inline function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform,
+			?blend:BlendMode, smoothing:Bool = false, ?shader:FlxShader):Void
+	{
+		_helperMaterial.blendMode = blend;
+		_helperMaterial.smoothing = smoothing;
+		_helperMaterial.shader = shader;
+		_helperMaterial.repeat = false; // Can't determine repeat, assume false!
+		
+		copyPixelsInternal(frame, pixels, _helperMaterial, sourceRect, destPoint, transform);
+	}
+		
 	/**
 	 * Draws `frame` or `pixels` (depends on the renderer backend) onto the current render target.
      * 
@@ -163,9 +223,16 @@ class FlxRenderer implements IFlxDestroyable
 	 * @param   smoothing    Whether to use smoothing (anti-aliasing) when drawing.
 	 * @param   shader       The shader to use, optional (used only with the DRAW_TILES renderer).
 	 */
-	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
-		smoothing:Bool = false, ?shader:FlxShader):Void {}
+	overload extern public inline function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point,
+			?transform:ColorTransform):Void
+	{
+		copyPixelsInternal(frame, pixels, material, sourceRect, destPoint, transform);
+	}
 	
+	/* For internal use only */
+	function copyPixelsInternal(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point,
+		?transform:ColorTransform):Void {}
+    
 	/**
 	 * Draws a set of triangles onto the current render target.
      * 
@@ -181,8 +248,38 @@ class FlxRenderer implements IFlxDestroyable
 	 * @param   transform   The color transform to use, optional.
 	 * @param   shader      The shader to use, optional (used only with the DRAW_TILES renderer).
 	 */
-	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-		?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader):Void {}
+	overload extern public inline function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>,
+		?colors:DrawData<Int>, ?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform,
+		?shader:FlxShader):Void 
+    {
+        _helperMaterial.blendMode = blend;
+		_helperMaterial.smoothing = smoothing;
+		_helperMaterial.shader = shader;
+		_helperMaterial.repeat = repeat;
+
+        drawTrianglesInternal(graphic, vertices, indices, uvtData, colors, position, _helperMaterial, transform);
+    }
+
+    /**
+	 * Draws a set of triangles onto the current render target.
+     * 
+	 * @param   graphic     The graphic to use for the triangles.
+	 * @param   vertices    A vector where each element is a coordinate location. 2 elements make up an (x, y) pair.
+	 * @param   indices     A vector where each element is an index to a vertex (x, y) pair. 3 indices make up a triangle.
+	 * @param   uvtData     A vector where each element is a normalized coordinate (from 0.0 to 1.0), per vertex, used to apply texture mapping.
+	 * @param   colors      A vector containing the colors to use per vertex. Currently does not work with any renderer.
+	 * @param   position    A point representing the top-left position to draw to.
+     * @param   material    The material to use.
+	 * @param   transform   The color transform to use, optional.
+	 */
+	overload extern public inline function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
+		?position:FlxPoint, material:FlxMaterial, ?transform:ColorTransform):Void 
+    {
+        drawTrianglesInternal(graphic, vertices, indices, uvtData, colors, position, material, transform);
+    }
+		
+	function drawTrianglesInternal(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
+		?position:FlxPoint, material:FlxMaterial, ?transform:ColorTransform):Void {}
 
     /**
      * Fills the current render target with `color`.

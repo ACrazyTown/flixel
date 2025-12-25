@@ -2,6 +2,7 @@ package flixel.system.render.quad;
 
 import openfl.geom.Point;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.FlxMaterial;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawBaseItem;
 import flixel.graphics.tile.FlxDrawQuadsItem;
@@ -86,22 +87,21 @@ class FlxQuadRenderer extends FlxRenderer
 		camera.drawFX();
 	}
 
-	override function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false,
-		?shader:FlxShader)
+	override function drawPixelsInternal(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void
 	{
 		var isColored = (transform != null #if !html5 && transform.hasRGBMultipliers() #end);
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 		
+		// TODO ant: probably just pass in material lol
 		#if FLX_RENDER_TRIANGLE
-		final drawItem:FlxDrawTrianglesItem = view.startTrianglesBatch(frame.parent, smoothing, isColored, blend, hasColorOffsets, shader);
+		final drawItem:FlxDrawTrianglesItem = view.startTrianglesBatch(frame.parent, material.smoothing, isColored, material.blendMode, hasColorOffsets, material.shader);
 		#else
-		final drawItem:FlxDrawQuadsItem = view.startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
+		final drawItem:FlxDrawQuadsItem = view.startQuadBatch(frame.parent, isColored, hasColorOffsets, material.blendMode, material.smoothing, material.shader);
 		#end
 		drawItem.addQuad(frame, matrix, transform);
 	}
 	
-	override function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
-			smoothing:Bool = false, ?shader:FlxShader)
+	override function copyPixelsInternal(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform):Void
 	{
 		_helperMatrix.identity();
 		_helperMatrix.translate(destPoint.x + frame.offset.x, destPoint.y + frame.offset.y);
@@ -109,23 +109,25 @@ class FlxQuadRenderer extends FlxRenderer
 		var isColored = (transform != null && transform.hasRGBMultipliers());
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 		
+		// TODO ant: probably just pass in material lol
 		#if FLX_RENDER_TRIANGLE
-		final drawItem:FlxDrawTrianglesItem = view.startTrianglesBatch(frame.parent, smoothing, isColored, blend, hasColorOffsets, shader);
+		final drawItem:FlxDrawTrianglesItem = view.startTrianglesBatch(frame.parent, material.smoothing, isColored, material.blendMode, hasColorOffsets,  material.shader);
 		#else
-		final drawItem:FlxDrawQuadsItem = view.startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
+		final drawItem:FlxDrawQuadsItem = view.startQuadBatch(frame.parent, isColored, hasColorOffsets, material.blendMode, material.smoothing, material.shader);
 		#end
 		drawItem.addQuad(frame, _helperMatrix, transform);
 	}
 	
-	override function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader)
+	override function drawTrianglesInternal(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
+			?position:FlxPoint, material:FlxMaterial, ?transform:ColorTransform):Void
 	{
 		final cameraBounds = _bounds.set(camera.viewMarginLeft, camera.viewMarginTop, camera.viewWidth, camera.viewHeight);
 		
 		final isColored = (colors != null && colors.length != 0) || (transform != null && transform.hasRGBMultipliers());
 		final hasColorOffsets = (transform != null && transform.hasRGBAOffsets());
-		
-		final drawItem = view.startTrianglesBatch(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
+	
+		// TODO ant: probably just pass in material lol
+		final drawItem = view.startTrianglesBatch(graphic, material.smoothing, isColored, material.blendMode, hasColorOffsets, material.shader);
 		drawItem.addTriangles(vertices, indices, uvtData, colors, position, cameraBounds, transform);
 	}
 

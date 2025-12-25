@@ -10,6 +10,7 @@ import flixel.tile.FlxTilemap;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import flixel.graphics.FlxMaterial;
 import openfl.geom.ColorTransform;
 
 /**
@@ -65,8 +66,11 @@ class FlxTilemapBuffer implements IFlxDestroyable
 	 */
 	public var pixels(default, null):BitmapData;
 
-	public var blend:BlendMode;
-	public var antialiasing:Bool = false;
+	public var material:FlxMaterial = new FlxMaterial();
+	
+	public var blend(get, set):BlendMode;
+	
+	public var antialiasing(get, set):Bool;
 
 	var _flashRect:Rectangle;
 	var _matrix:FlxMatrix;
@@ -185,14 +189,15 @@ class FlxTilemapBuffer implements IFlxDestroyable
 
 		if (isPixelPerfectRender(camera) && (scaleX == 1.0 && scaleY == 1.0) && blend == null)
 		{
-			FlxG.renderer.copyPixels(pixels, _flashRect, flashPoint, null, null, true);
+			FlxG.renderer.copyPixels(null, pixels, material, _flashRect, flashPoint, null);
 		}
 		else
 		{
 			_matrix.identity();
 			_matrix.scale(scaleX, scaleY);
 			_matrix.translate(flashPoint.x, flashPoint.y);
-			FlxG.renderer.drawPixels(pixels, _matrix, null, blend, antialiasing);
+
+			FlxG.renderer.drawPixels(null, pixels, material, _matrix, null);
 		}
 	}
 	
@@ -290,5 +295,24 @@ class FlxTilemapBuffer implements IFlxDestroyable
 		}
 		
 		return dirty;
+	}
+	function get_blend():BlendMode
+	{
+		return material.blendMode;
+	}
+	
+	function set_blend(value:BlendMode):BlendMode
+	{
+		return material.blendMode = value;
+	}
+	
+	function get_antialiasing():Bool
+	{
+		return material.smoothing;
+	}
+	
+	function set_antialiasing(value:Bool):Bool
+	{
+		return material.smoothing = value;
 	}
 }
