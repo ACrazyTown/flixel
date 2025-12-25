@@ -14,12 +14,11 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxMatrix;
 import flixel.graphics.tile.FlxDrawTrianglesItem;
 import flixel.util.FlxColor;
+import flixel.graphics.FlxBlendMode;
 import openfl.filters.BitmapFilter;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
-import openfl.display.BlendMode;
-import openfl.display.DisplayObject;
 import openfl.display.BitmapData;
 import openfl.display.Sprite;
 import openfl.Vector;
@@ -237,7 +236,7 @@ class FlxBlitView extends FlxCameraView
 		gfx.lineTo(x2, y2);
 	}
 	
-	override function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false,
+	override function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:FlxBlendMode, smoothing:Bool = false,
 			?shader:FlxShader):Void
 	{
 		_helperMatrix.copyFrom(matrix);
@@ -254,7 +253,7 @@ class FlxBlitView extends FlxCameraView
 		}
 	}
 	
-	override function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
+	override function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:FlxBlendMode,
 			smoothing:Bool = false, ?shader:FlxShader)
 	{
 		if (pixels != null)
@@ -281,7 +280,7 @@ class FlxBlitView extends FlxCameraView
 	}
 	
 	override function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader)
+			?position:FlxPoint, ?blend:FlxBlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader)
 	{
 		final cameraBounds = _bounds.set(camera.viewMarginLeft, camera.viewMarginTop, camera.viewWidth, camera.viewHeight);
 		

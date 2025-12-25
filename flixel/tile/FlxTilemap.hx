@@ -20,8 +20,9 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxSpriteUtil;
+import flixel.graphics.FlxMaterial;
 import openfl.display.BitmapData;
-import openfl.display.BlendMode;
+import flixel.graphics.FlxBlendMode;
 import openfl.display.Graphics;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
@@ -175,7 +176,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	 * 
 	 * @see FlxSprite.defaultAntialiasing
 	 */
-	public var antialiasing(default, set):Bool = FlxSprite.defaultAntialiasing;
+	public var antialiasing(get, set):Bool;
 
 	/**
 	 * Use to offset the drawing position of the tilemap,
@@ -203,10 +204,12 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 
 	public var colorTransform(default, null):ColorTransform = new ColorTransform();
 
+	public var material(default, set):FlxMaterial = new FlxMaterial();
+
 	/**
 	 * Blending modes, just like Photoshop or whatever, e.g. "multiply", "screen", etc.
 	 */
-	public var blend(default, set):BlendMode = null;
+	public var blend(get, set):FlxBlendMode;
 
 	/**
 	 * The unscaled width of a single tile.
@@ -243,7 +246,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	 * Avoid changing it frequently as this is a costly operation.
 	 * @since 4.1.0
 	 */
-	public var shader:FlxShader;
+	public var shader(get, set):FlxShader;
 
 	/**
 	 * Rendering helper, minimize new object instantiation on repetitive methods.
@@ -285,6 +288,8 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	function new()
 	{
 		super();
+
+		material.antialiasing = FlxSprite.defaultAntialiasing;
 
 		if (FlxG.renderTile)
 		{
@@ -1393,15 +1398,30 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	{
 		var buffer = new FlxTilemapBuffer(tileWidth, tileHeight, widthInTiles, heightInTiles, camera, scale.x, scale.y);
 		buffer.pixelPerfectRender = pixelPerfectRender;
-		buffer.antialiasing = antialiasing;
+		buffer.material = material;
 		return buffer;
+	}
+
+	function get_shader():FlxShader
+	{
+		return material.shader;
+	}
+
+	function set_shader(value:FlxShader):FlxShader
+	{
+		return material.shader = value;
+	}
+
+	function get_antialiasing():Bool
+	{
+		return material.antialiasing;
 	}
 
 	function set_antialiasing(value:Bool):Bool
 	{
 		for (buffer in _buffers)
 			buffer.antialiasing = value;
-		return antialiasing = value;
+		return material.antialiasing = value;
 	}
 
 	/**
@@ -1466,10 +1486,21 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		setDirty();
 	}
 
-	function set_blend(value:BlendMode):BlendMode
+	function set_material(value:FlxMaterial):FlxMaterial
 	{
 		setDirty();
-		return blend = value;
+		return material = value;
+	}
+	
+	function get_blend():FlxBlendMode
+	{
+		return material.blendMode;
+	}
+
+	function set_blend(value:FlxBlendMode):FlxBlendMode
+	{
+		setDirty();
+		return material.blendMode = value;
 	}
 
 	function setScaleXYCallback(scale:FlxPoint):Void
@@ -1587,5 +1618,5 @@ typedef FlxTileProperties =
 	y:Float,
 	scale:FlxPoint,
 	alpha:Float,
-	blend:BlendMode
+	blend:FlxBlendMode
 }

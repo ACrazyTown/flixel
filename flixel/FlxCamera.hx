@@ -1,5 +1,6 @@
 package flixel;
 
+import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawBaseItem;
@@ -766,16 +767,30 @@ class FlxCamera extends FlxBasic
 		view.drawDebugLine(x1, y1, x2, y2, color, thickness);
 	}
 
-	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
+	// TODO ant - can't add draw() method because it collides with FlxBasic.draw
+	// gonna have to settle with overloading drawPixels and copyPixels for now
+	@:deprecated("drawPixels(frame, pixels, matrix, transform, blend, smoothing, shader) is deprecated. Use drawPixels(frame, pixels, material, matrix, transform) instead.")
+	overload extern public inline function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
 			?shader:FlxShader):Void
 	{
 		view.drawPixels(frame, pixels, matrix, transform, blend, smoothing, shader);
 	}
 
-	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
+	overload extern public inline function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void
+	{
+		view.draw(frame, pixels, material, matrix, transform);
+	}
+
+	@:deprecated("copyPixels(frame, pixels, sourceRect, destPoint, transform, blend, smoothing, shader) is deprecated. Use copyPixels(frame, pixels, material, sourceRect, destPoint, transform) instead.")
+	overload extern public inline function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
 			?smoothing:Bool = false, ?shader:FlxShader):Void
 	{
 		view.copyPixels(frame, pixels, sourceRect, destPoint, transform, blend, smoothing, shader);
+	}
+
+	overload extern public inline function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform):Void
+	{
+		view.copy(frame, pixels, material, sourceRect, destPoint, transform);
 	}
 
 	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,

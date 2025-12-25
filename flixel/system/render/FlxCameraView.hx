@@ -1,5 +1,6 @@
 package flixel.system.render;
 
+import flixel.graphics.FlxMaterial;
 import flixel.math.FlxRect;
 import openfl.display.DisplayObjectContainer;
 import flixel.FlxG;
@@ -12,11 +13,11 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxMatrix;
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import flixel.util.FlxColor;
+import flixel.graphics.FlxBlendMode;
 import openfl.filters.BitmapFilter;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
-import openfl.display.BlendMode;
 import openfl.display.DisplayObject;
 import openfl.display.BitmapData;
 
@@ -106,14 +107,23 @@ class FlxCameraView implements IFlxDestroyable
 	 */
 	public function render():Void {}
 	
-	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false,
+	// TODO ant unify FlxFrame and BitmapData somehow
+	public function draw(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void {}
+
+	@:deprecated("drawPixels() is deprecated, use draw() instead")
+	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:FlxBlendMode, smoothing:Bool = false,
 		?shader:FlxShader):Void {}
-		
-	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
+
+	// TODO ant unify FlxFrame and BitmapData somehow
+	public function copy(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform):Void {}
+
+	@:deprecated("copyPixels() is deprecated, use copy() instead")
+	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:FlxBlendMode,
 		smoothing:Bool = false, ?shader:FlxShader):Void {}
-		
+	
+	// TODO ant rework triangles
 	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-		?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader):Void {}
+		?position:FlxPoint, ?blend:FlxBlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader):Void {}
 		
 	public function beginDrawDebug():Void {}
 	
