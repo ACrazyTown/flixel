@@ -7,7 +7,7 @@ import flixel.FlxG;
 import flixel.FlxCamera;
 import flixel.util.FlxDestroyUtil;
 import flixel.graphics.FlxGraphic;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shader.FlxShader;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxPoint;
 import flixel.math.FlxMatrix;
@@ -28,29 +28,36 @@ import openfl.display.BitmapData;
 @:allow(flixel.FlxCamera)
 class FlxCameraView implements IFlxDestroyable
 {
+	public static inline final INDICES_PER_QUAD:Int = 6;
+	public static inline final VERTICES_PER_QUAD:Int = 4;
+
+	public static inline final MAX_QUAD_VERTICES:Int = 65536;
+	public static inline final MAX_QUAD_INDICES:Int = 16384;
+
+	public static var QUADS_PER_BATCH:Int = 2730;
+	
 	/**
 	 * The number of total draw calls in a frame.
 	 */
 	public static var totalDrawCalls:Int = 0;
-	
+
 	/**
 	 * Creates a `FlxCameraView` object tied to a camera, based on the target and project configuration.
 	 * @param camera The camera to create the view for
 	 */
 	public static inline function create(camera:FlxCamera):FlxCameraView
 	{
-		if (FlxG.renderTile)
+		if (FlxG.renderBlit)
 		{
-			// TODO ant -- Don't check renderTile here, make some new property
+			return cast new flixel.system.render.blit.FlxBlitView(camera);
+		}
+		else
+		{
 			#if FLX_RENDER_GL
 			return cast new flixel.system.render.gl.FlxGLView(camera);
 			#else
 			return cast new flixel.system.render.quad.FlxQuadView(camera);
 			#end
-		}
-		else
-		{
-			return cast new flixel.system.render.blit.FlxBlitView(camera);
 		}
 	}
 	

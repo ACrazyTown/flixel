@@ -531,8 +531,6 @@ class FlxGame extends Sprite
 	#if FLX_RENDER_GL
 	function onRenderGL(event:RenderEvent):Void
 	{
-		var renderer:openfl.display.OpenGLRenderer = cast event.renderer;
-		flixel.system.render.gl.FlxGLView.context = renderer.gl;
 		draw();
 	}
 	#end

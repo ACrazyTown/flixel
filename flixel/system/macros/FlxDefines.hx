@@ -307,7 +307,7 @@ class FlxDefines
 		if (!defined(FLX_OPENGL_AVAILABLE))
 			abort("Missing required dependencies for OpenGL renderer", (macro null).pos);
 		#else
-		define(FLX_RENDER_QUADS)
+		define(FLX_RENDER_QUADS);
 		#end
 		
 		defineInversion(FLX_TRACK_GRAPHICS, FLX_NO_TRACK_GRAPHICS);

@@ -117,7 +117,7 @@ class FlxCamera extends FlxBasic
 	public var viewGL(default, null):Null<FlxGLView>;
 	#end
 
-	#if FLX_RENDER_QUAD
+	#if FLX_RENDER_QUADS
 	/**
 	 * This camera's `view`, typed as a `FlxQuadView`.
 	 * 

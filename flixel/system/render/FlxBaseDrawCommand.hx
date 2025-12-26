@@ -6,10 +6,12 @@ import flixel.graphics.FlxGraphic;
 
 class FlxBaseDrawCommand<T> implements IFlxDestroyable
 {
-    public var type:FlxDrawCommandType
+    public var type:FlxDrawCommandType;
 
     public var graphic:FlxGraphic;
     public var material:FlxMaterial;
+    public var colored:Bool = false;
+    public var hasColorOffsets:Bool = false;
 
     public function new() {}
 
@@ -23,9 +25,20 @@ class FlxBaseDrawCommand<T> implements IFlxDestroyable
     {
         graphic = null;
         material = null;
+        colored = false;
+        hasColorOffsets = false;
     }
 
     public function flush(?view:FlxCameraView):Void {}
+
+    public function equals(type:FlxDrawCommandType, graphic:FlxGraphic, material:FlxMaterial, colored:Bool, hasColorOffsets:Bool)
+    {
+        return (this.type == type
+            && this.graphic == graphic
+            && this.material.equals(material)
+            && this.colored == colored
+            && this.hasColorOffsets == hasColorOffsets);
+    }
 }
 
 enum abstract FlxDrawCommandType(Int) from Int to Int
