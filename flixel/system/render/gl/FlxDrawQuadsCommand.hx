@@ -29,6 +29,11 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
     var indices:UInt16Array;
     var indexBuffer:GLBuffer;
 
+    /**
+     * Internal flag to check whether data needs to be reuploaded to the GPU.
+     */
+    var dirty:Bool = false;
+
     public function new(size:Int = 0)
     {
         super();
@@ -37,12 +42,15 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
         if (size <= 0)
             size = FlxCameraView.QUADS_PER_BATCH;
 
-        vertices = new Float32Array(size * FlxCameraView.VERTICES_PER_QUAD * ELEMENTS_PER_VERTEX);
-        vertexBuffer = GL.createBuffer();
+        final numVertices:Int = size * FlxCameraView.VERTICES_PER_QUAD * 2;
+        vertices = new Float32Array(numVertices); 
+
+        // reuse numVertices because both of these buffers also store 2 values per vertex
+        uvs = new Float32Array(numVertices);
+        colors = new Float32Array(numVertices);
 
         final numIndices:Int = size * FlxCameraView.INDICES_PER_QUAD;
-        indices = new UInt16Array(numIndices)
-        indexBuffer = GL.createBuffer();
+        indices = new UInt16Array(numIndices); // TODO ant -- use 32bit indices instead?
 
         var indexPos:Int = 0;
 		var index:Int = 0;
@@ -59,5 +67,41 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 			indexPos += FlxCameraView.INDICES_PER_QUAD;
 			index += FlxCameraView.VERTICES_PER_QUAD;
 		}
+
+        vertexBuffer = GL.createBuffer();
+        uvBuffer = GL.createBuffer();
+        colorBuffer = GL.createBuffer();
+        indexBuffer = GL.createBuffer();
+    }
+
+    override function destroy():Void
+    {
+        vertices = null;
+        uvs = null;
+        colors = null;
+        indices = null;
+
+        GL.deleteBuffer(vertexBuffer);
+        GL.deleteBuffer(uvBuffer);
+        GL.deleteBuffer(colorBuffer);
+        GL.deleteBuffer(indexBuffer);
+    }
+
+    override function reset():Void
+    {
+        dirty = true;
+    }
+
+    override function flush(?view:FlxCameraView):Void
+    {
+        uploadData();
+    }
+
+    function uploadData():Void
+    {
+        if (dirty)
+        {
+            dirty = false;
+        }
     }
 }

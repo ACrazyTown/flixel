@@ -346,7 +346,7 @@ class FlxGame extends Sprite
 		// Finally, set up an event for the actual game loop stuff.
 		stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		#if FLX_RENDER_GL
-		stage.addEventListener(RenderEvent.RENDER_OPENGL, onRenderGL);
+		addEventListener(RenderEvent.RENDER_OPENGL, onRenderGL);
 		#end
 
 		// We need to listen for resize event which means new context
@@ -532,6 +532,7 @@ class FlxGame extends Sprite
 	function onRenderGL(event:RenderEvent):Void
 	{
 		draw();
+		trace("render tick!");
 	}
 	#end
 

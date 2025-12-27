@@ -7,7 +7,7 @@ import flixel.FlxG;
 import flixel.FlxCamera;
 import flixel.util.FlxDestroyUtil;
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.shader.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxPoint;
 import flixel.math.FlxMatrix;

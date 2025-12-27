@@ -31,6 +31,14 @@ class FlxBaseDrawCommand<T> implements IFlxDestroyable
 
     public function flush(?view:FlxCameraView):Void {}
 
+    public function set(graphic:FlxGraphic, material:FlxMaterial, colored:Bool, hasColorOffsets:Bool):Void
+    {
+        this.graphic = graphic;
+        this.material = material;
+        this.colored = colored;
+        this.hasColorOffsets = hasColorOffsets;
+    }
+
     public function equals(type:FlxDrawCommandType, graphic:FlxGraphic, material:FlxMaterial, colored:Bool, hasColorOffsets:Bool)
     {
         return (this.type == type

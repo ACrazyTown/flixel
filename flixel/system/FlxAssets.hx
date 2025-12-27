@@ -116,8 +116,8 @@ abstract FlxJsonAsset<T>(OneOfTwo<T, String>) from T from String
 	}
 }
 
-@:deprecated("flixel.system.FlxAssets.FlxShader was moved to flixel.graphics.shader.FlxShader")
-typedef FlxShader = #if nme Dynamic #else flixel.graphics.shader.FlxShader #end;
+@:deprecated("flixel.system.FlxAssets.FlxShader was moved to flixel.graphics.shaders.FlxShader")
+typedef FlxShader = #if nme Dynamic #else flixel.graphics.shaders.FlxShader #end;
 #end
 
 class FlxAssets
