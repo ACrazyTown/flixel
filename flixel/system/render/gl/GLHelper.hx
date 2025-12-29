@@ -45,6 +45,8 @@ class GLHelper
 
     public static function useShader(shader:FlxShader):Void
     {
+        if (currentShader == shader) return;
+
         initShader(shader);
         GL.useProgram(shader.glProgram);
         currentShader = shader;

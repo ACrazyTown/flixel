@@ -28,13 +28,36 @@ import openfl.display.BitmapData;
 @:allow(flixel.FlxCamera)
 class FlxCameraView implements IFlxDestroyable
 {
-	public static inline final INDICES_PER_QUAD:Int = 6;
+	// Batching related static variables and constants:
+	public static inline final MAX_INDICES_PER_BUFFER:Int = 98298;
+	public static inline final MAX_VERTEX_PER_BUFFER:Int = 65532; // (MAX_INDICES_PER_BUFFER * 4 / 6)
+	public static inline final MAX_QUADS_PER_BUFFER:Int = 16383; // (MAX_VERTEX_PER_BUFFER / 4)
+	public static inline final MAX_TRIANGLES_PER_BUFFER:Int = 21844; // (MAX_VERTEX_PER_BUFFER / 3)
+
 	public static inline final VERTICES_PER_QUAD:Int = 4;
+	public static inline final TRIANGLES_PER_QUAD:Int = 2;
+	public static inline final INDICES_PER_TRIANGLE:Int = 3;
+	public static inline final INDICES_PER_QUAD:Int = 6;
 
-	public static inline final MAX_QUAD_VERTICES:Int = 65536;
-	public static inline final MAX_QUAD_INDICES:Int = 16384;
+	/**
+	 * Max size of the batch. Used for quad render items. If you'll try to add one more tile to the full batch, then new batch will be started.
+	 */
+	public static var QUADS_PER_BATCH(default, set):Int = 2000;
 
-	public static var QUADS_PER_BATCH:Int = 2730;
+	static function set_QUADS_PER_BATCH(value:Int):Int
+	{
+		QUADS_PER_BATCH = (value > MAX_QUADS_PER_BUFFER) ? MAX_QUADS_PER_BUFFER : value;
+		return QUADS_PER_BATCH;
+	}
+
+	public static var TRIANGLES_PER_BATCH(default, set):Int = 2600;
+
+	static function set_TRIANGLES_PER_BATCH(value:Int):Int
+	{
+		TRIANGLES_PER_BATCH = (value > MAX_TRIANGLES_PER_BUFFER) ? MAX_TRIANGLES_PER_BUFFER : value;
+		return TRIANGLES_PER_BATCH;
+	}
+
 	
 	/**
 	 * The number of total draw calls in a frame.

@@ -22,11 +22,9 @@ import flixel.system.render.gl.impl.GLUniformLocation;
 import lime.utils.UInt16Array;
 import lime.utils.Float32Array;
 
-// switch back to a single vertex buffer
-
 // TODO ant: Beeble's branch has roundPixels, used by the debug layer
 // TODO ant: fix colors & color offset
-// TODO ant: wire up destroy() properly
+// TODO ant: wire up defaultColoredShader
 
 class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 {
@@ -35,9 +33,9 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
     public static var defaultColoredShader:FlxShader = null;
 
     /**
-     * x, y, u, v, color, color offset
+     * 2 bytes per index, since we're using a 16 bit index buffer.
      */
-    static inline final ELEMENTS_PER_VERTEX:Int = 6;
+    static inline final BYTES_PER_INDEX:Int = 2;
 
     /**
      * The number of quads this command can hold.
@@ -136,10 +134,19 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 
     override function destroy():Void
     {
+        super.destroy();
+
+        shader = null;
+
         positions = null;
         uvs = null;
         colors = null;
         indices = null;
+
+        for (state in states)
+            state.destroy();
+
+        states = null;
 
         GL.deleteBuffer(positionBuffer);
         GL.deleteBuffer(uvBuffer);
@@ -241,28 +248,6 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 
 		// then reset the batch!
 		reset();
-
-        // if (numQuads == 0)
-            // return;
-
-        // uploadData();
-
-        // // TODO ant : blend mode
-
-        // GL.activeTexture(GL.TEXTURE0);
-        // // GLInternal.bindTexture(texture);
-        // @:privateAccess
-        // GL.bindTexture(GL.TEXTURE_2D, graphic.bitmap.getTexture(flixel.FlxG.stage.context3D).__getTexture());
-
-        // GL.uniform1i(shader.data.uImage0.index, 0);
-
-        // GLHelper.setTextureSmoothing(material.antialiasing);
-        // GLHelper.setTextureRepeat(material.repeat);
-
-        // GL.uniform2f(shader.data.uTextureSize.index, graphic.width, graphic.height);
-
-        // GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        // GL.drawElements(GL.TRIANGLES, numQuads * FlxCameraView.INDICES_PER_QUAD, GL.UNSIGNED_SHORT, 0);
     }
 
     function setShader(material:FlxMaterial):FlxShader
@@ -285,8 +270,7 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
         GLHelper.setTexture(texture, material.antialiasing, material.repeat);
 
 		// now draw those suckas!
-        final BYTES_PER_INDEX = 2;
-		GL.drawElements(GL.TRIANGLES, size * FlxCameraView.INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * FlxCameraView.INDICES_PER_QUAD);
+		GL.drawElements(GL.TRIANGLES, size * FlxCameraView.INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * FlxCameraView.INDICES_PER_QUAD * BYTES_PER_INDEX);
         // GL.drawElements(GL.TRIANGLES, numQuads * FlxCameraView.INDICES_PER_QUAD, GL.UNSIGNED_SHORT, 0);
 
         FlxCameraView.totalDrawCalls++;
@@ -361,7 +345,6 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 
 		if (transform != null)
 		{
-            transform.color;
 			tint = Std.int(transform.redMultiplier * 255) << 16 | Std.int(transform.greenMultiplier * 255) << 8 | Std.int(transform.blueMultiplier * 255);
 			color = (Std.int(transform.alphaMultiplier * 255) & 0xFF) << 24 | tint;
 		}
