@@ -526,13 +526,18 @@ class FlxGame extends Sprite
 			debugger.update();
 			#end
 		}
+
+		#if FLX_RENDER_GL
+		// force render call
+		invalidate();
+		#end
 	}
 
 	#if FLX_RENDER_GL
 	function onRenderGL(event:RenderEvent):Void
 	{
 		draw();
-		trace("render tick!");
+		// trace("render tick!");
 	}
 	#end
 

@@ -1,5 +1,6 @@
 package flixel.system.render.gl;
 
+import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import lime.graphics.opengl.GLRenderbuffer;
 import flixel.system.render.gl.impl.GL;
@@ -8,6 +9,7 @@ import flixel.system.render.gl.impl.GLTexture;
 import flixel.system.render.gl.impl.GLInternal;
 import flixel.system.render.gl.GLHelper;
 
+@:allow(flixel.system.render.gl)
 class FlxRenderTexture implements IFlxDestroyable
 {
     public var width(default, null):Int;
@@ -55,6 +57,26 @@ class FlxRenderTexture implements IFlxDestroyable
 
         createTexture(width, height);
         createRenderbuffer(width, height);
+
+        // unbind framebuffer
+        GL.bindFramebuffer(GL.FRAMEBUFFER, null);
+    }
+
+    public function clear(color:FlxColor, ?clearColor:Bool = true, ?clearDepth:Bool = false):Void
+    {
+        // bind framebuffer
+        GL.bindFramebuffer(GL.FRAMEBUFFER, glFramebuffer);
+
+        // set clear color
+        GL.clearColor(color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat);
+
+        // actually clear the buffer
+        var mask:Int = 0;
+        if (clearColor)
+            mask |= GL.COLOR_BUFFER_BIT;
+        if (clearDepth)
+            mask |= GL.DEPTH_BUFFER_BIT;
+        GL.clear(mask);
 
         // unbind framebuffer
         GL.bindFramebuffer(GL.FRAMEBUFFER, null);

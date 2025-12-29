@@ -1,6 +1,8 @@
 package flixel.system.render.gl;
 
+import flixel.FlxG;
 import flixel.system.render.gl.impl.GL;
+import flixel.graphics.FlxGraphic;
 
 /**
  * Helper methods for working with OpenGL
