@@ -4,7 +4,6 @@ import flixel.graphics.frames.FlxFrame;
 import openfl.geom.ColorTransform;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
-import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxGraphic;
@@ -33,6 +32,7 @@ class FlxBaseDrawCommand<T> implements IFlxDestroyable
         graphic = null;
         material = null;
         colored = false;
+        colored = false;
         hasColorOffsets = false;
     }
 
@@ -40,7 +40,7 @@ class FlxBaseDrawCommand<T> implements IFlxDestroyable
 
     public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, material:FlxMaterial):Void {}
 
-	public function addUVQuad(rect:FlxRect, uv:FlxUVRect, matrix:FlxMatrix, ?transform:ColorTransform, material:FlxMaterial):Void {}
+	public function addUVQuad(graphic:FlxGraphic, rect:FlxRect, uv:FlxUVRect, matrix:FlxMatrix, ?transform:ColorTransform, material:FlxMaterial):Void {}
 
     public function set(graphic:FlxGraphic, material:FlxMaterial, colored:Bool, hasColorOffsets:Bool):Void
     {

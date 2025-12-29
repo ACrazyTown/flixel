@@ -1,5 +1,7 @@
 package flixel.system.render.gl;
 
+import flixel.graphics.FlxBlendMode;
+import openfl.display.BitmapData;
 import flixel.graphics.shaders.FlxShader;
 import flixel.FlxG;
 import flixel.system.render.gl.impl.GL;
@@ -10,6 +12,27 @@ import flixel.graphics.FlxGraphic;
  */
 class GLHelper
 {
+    static var currentShader:Null<FlxShader> = null;
+
+    public static function setTexture(texture:BitmapData, antialiasing:Bool, repeat:Bool):Void
+    {
+        if (texture != null)
+		{
+			GL.activeTexture(GL.TEXTURE0);
+			// GLInternal.bindTexture(texture);
+            @:privateAccess
+            GL.bindTexture(GL.TEXTURE_2D, texture.getTexture(flixel.FlxG.stage.context3D).__getTexture());
+			GL.uniform1i(currentShader.data.uImage0.index, 0);
+
+			setTextureSmoothing(antialiasing);
+			setTextureRepeat(repeat);
+
+			GL.uniform2f(currentShader.data.uTextureSize.index, texture.width, texture.height);
+		}
+    }
+
+    public static function setBlendMode(blendMode:FlxBlendMode):Void {}
+
     @:access(openfl.display.Shader)
     public static function initShader(shader:FlxShader):Void
     {
@@ -18,6 +41,13 @@ class GLHelper
             shader.__context = FlxG.stage.context3D;
             shader.__init();
         }
+    }
+
+    public static function useShader(shader:FlxShader):Void
+    {
+        initShader(shader);
+        GL.useProgram(shader.glProgram);
+        currentShader = shader;
     }
 
     /**

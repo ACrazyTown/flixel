@@ -22,23 +22,19 @@ class FlxGLView extends FlxCameraView
     public var projectionMatrix:Matrix4 = new Matrix4();
     public var renderTexture:FlxRenderTexture;
 
-    public var context:GLContext;
-
     var currentCommand:FlxDrawCommand<Dynamic> = null;
     var quads:FlxDrawQuadsCommand = new FlxDrawQuadsCommand();
-    var singleQuads:FlxDrawQuadsCommand = new FlxDrawQuadsCommand(1);
+    var singleQuad:FlxDrawQuadsCommand = new FlxDrawQuadsCommand(1);
 
     public function new(camera:FlxCamera)
     {
         super(camera);
 
-        context = new GLContext();
-
         renderTexture = new FlxRenderTexture(camera.width, camera.height);
 
         projectionMatrix.createOrtho(0, camera.width, camera.height, 0, -1000, 1000);
         // projectionMatrix.invert();
-        singleQuads.__temp__uMat = projectionMatrix;
+        singleQuad.__temp__uMat = projectionMatrix;
         quads.__temp__uMat = projectionMatrix;
         // singleQuads.__temp__uMat.copyFrom(projectionMatrix);
     }
@@ -52,20 +48,37 @@ class FlxGLView extends FlxCameraView
 
     override function render():Void
     {
-    //    var gl:WebGL2RenderContext = GL.context;
-        // quads.flush();
+        if (currentCommand != null)
+        {
+            currentCommand.flush();
+            currentCommand = null;
+        }
     }
 
     override function draw(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void
     {
         //super.draw(frame, pixels, material, matrix, transform);
-        singleQuads.reset();
-        singleQuads.set(frame.parent, material, false, false);
-        singleQuads.addQuad(frame, matrix, transform, material);
-        singleQuads.flush();
+        // singleQuads.reset();
+        // singleQuads.set(frame.parent, material, false, false);
+        // singleQuads.addQuad(frame, matrix, transform, material);
+        // singleQuads.flush();
+        var c = getQuads(frame, material);
+        c.addQuad(frame, matrix, transform, material);
+    }
 
-        // var c = getQuads(frame, material);
-        // c.addQuad(frame, matrix, transform, material);
+    function getQuads(frame:FlxFrame, material:FlxMaterial)
+    {
+        if (currentCommand != null)
+		{
+			if (material.batchable && currentCommand != quads)
+				currentCommand.flush();
+			else if (!material.batchable)
+				currentCommand.flush();
+		}
+
+		var result = (material.batchable) ? quads : singleQuad;
+		currentCommand = result;
+		return result;
     }
 
     override function get_display():DisplayObjectContainer
