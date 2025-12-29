@@ -22,6 +22,8 @@ class FlxGLView extends FlxCameraView
     public var projectionMatrix:Matrix4 = new Matrix4();
     public var renderTexture:FlxRenderTexture;
 
+    public var context:GLContext;
+
     var currentCommand:FlxDrawCommand<Dynamic> = null;
     var quads:FlxDrawQuadsCommand = new FlxDrawQuadsCommand();
     var singleQuads:FlxDrawQuadsCommand = new FlxDrawQuadsCommand(1);
@@ -29,6 +31,8 @@ class FlxGLView extends FlxCameraView
     public function new(camera:FlxCamera)
     {
         super(camera);
+
+        context = new GLContext();
 
         renderTexture = new FlxRenderTexture(camera.width, camera.height);
 

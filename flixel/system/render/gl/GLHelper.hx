@@ -1,5 +1,6 @@
 package flixel.system.render.gl;
 
+import flixel.graphics.shaders.FlxShader;
 import flixel.FlxG;
 import flixel.system.render.gl.impl.GL;
 import flixel.graphics.FlxGraphic;
@@ -9,6 +10,16 @@ import flixel.graphics.FlxGraphic;
  */
 class GLHelper
 {
+    @:access(openfl.display.Shader)
+    public static function initShader(shader:FlxShader):Void
+    {
+        if (shader.__context == null)
+        {
+            shader.__context = FlxG.stage.context3D;
+            shader.__init();
+        }
+    }
+
     /**
      * Sets the texture's smoothing value.
      * 

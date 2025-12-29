@@ -5,8 +5,7 @@ import flixel.graphics.shaders.FlxShader;
 class FlxTexturedShader extends FlxShader
 {
     @:glVertexSource('
-    precision highp float;
-
+    // precision highp float;
     attribute vec4 aPosition;
     attribute vec2 aTexCoord;
     attribute vec4 aColor;
@@ -30,8 +29,7 @@ class FlxTexturedShader extends FlxShader
     ')
 
     @:glFragmentSource('
-    precision highp float;
-
+    // precision highp float;
     varying vec2 vTexCoord;
     varying vec4 vColor;
     varying vec4 vColorOffset;
