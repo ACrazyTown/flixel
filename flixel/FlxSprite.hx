@@ -331,6 +331,9 @@ class FlxSprite extends FlxObject
 	@:noCompletion
 	var _flashPointZero:Point;
 
+	@:noCompletion
+	var _screenPos:FlxPoint;
+
 	/**
 	 * Internal, helps with animation, caching and drawing.
 	 */
@@ -400,6 +403,7 @@ class FlxSprite extends FlxObject
 		origin = FlxPoint.get();
 		scale = FlxPoint.get(1, 1);
 		_halfSize = FlxPoint.get();
+		_screenPos = FlxPoint.get();
 		_matrix = new FlxMatrix();
 		_scaledOrigin = new FlxPoint();
 	}
@@ -426,6 +430,7 @@ class FlxSprite extends FlxObject
 		_halfSize = FlxDestroyUtil.put(_halfSize);
 		_scaledOrigin = FlxDestroyUtil.put(_scaledOrigin);
 		_lastClipRect = FlxDestroyUtil.put(_lastClipRect);
+		_screenPos = FlxDestroyUtil.put(_screenPos);
 
 		framePixels = FlxDestroyUtil.dispose(framePixels);
 
@@ -818,7 +823,9 @@ class FlxSprite extends FlxObject
 		
 		for (camera in getCamerasLegacy())
 		{
-			if (!camera.visible || !camera.exists || !isOnScreen(camera))
+			getScreenPosition(_screenPos, camera);
+
+			if (!camera.visible || !camera.exists || !camera.containsPoint(_screenPos, width, height))
 				continue;
 			
 			if (isSimpleRender(camera))
@@ -877,7 +884,10 @@ class FlxSprite extends FlxObject
 	{
 		final matrix = this._matrix; // TODO: Just use local?
 		frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
-		matrix.translate(-origin.x, -origin.y);
+
+		matrix.tx -= origin.x;
+		matrix.ty -= origin.y;
+
 		matrix.scale(scale.x, scale.y);
 		
 		if (bakedRotationAngle <= 0)
@@ -888,9 +898,12 @@ class FlxSprite extends FlxObject
 				matrix.rotateWithTrig(_cosAngle, _sinAngle);
 		}
 		
-		getScreenPosition(_point, camera).subtract(offset);
-		_point.add(origin.x, origin.y);
-		matrix.translate(_point.x, _point.y);
+		@:bypassAccessor _point.x = _screenPos.x - offset.x + origin.x;
+		@:bypassAccessor _point.y = _screenPos.y - offset.y + origin.y;
+
+		// matrix.translate(screenPos.x, screenPos.y);
+		matrix.tx += @:bypassAccessor _point.x;
+		matrix.ty += @:bypassAccessor _point.y;
 		
 		if (isPixelPerfectRender(camera))
 		{

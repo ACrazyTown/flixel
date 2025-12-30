@@ -1055,11 +1055,16 @@ class FlxObject extends FlxBasic
 		if (camera == null)
 			camera = getDefaultCamera();
 
-		result.set(x, y);
+		result.x = x;
+		result.y = y;
+
 		if (pixelPerfectPosition)
 			result.floor();
 
-		return result.subtract(camera.scroll.x * scrollFactor.x, camera.scroll.y * scrollFactor.y);
+		result.x -= camera.scroll.x * scrollFactor.x;
+		result.y -= camera.scroll.y * scrollFactor.y;
+
+		return result;
 	}
 
 	/**
