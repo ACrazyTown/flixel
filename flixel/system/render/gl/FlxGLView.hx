@@ -23,7 +23,7 @@ class FlxGLView extends FlxCameraView
     public var renderTexture:FlxRenderTexture;
 
     var currentCommand:FlxDrawCommand<Dynamic> = null;
-    var quads:FlxDrawQuadsCommand = new FlxDrawQuadsCommand();
+    var quads:FlxDrawQuadsCommand = new FlxDrawQuadsCommand(16383);
     var singleQuad:FlxDrawQuadsCommand = new FlxDrawQuadsCommand(1);
 
     public function new(camera:FlxCamera)

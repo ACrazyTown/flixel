@@ -1,5 +1,7 @@
 package flixel.system.render.gl;
 
+import lime.utils.UInt32Array;
+import lime.utils.ArrayBuffer;
 import flixel.graphics.FlxBlendMode;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
@@ -37,6 +39,8 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
      */
     static inline final BYTES_PER_INDEX:Int = 2;
 
+    static inline final elementsPerVertex:Int = 6;
+
     /**
      * The number of quads this command can hold.
      */
@@ -50,20 +54,36 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 
     public var numQuads:Int = 0;
 
-    var positions:Float32Array;
-    var positionBuffer:GLBuffer;
-    var positionIndex:Int = 0;
+    var vertexIndex:Int = 0;
 
-    var uvs:Float32Array;
-    var uvBuffer:GLBuffer;
-    var uvIndex:Int = 0;
+    /**
+	 * Holds the vertices data (positions, uvs, colors)
+	 */
+	var vertices:ArrayBuffer;
 
-    var colors:Float32Array;
-    var colorBuffer:GLBuffer;
-    var colorIndex:Int = 0;
+	/**
+	 * The total number of bytes in vertices buffer.
+	 */
+	var verticesNumBytes(get, null):Int;
 
-    var indices:UInt16Array;
-    var indexBuffer:GLBuffer;
+	/**
+	 * View on the vertices as a Float32Array
+	 */
+	var positions:Float32Array;
+
+	/**
+	 * View on the vertices as a UInt32Array
+	 */
+	var colors:UInt32Array;
+
+	var vertexBuffer:GLBuffer;
+
+    /**
+	 * Holds the indices
+	 */
+	var indices:UInt16Array;
+
+	var indexBuffer:GLBuffer;
 
     /**
      * Internal flag to check whether data needs to be reuploaded to the GPU.
@@ -79,16 +99,11 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 
         if (size <= 0)
             size = FlxCameraView.QUADS_PER_BATCH;
-
         this.size = size;
 
-        final numPositions:Int = size * FlxCameraView.VERTICES_PER_QUAD * 2;
-        trace(numPositions);
-        positions = new Float32Array(numPositions); 
-
-        // reuse numPositions because both of these buffers also store 2 values per vertex
-        uvs = new Float32Array(numPositions);
-        colors = new Float32Array(numPositions);
+        vertices = new ArrayBuffer(verticesNumBytes);
+		positions = new Float32Array(vertices);
+		colors = new UInt32Array(vertices);
 
         final numIndices:Int = size * FlxCameraView.INDICES_PER_QUAD;
         indices = new UInt16Array(numIndices); // TODO ant -- use 32bit indices instead?
@@ -110,23 +125,15 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 		}
 
         // create GL buffers and upload them to the GPU
-        final verticesNumBytes:Int = numPositions * Float32Array.BYTES_PER_ELEMENT;
-        positionBuffer = GL.createBuffer();
-        GL.bindBuffer(GL.ARRAY_BUFFER, positionBuffer);
-        GLInternal.bufferData(GL.ARRAY_BUFFER, positions, GL.DYNAMIC_DRAW, null, verticesNumBytes);
-
-        uvBuffer = GL.createBuffer();
-        GL.bindBuffer(GL.ARRAY_BUFFER, uvBuffer);
-        GLInternal.bufferData(GL.ARRAY_BUFFER, uvs, GL.DYNAMIC_DRAW, null, verticesNumBytes);
-
-        colorBuffer = GL.createBuffer();
-        GL.bindBuffer(GL.ARRAY_BUFFER, colorBuffer);
-        GLInternal.bufferData(GL.ARRAY_BUFFER, colors, GL.DYNAMIC_DRAW, null, verticesNumBytes);
-
-        final indicesNumBytes:Int = numIndices * UInt16Array.BYTES_PER_ELEMENT;
         indexBuffer = GL.createBuffer();
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+        var indicesNumBytes:Int = size * FlxCameraView.INDICES_PER_QUAD * UInt16Array.BYTES_PER_ELEMENT;
         GLInternal.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices, GL.STATIC_DRAW, null, indicesNumBytes);
+
+        vertexBuffer = GL.createBuffer();
+        GL.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer);
+        GLInternal.bufferData(GL.ARRAY_BUFFER, positions, GL.DYNAMIC_DRAW, null, verticesNumBytes);
 
         for (i in 0...size)
             states[i] = new RenderState();
@@ -138,8 +145,10 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 
         shader = null;
 
+        GL.deleteBuffer(vertexBuffer);
+        GL.deleteBuffer(indexBuffer);
+
         positions = null;
-        uvs = null;
         colors = null;
         indices = null;
 
@@ -147,11 +156,6 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
             state.destroy();
 
         states = null;
-
-        GL.deleteBuffer(positionBuffer);
-        GL.deleteBuffer(uvBuffer);
-        GL.deleteBuffer(colorBuffer);
-        GL.deleteBuffer(indexBuffer);
     }
 
     override function reset():Void
@@ -162,10 +166,7 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 
         dirty = true;
 
-        positionIndex = 0;
-        uvIndex = 0;
-        colorIndex = 0;
-
+        vertexIndex = 0;
         numQuads = 0;
     }
 
@@ -376,63 +377,48 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
         {
             dirty = false;
 
+            GL.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer);
+
+            var stride:Int = Float32Array.BYTES_PER_ELEMENT * elementsPerVertex;
+			var offset:Int = 0;
+
             // enable position
-            GL.bindBuffer(GL.ARRAY_BUFFER, positionBuffer);
-            GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
+            GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, stride, offset);
             GL.enableVertexAttribArray(shader.data.aPosition.index);
+            offset += 2 * 4;
 
             if (textured)
             {
-                GL.bindBuffer(GL.ARRAY_BUFFER, uvBuffer);
-                GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
+                GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, stride, offset);
                 GL.enableVertexAttribArray(shader.data.aTexCoord.index);
             }
 
+            offset += 2 * 4;
+
             // color attributes will be interpreted as unsigned bytes and normalized
-            GL.bindBuffer(GL.ARRAY_BUFFER, colorBuffer);
-            GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
+            GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, stride, offset);
             GL.enableVertexAttribArray(shader.data.aColor.index);
+            offset += 4;
 
             if (textured)
             {
-                GL.vertexAttribPointer(shader.data.aColorOffset.index, 4, GL.UNSIGNED_BYTE, true, 0, 4); // offset by 4 bytes!
+                GL.vertexAttribPointer(shader.data.aColorOffset.index, 4, GL.UNSIGNED_BYTE, true, stride, offset); // offset by 4 bytes!
                 GL.enableVertexAttribArray(shader.data.aColorOffset.index);
             }
         }
 
-        // Upload the entire buffer
-        if (numQuads > (size / 2))
+        // upload the verts to the buffer
+		if (numQuads > 0.5 * size)
 		{
-            // TODO ant: cache this? old branch had verticesNumBytes
-            final verticesNumBytes = size * FlxCameraView.VERTICES_PER_QUAD * 2 * Float32Array.BYTES_PER_ELEMENT;
-            GL.bindBuffer(GL.ARRAY_BUFFER, positionBuffer);
 			GLInternal.bufferSubData(GL.ARRAY_BUFFER, 0, positions, null, verticesNumBytes);
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, uvBuffer);
-			GLInternal.bufferSubData(GL.ARRAY_BUFFER, 0, uvs, null, verticesNumBytes);
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, colorBuffer);
-			GLInternal.bufferSubData(GL.ARRAY_BUFFER, 0, colors, null, verticesNumBytes);
 		}
 		else
 		{
-            // If we're using less than half the buffer, upload only the used portion
+			var viewLen:Int = numQuads * FlxCameraView.VERTICES_PER_QUAD * elementsPerVertex;
+			var view = positions.subarray(0, viewLen);
 
-			var viewLen:Int = numQuads * FlxCameraView.VERTICES_PER_QUAD * 2;
 			var numBytes:Int = viewLen * Float32Array.BYTES_PER_ELEMENT;
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, positionBuffer);
-			GLInternal.bufferSubData(GL.ARRAY_BUFFER, 0, positions.subarray(0, viewLen), null, numBytes);
-
-            // uv and color are both 2 elements per quad!
-            // viewLen = numQuads * 2 * 2;
-            // numBytes = viewLen * Float32Array.BYTES_PER_ELEMENT;
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, uvBuffer);
-            GLInternal.bufferSubData(GL.ARRAY_BUFFER, 0, uvs.subarray(0, viewLen), null, numBytes);
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, colorBuffer);
-            GLInternal.bufferSubData(GL.ARRAY_BUFFER, 0, colors.subarray(0, viewLen), null, numBytes);
+			GLInternal.bufferSubData(GL.ARRAY_BUFFER, 0, view, null, numBytes);
 		}
 
 		GLInternal.uniformMatrix4fv(shader.data.uMatrix.index, false, __temp__uMat);
@@ -486,18 +472,23 @@ class FlxDrawQuadsCommand extends FlxDrawCommand<FlxDrawQuadsCommand>
 
     function addVertex(x:Float = 0, y:Float = 0, u:Float = 0, v:Float = 0, color:FlxColor = FlxColor.WHITE, offset:FlxColor = FlxColor.TRANSPARENT)
     {
-        positions[positionIndex++] = x;
-        positions[positionIndex++] = y;
-        uvs[uvIndex++] = u;
-        uvs[uvIndex++] = v;
-        colors[colorIndex++] = color;
-        colors[colorIndex++] = offset;
+		positions[vertexIndex++] = x;
+		positions[vertexIndex++] = y;
+		positions[vertexIndex++] = u;
+		positions[vertexIndex++] = v;
+		colors[vertexIndex++] = color;
+		colors[vertexIndex++] = offset;
     }
 
     public inline function canAddQuad():Bool
     {
         return (numQuads + 1) <= size;
     }
+
+    inline function get_verticesNumBytes():Int
+	{
+		return size * Float32Array.BYTES_PER_ELEMENT * FlxCameraView.VERTICES_PER_QUAD * elementsPerVertex;
+	}
 }
 
 private class RenderState implements IFlxDestroyable
