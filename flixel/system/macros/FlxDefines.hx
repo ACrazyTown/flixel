@@ -84,6 +84,9 @@ private enum UserDefine
 	 * `NOTICE`, `NORMAL` or `NONE`. Ignored if `FLX_NO_DEBUG` is defined. If undefined, `NOTICE` is used.
 	 */
 	FLX_LOG_OPEN_CONSOLE;
+
+	/** Enables the experimental OpenGL renderer. */
+	FLX_RENDER_OPENGL;
 }
 
 /**
@@ -291,7 +294,7 @@ class FlxDefines
 		// should always be defined as of 5.5.1 and, therefore, deprecated
 		define(FLX_DRAW_QUADS);
 		// #end
-		
+
 		if (defined(FLX_TRACK_POOLS) && !defined("debug"))
 			abort("Can only define FLX_TRACK_POOLS on debug mode", (macro null).pos);
 		
@@ -303,7 +306,7 @@ class FlxDefines
 		if (defined(FLX_NO_UNIT_TEST))
 			define(FLX_OPENGL_AVAILABLE);
 		#end
-		
+			
 		defineInversion(FLX_TRACK_GRAPHICS, FLX_NO_TRACK_GRAPHICS);
 		
 		if (defined(FLX_CUSTOM_ASSETS_DIRECTORY))

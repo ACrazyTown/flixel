@@ -29,7 +29,11 @@ class FlxCameraView implements IFlxDestroyable
 		}
 		else
 		{
+			#if FLX_RENDER_OPENGL
+			return cast new flixel.system.render.gl.FlxGLView(camera);
+			#else
 			return cast new flixel.system.render.quad.FlxQuadView(camera);
+			#end
 		}
 	}
 

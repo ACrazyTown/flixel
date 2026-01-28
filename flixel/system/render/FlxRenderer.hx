@@ -47,7 +47,11 @@ class FlxRenderer implements IFlxDestroyable
         }
         else
         {
+            #if FLX_RENDER_OPENGL
+            return new flixel.system.render.gl.FlxGLRenderer();
+            #else
             return new flixel.system.render.quad.FlxQuadRenderer();
+            #end
         }
     }
 
@@ -260,6 +264,13 @@ class FlxRenderer implements IFlxDestroyable
  */
 enum FlxRenderMethod
 {
+    /**
+     * Uses a custom OpenGL renderer to achieve hardware accelerated rendering.
+     * 
+     * This method can only be used if hardware acceleration is available.
+     */
+    OPENGL;
+
     /**
      * Uses the `drawQuads()` method from OpenFL's Graphics API to achieve hardware accelerated rendering.
      * 
