@@ -701,23 +701,24 @@ class FlxCamera extends FlxBasic
 	static inline function get_renderRect():FlxRect return FlxBlitRenderer.renderRect;
 	static inline function set_renderRect(value:FlxRect):FlxRect return FlxBlitRenderer.renderRect = value;
 
-	@:noCompletion
-	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
-	{
-		return viewQuad.startQuadBatch(graphic, colored, hasColorOffsets, blend, smooth, shader);
-	}
+	// TODO ant: temp
+	// @:noCompletion
+	// public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
+	// {
+	// 	return viewQuad.startQuadBatch(graphic, colored, hasColorOffsets, blend, smooth, shader);
+	// }
 
-	@:noCompletion
-	public function startTrianglesBatch(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxShader):FlxDrawTrianglesItem
-	{
-		return viewQuad.startTrianglesBatch(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
-	}
+	// @:noCompletion
+	// public function startTrianglesBatch(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxShader):FlxDrawTrianglesItem
+	// {
+	// 	return viewQuad.startTrianglesBatch(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
+	// }
 
-	@:noCompletion
-	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxShader):FlxDrawTrianglesItem
-	{
-		return viewQuad.getNewDrawTrianglesItem(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
-	}
+	// @:noCompletion
+	// public function getNewDrawTrianglesItem(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxShader):FlxDrawTrianglesItem
+	// {
+	// 	return viewQuad.getNewDrawTrianglesItem(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
+	// }
 
 	@:allow(flixel.system.frontEnds.CameraFrontEnd)
 	@:deprecated("camera.render() is deprecated, use FlxG.renderer.render() instead.")

@@ -12,7 +12,16 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 {
 	static inline var VERTICES_PER_QUAD = 4;
 
-	public var shader:FlxShader;
+	@:deprecated("shader is deprecated, use material.shader instead.")
+	public var shader(get, set):FlxShader;
+	@:noCompletion inline function get_shader():FlxShader
+	{
+		return material.shader;
+	}
+	@:noCompletion inline function set_shader(value:FlxShader):FlxShader
+	{
+		return material.shader = value;
+	}
 
 	var rects:Vector<Float>;
 	var transforms:Vector<Float>;
@@ -121,6 +130,7 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		final shader = shader != null ? shader : graphics.shader;
 		shader.bitmap.input = graphics.bitmap;
 		shader.bitmap.filter = (camera.antialiasing || antialiasing) ? LINEAR : NEAREST;
+		shader.bitmap.wrap = (material.wrap != null ? material.wrap.toContext3DWrap() : CLAMP); // fallback to CLAMP?
 		shader.alpha.value = alphas;
 
 		if (colored || hasColorOffsets)

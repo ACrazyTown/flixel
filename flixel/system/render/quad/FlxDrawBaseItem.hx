@@ -1,5 +1,6 @@
 package flixel.system.render.quad;
 
+import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxCamera;
 import flixel.graphics.frames.FlxFrame;
@@ -42,10 +43,32 @@ class FlxDrawBaseItem<T>
 	public var next:FlxDrawBaseItem<T>;
 
 	public var graphics:FlxGraphic;
-	public var antialiasing:Bool = false;
+	public var material:FlxMaterial;
+
+	@:deprecated("antialiasing is deprecated, use material.smoothing instead.")
+	public var antialiasing(get, set):Bool;
+	@:noCompletion inline function get_antialiasing():Bool
+	{
+		return material.smoothing;
+	}
+	@:noCompletion inline function set_antialiasing(value:Bool):Bool
+	{
+		return material.smoothing = value;
+	}
+
+	@:deprecated("blend is deprecated, use material.blendMode instead.")
+	public var blend(get, set):BlendMode;
+	@:noCompletion inline function get_blend():BlendMode 
+	{
+		return material.blendMode;
+	}
+	@:noCompletion inline function set_blend(value:BlendMode):BlendMode
+	{
+		return material.blendMode = value;
+	}
+
 	public var colored:Bool = false;
 	public var hasColorOffsets:Bool = false;
-	public var blend:BlendMode;
 
 	@:noCompletion
 	@:deprecated("blending is deprecated, remove all references to it")
@@ -61,14 +84,15 @@ class FlxDrawBaseItem<T>
 
 	public function reset():Void
 	{
+		material = null;
 		graphics = null;
-		antialiasing = false;
 		nextTyped = null;
 		next = null;
 	}
 
 	public function dispose():Void
 	{
+		material = null;
 		graphics = null;
 		next = null;
 		type = null;

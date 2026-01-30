@@ -1235,8 +1235,9 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 			scaledWidth = scaledTileWidth;
 			scaledHeight = scaledTileHeight;
 
+			// TODO ant: why is this using batches directly?
 			var hasColorOffsets:Bool = (colorTransform != null && colorTransform.hasRGBAOffsets());
-			drawItem = camera.startQuadBatch(graphic, isColored, hasColorOffsets, blend, antialiasing, shader);
+			drawItem = camera.viewQuad.startQuadBatch(graphic, material, hasColorOffsets);
 		}
 
 		// Copy tile images into the tile buffer

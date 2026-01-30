@@ -158,7 +158,6 @@ class FlxRenderer implements IFlxDestroyable
 		_helperMaterial.blendMode = blend;
 		_helperMaterial.smoothing = smoothing;
 		_helperMaterial.shader = shader;
-		_helperMaterial.repeat = false; // Can't determine repeat, assume false!
 		
 		drawPixelsInternal(frame, pixels, _helperMaterial, matrix, transform);
 	}
@@ -203,7 +202,6 @@ class FlxRenderer implements IFlxDestroyable
 		_helperMaterial.blendMode = blend;
 		_helperMaterial.smoothing = smoothing;
 		_helperMaterial.shader = shader;
-		_helperMaterial.repeat = false; // Can't determine repeat, assume false!
 		
 		copyPixelsInternal(frame, pixels, _helperMaterial, sourceRect, destPoint, transform);
 	}
@@ -255,7 +253,6 @@ class FlxRenderer implements IFlxDestroyable
         _helperMaterial.blendMode = blend;
 		_helperMaterial.smoothing = smoothing;
 		_helperMaterial.shader = shader;
-		_helperMaterial.repeat = repeat;
 
         drawTrianglesInternal(graphic, vertices, indices, uvtData, colors, position, _helperMaterial, transform);
     }

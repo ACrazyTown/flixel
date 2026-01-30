@@ -1,6 +1,7 @@
 package flixel.graphics;
 
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 
@@ -29,9 +30,12 @@ class FlxMaterial implements IFlxDestroyable
 	public var smoothing:Bool = false;
 
 	/**
-	 * Tells if textures of the material should be repeated or not.
+	 * The texture wrapping mode that decides how textures should be rendered
+	 * if coordinates outside the normal range are used.
+	 * 
+	 * If `null`, the texture's wrapping mode will be used.
 	 */
-	public var repeat:Bool = false;
+	public var wrap:Null<FlxTextureWrap> = null;
 
 	/**
 	 * Tells if this material should be batched (try to batch it with another sprites or not).
@@ -52,13 +56,58 @@ class FlxMaterial implements IFlxDestroyable
 		return (shader == material.shader
 			&& blendMode == material.blendMode
 			&& smoothing == material.smoothing
-			&& repeat == material.repeat
+			&& wrap == material.wrap
             && (checkBatchable ? batchable == material.batchable : true));
 	}
 
     public function destroy():Void
     {
 		shader = null;
+		wrap = null;
 	}
 }
 
+// TODO ant: move this to FlxTexture, whenever that gets made
+@:using(flixel.graphics.FlxMaterial.FlxTextureWrapTools)
+enum FlxTextureWrap
+{
+	CLAMP(s:Bool, t:Bool);
+	REPEAT(s:Bool, t:Bool);
+	MIRRORED_REPEAT(s:Bool, t:Bool);
+}
+
+private class FlxTextureWrapTools
+{
+	public static inline function toContext3DWrap(wrap:FlxTextureWrap):Context3DWrapMode
+	{
+		// return switch (wrap)
+		// {
+		// 	case CLAMP(s, t):
+		// 		if (s && t) CLAMP;
+		// 		if (s && !t) CLAMP_U_REPEAT_V;
+		// 		if (!s && t) CLAMP
+
+		// 	// OpenFL doesn't support mirrored repeat, fall back to repeat
+		// 	case MIRRORED_REPEAT(s, t):
+
+		// }
+
+		return switch (wrap)
+		{
+			case CLAMP(s, t):
+				if (s && t) CLAMP;
+				else if (s && !t) CLAMP_U_REPEAT_V;
+				else if (!s && t) REPEAT_U_CLAMP_V;
+				else REPEAT;
+
+			// OpenFL doesn't support mirrored repeat, so we have to fall back to regular repeat
+			case MIRRORED_REPEAT(s, t), REPEAT(s, t):
+				if (s && t) REPEAT;
+				else if (s && !t) REPEAT_U_CLAMP_V;
+				else if (!s && t) CLAMP_U_REPEAT_V;
+				else CLAMP;
+		}
+
+		// return null;
+	}
+}

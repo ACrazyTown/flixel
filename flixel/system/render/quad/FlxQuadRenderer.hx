@@ -94,9 +94,9 @@ class FlxQuadRenderer extends FlxRenderer
 		
 		// TODO ant: probably just pass in material lol
 		#if FLX_RENDER_TRIANGLE
-		final drawItem:FlxDrawTrianglesItem = view.startTrianglesBatch(frame.parent, material.smoothing, isColored, material.blendMode, hasColorOffsets, material.shader);
+		final drawItem:FlxDrawTrianglesItem = view.startTrianglesBatch(frame.parent, material, isColored, hasColorOffsets);
 		#else
-		final drawItem:FlxDrawQuadsItem = view.startQuadBatch(frame.parent, isColored, hasColorOffsets, material.blendMode, material.smoothing, material.shader);
+		final drawItem:FlxDrawQuadsItem = view.startQuadBatch(frame.parent, material, isColored, hasColorOffsets);
 		#end
 		drawItem.addQuad(frame, matrix, transform);
 	}
@@ -111,9 +111,9 @@ class FlxQuadRenderer extends FlxRenderer
 		
 		// TODO ant: probably just pass in material lol
 		#if FLX_RENDER_TRIANGLE
-		final drawItem:FlxDrawTrianglesItem = view.startTrianglesBatch(frame.parent, material.smoothing, isColored, material.blendMode, hasColorOffsets,  material.shader);
+		final drawItem:FlxDrawTrianglesItem = view.startTrianglesBatch(frame.parent, material, isColored, hasColorOffsets);
 		#else
-		final drawItem:FlxDrawQuadsItem = view.startQuadBatch(frame.parent, isColored, hasColorOffsets, material.blendMode, material.smoothing, material.shader);
+		final drawItem:FlxDrawQuadsItem = view.startQuadBatch(frame.parent, material, hasColorOffsets);
 		#end
 		drawItem.addQuad(frame, _helperMatrix, transform);
 	}
@@ -126,8 +126,7 @@ class FlxQuadRenderer extends FlxRenderer
 		final isColored = (colors != null && colors.length != 0) || (transform != null && transform.hasRGBMultipliers());
 		final hasColorOffsets = (transform != null && transform.hasRGBAOffsets());
 	
-		// TODO ant: probably just pass in material lol
-		final drawItem = view.startTrianglesBatch(graphic, material.smoothing, isColored, material.blendMode, hasColorOffsets, material.shader);
+		final drawItem = view.startTrianglesBatch(graphic, material, isColored, hasColorOffsets);
 		drawItem.addTriangles(vertices, indices, uvtData, colors, position, cameraBounds, transform);
 	}
 

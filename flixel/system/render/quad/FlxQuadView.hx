@@ -1,5 +1,6 @@
 package flixel.system.render.quad;
 
+import flixel.graphics.FlxMaterial;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
@@ -225,8 +226,132 @@ class FlxQuadView extends FlxCameraView
 	 */
 	static var _storageTrianglesHead:FlxDrawTrianglesItem;
 	
+	// @:noCompletion
+	// public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
+	// {
+	// 	#if FLX_RENDER_TRIANGLE
+	// 	return startTrianglesBatch(graphic, smooth, colored, blend);
+	// 	#else
+	// 	var itemToReturn = null;
+		
+	// 	if (_currentDrawItem != null
+	// 		&& _currentDrawItem.type == FlxDrawItemType.TILES
+	// 		&& _headTiles.graphics == graphic
+	// 		&& _headTiles.colored == colored
+	// 		&& _headTiles.hasColorOffsets == hasColorOffsets
+	// 		&& _headTiles.blend == blend
+	// 		&& _headTiles.antialiasing == smooth
+	// 		&& _headTiles.shader == shader)
+	// 	{
+	// 		return _headTiles;
+	// 	}
+		
+	// 	if (_storageTilesHead != null)
+	// 	{
+	// 		itemToReturn = _storageTilesHead;
+	// 		var newHead = _storageTilesHead.nextTyped;
+	// 		itemToReturn.reset();
+	// 		_storageTilesHead = newHead;
+	// 	}
+	// 	else
+	// 	{
+	// 		itemToReturn = new FlxDrawQuadsItem();
+	// 	}
+		
+	// 	// TODO: catch this error when the dev actually messes up, not in the draw phase
+	// 	if (graphic.isDestroyed)
+	// 		throw 'Cannot queue ${graphic.key}. This sprite was destroyed.';
+			
+	// 	itemToReturn.graphics = graphic;
+	// 	itemToReturn.antialiasing = smooth;
+	// 	itemToReturn.colored = colored;
+	// 	itemToReturn.hasColorOffsets = hasColorOffsets;
+	// 	itemToReturn.blend = blend;
+	// 	itemToReturn.shader = shader;
+		
+	// 	itemToReturn.nextTyped = _headTiles;
+	// 	_headTiles = itemToReturn;
+		
+	// 	if (_headOfDrawStack == null)
+	// 	{
+	// 		_headOfDrawStack = itemToReturn;
+	// 	}
+		
+	// 	if (_currentDrawItem != null)
+	// 	{
+	// 		_currentDrawItem.next = itemToReturn;
+	// 	}
+		
+	// 	_currentDrawItem = itemToReturn;
+		
+	// 	return itemToReturn;
+	// 	#end
+	// }
+	
+	// @:noCompletion
+	// public function startTrianglesBatch(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool,
+	// 		?shader:FlxShader):FlxDrawTrianglesItem
+	// {
+	// 	if (_currentDrawItem != null
+	// 		&& _currentDrawItem.type == FlxDrawItemType.TRIANGLES
+	// 		&& _headTriangles.graphics == graphic
+	// 		&& _headTriangles.antialiasing == smoothing
+	// 		&& _headTriangles.colored == isColored
+	// 		&& _headTriangles.blend == blend
+	// 		&& _headTriangles.hasColorOffsets == hasColorOffsets
+	// 		&& _headTriangles.shader == shader)
+	// 	{
+	// 		return _headTriangles;
+	// 	}
+		
+	// 	return getNewDrawTrianglesItem(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
+	// }
+	
+	// @:noCompletion
+	// public function getNewDrawTrianglesItem(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool,
+	// 		?shader:FlxShader):FlxDrawTrianglesItem
+	// {
+	// 	var itemToReturn:FlxDrawTrianglesItem = null;
+		
+	// 	if (_storageTrianglesHead != null)
+	// 	{
+	// 		itemToReturn = _storageTrianglesHead;
+	// 		var newHead:FlxDrawTrianglesItem = _storageTrianglesHead.nextTyped;
+	// 		itemToReturn.reset();
+	// 		_storageTrianglesHead = newHead;
+	// 	}
+	// 	else
+	// 	{
+	// 		itemToReturn = new FlxDrawTrianglesItem();
+	// 	}
+		
+	// 	itemToReturn.graphics = graphic;
+	// 	itemToReturn.antialiasing = smoothing;
+	// 	itemToReturn.colored = isColored;
+	// 	itemToReturn.blend = blend;
+	// 	itemToReturn.hasColorOffsets = hasColorOffsets;
+	// 	itemToReturn.shader = shader;
+		
+	// 	itemToReturn.nextTyped = _headTriangles;
+	// 	_headTriangles = itemToReturn;
+		
+	// 	if (_headOfDrawStack == null)
+	// 	{
+	// 		_headOfDrawStack = itemToReturn;
+	// 	}
+		
+	// 	if (_currentDrawItem != null)
+	// 	{
+	// 		_currentDrawItem.next = itemToReturn;
+	// 	}
+		
+	// 	_currentDrawItem = itemToReturn;
+		
+	// 	return itemToReturn;
+	// }
+
 	@:noCompletion
-	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
+	public function startQuadBatch(graphic:FlxGraphic, material:FlxMaterial, colored:Bool, hasColorOffsets:Bool = false)
 	{
 		#if FLX_RENDER_TRIANGLE
 		return startTrianglesBatch(graphic, smooth, colored, blend);
@@ -238,9 +363,7 @@ class FlxQuadView extends FlxCameraView
 			&& _headTiles.graphics == graphic
 			&& _headTiles.colored == colored
 			&& _headTiles.hasColorOffsets == hasColorOffsets
-			&& _headTiles.blend == blend
-			&& _headTiles.antialiasing == smooth
-			&& _headTiles.shader == shader)
+			&& _headTiles.material.equals(material, false))
 		{
 			return _headTiles;
 		}
@@ -262,11 +385,9 @@ class FlxQuadView extends FlxCameraView
 			throw 'Cannot queue ${graphic.key}. This sprite was destroyed.';
 			
 		itemToReturn.graphics = graphic;
-		itemToReturn.antialiasing = smooth;
+		itemToReturn.material = material;
 		itemToReturn.colored = colored;
 		itemToReturn.hasColorOffsets = hasColorOffsets;
-		itemToReturn.blend = blend;
-		itemToReturn.shader = shader;
 		
 		itemToReturn.nextTyped = _headTiles;
 		_headTiles = itemToReturn;
@@ -288,27 +409,23 @@ class FlxQuadView extends FlxCameraView
 	}
 	
 	@:noCompletion
-	public function startTrianglesBatch(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool,
-			?shader:FlxShader):FlxDrawTrianglesItem
+	public function startTrianglesBatch(graphic:FlxGraphic, material:FlxMaterial, isColored:Bool = false, ?hasColorOffsets:Bool):FlxDrawTrianglesItem
 	{
 		if (_currentDrawItem != null
 			&& _currentDrawItem.type == FlxDrawItemType.TRIANGLES
 			&& _headTriangles.graphics == graphic
-			&& _headTriangles.antialiasing == smoothing
+			&& _headTriangles.material.equals(material, false)
 			&& _headTriangles.colored == isColored
-			&& _headTriangles.blend == blend
-			&& _headTriangles.hasColorOffsets == hasColorOffsets
-			&& _headTriangles.shader == shader)
+			&& _headTriangles.hasColorOffsets == hasColorOffsets)
 		{
 			return _headTriangles;
 		}
 		
-		return getNewDrawTrianglesItem(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
+		return getNewDrawTrianglesItem(graphic, material, isColored, hasColorOffsets);
 	}
 	
 	@:noCompletion
-	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool,
-			?shader:FlxShader):FlxDrawTrianglesItem
+	public function getNewDrawTrianglesItem(graphic:FlxGraphic, material:FlxMaterial, isColored:Bool = false, ?hasColorOffsets:Bool):FlxDrawTrianglesItem
 	{
 		var itemToReturn:FlxDrawTrianglesItem = null;
 		
@@ -325,11 +442,9 @@ class FlxQuadView extends FlxCameraView
 		}
 		
 		itemToReturn.graphics = graphic;
-		itemToReturn.antialiasing = smoothing;
+		itemToReturn.material = material;
 		itemToReturn.colored = isColored;
-		itemToReturn.blend = blend;
 		itemToReturn.hasColorOffsets = hasColorOffsets;
-		itemToReturn.shader = shader;
 		
 		itemToReturn.nextTyped = _headTriangles;
 		_headTriangles = itemToReturn;
