@@ -3,7 +3,7 @@ package flixel.system.render;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.FlxMaterial;
 import flixel.graphics.frames.FlxFrame;
-import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
+import flixel.system.render.quad.FlxDrawTrianglesItem.DrawData;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.system.FlxAssets.FlxShader;
