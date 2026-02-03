@@ -855,6 +855,9 @@ class FlxGame extends Sprite
 	#if FLX_RENDER_OPENGL
 	function onRenderGL(_):Void
 	{
+		var renderer:flixel.system.render.gl.FlxGLRenderer = cast FlxG.renderer;
+		renderer.context.invalidate();
+		
 		draw();
 	}
 	#end

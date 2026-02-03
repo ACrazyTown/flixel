@@ -1,14 +1,21 @@
-package flixel.system.render.gl;
+package flixel.system.render;
 
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxFrame;
+import flixel.math.FlxMatrix;
+import openfl.geom.ColorTransform;
+import flixel.graphics.FlxMaterial;
+import flixel.math.FlxRect;
 
 class FlxDrawCommand implements IFlxDestroyable
 {
     var type:FlxDrawCommandType;
 
 	var graphic:FlxGraphic;
+    var shader:FlxShader;
 	var material:FlxMaterial;
 	var colored:Bool;
 	var hasColorOffsets:Bool;
@@ -19,15 +26,23 @@ class FlxDrawCommand implements IFlxDestroyable
     {
         graphic = null;
         material = null;
+        shader = null;
     }
 
     public function reset():Void
     {
         graphic = null;
         material = null;
+        shader = null;
         colored = false;
         hasColorOffsets = false;
     }
+
+    public function flush():Void {}
+
+    public function addQuad(frame:FlxFrame, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void {}
+
+	public function addUVQuad(graphic:FlxGraphic, material:FlxMaterial, rect:FlxRect, uv:FlxUVRect, matrix:FlxMatrix, ?transform:ColorTransform):Void {}
 
     public function set(graphic:FlxGraphic, material:FlxMaterial, colored:Bool, hasColorOffsets:Bool):Void
     {

@@ -138,6 +138,8 @@ private enum HelperDefine
 	FLX_NO_DEFAULT_SOUND_EXT;
 	/** Enables audio streaming related APIs */
 	FLX_STREAM_SOUND;
+	/** The default drawQuads() renderer */
+	FLX_RENDER_QUADS;
 }
 
 class FlxDefines
@@ -306,6 +308,21 @@ class FlxDefines
 		if (defined(FLX_NO_UNIT_TEST))
 			define(FLX_OPENGL_AVAILABLE);
 		#end
+
+		if (defined(FLX_RENDER_OPENGL))
+		{
+			if (!defined(FLX_OPENGL_AVAILABLE))
+			{
+				abort("Can't use FLX_RENDER_OPENGL on a target that doesn't use OpenGL!", (macro null).pos);
+			}
+
+			// TODO ant: needed to avoid OpenGL state desync issues, is there a better way?
+			define("openfl_disable_context_cache");
+		}
+		else
+		{
+			define(FLX_RENDER_QUADS);
+		}
 			
 		defineInversion(FLX_TRACK_GRAPHICS, FLX_NO_TRACK_GRAPHICS);
 		

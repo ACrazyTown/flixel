@@ -10,6 +10,7 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
+import flixel.graphics.shaders.FlxShader;
 import openfl.display.BitmapData;
 
 /**

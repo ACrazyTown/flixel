@@ -2,11 +2,12 @@ package flixel.system.render;
 
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.FlxMaterial;
+import flixel.graphics.FlxTrianglesData;
 import flixel.graphics.frames.FlxFrame;
 import flixel.system.render.quad.FlxDrawTrianglesItem.DrawData;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
@@ -104,6 +105,16 @@ class FlxRenderer implements IFlxDestroyable
 	 */
 	var _helperMaterial:FlxMaterial = new FlxMaterial();
 
+    /**
+     * Internal, used when the legacy `drawTriangles()` signature is called.
+     */
+    var _helperTrianglesData:FlxTrianglesData = new FlxTrianglesData();
+
+    /**
+     * Internal, used when the legacy `drawTriangles()` signature is called.
+     */
+    var _helperMatrix:FlxMatrix = new FlxMatrix();
+
     public function new() 
     {
         maxTextureSize = -1;
@@ -112,7 +123,9 @@ class FlxRenderer implements IFlxDestroyable
     public function destroy():Void 
     {
         camera = null;
-		_helperMaterial = FlxDestroyUtil.destroy(_helperMaterial);   
+		_helperMaterial = FlxDestroyUtil.destroy(_helperMaterial);
+        _helperTrianglesData = FlxDestroyUtil.destroy(_helperTrianglesData);
+        _helperMatrix = null;
     }
 
     // ------------------------ RENDERING ------------------------
@@ -152,6 +165,7 @@ class FlxRenderer implements IFlxDestroyable
      * @param   smoothing   Whether to use smoothing (anti-aliasing) when drawing.
      * @param   shader      The shader to use, optional (used only with the DRAW_TILES renderer).
      */
+    @:deprecated("This version of drawPixels() is deprecated. Use drawPixels(frame, pixels, material, matrix, transform) instead.")
 	overload extern public inline function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
 			smoothing:Bool = false, ?shader:FlxShader):Void
 	{
@@ -177,9 +191,6 @@ class FlxRenderer implements IFlxDestroyable
 		drawPixelsInternal(frame, pixels, material, matrix, transform);
 	}
 	
-	// TODO ant: handle these internal implementations differently
-	// make them abstract functions, and FlxRenderer an abstract class?
-	
 	/* For internal use only */
 	function drawPixelsInternal(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform) {}
 	
@@ -196,6 +207,7 @@ class FlxRenderer implements IFlxDestroyable
 	 * @param   destPoint    A point representing the top-left position to draw to.
 	 * @param   transform    The color transform to use, optional.
 	 */
+    @:deprecated("This version of copyPixels() is deprecated. Use copyPixels(frame, pixels, material, sourceRest, destPoint, transform) instead.")
 	overload extern public inline function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform,
 			?blend:BlendMode, smoothing:Bool = false, ?shader:FlxShader):Void
 	{
@@ -246,6 +258,7 @@ class FlxRenderer implements IFlxDestroyable
 	 * @param   transform   The color transform to use, optional.
 	 * @param   shader      The shader to use, optional (used only with the DRAW_TILES renderer).
 	 */
+    @:deprecated("This version of drawTriangles() is deprecated. Use drawTriangles(graphic, data, material, matrix, transform) instead.")
 	overload extern public inline function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>,
 		?colors:DrawData<Int>, ?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform,
 		?shader:FlxShader):Void 
@@ -254,29 +267,33 @@ class FlxRenderer implements IFlxDestroyable
 		_helperMaterial.smoothing = smoothing;
 		_helperMaterial.shader = shader;
 
-        drawTrianglesInternal(graphic, vertices, indices, uvtData, colors, position, _helperMaterial, transform);
+        _helperTrianglesData.vertices = vertices;
+        _helperTrianglesData.indices = indices;
+        _helperTrianglesData.uvs = uvtData;
+        _helperTrianglesData.colors = colors;
+
+        _helperMatrix.identity();
+        _helperMatrix.translate(position.x, position.y);
+
+        drawTrianglesInternal(graphic, _helperTrianglesData, _helperMaterial, _helperMatrix, transform);
     }
 
     /**
 	 * Draws a set of triangles onto the current render target.
      * 
 	 * @param   graphic     The graphic to use for the triangles.
-	 * @param   vertices    A vector where each element is a coordinate location. 2 elements make up an (x, y) pair.
-	 * @param   indices     A vector where each element is an index to a vertex (x, y) pair. 3 indices make up a triangle.
-	 * @param   uvtData     A vector where each element is a normalized coordinate (from 0.0 to 1.0), per vertex, used to apply texture mapping.
-	 * @param   colors      A vector containing the colors to use per vertex. Currently does not work with any renderer.
-	 * @param   position    A point representing the top-left position to draw to.
+     * @param   data        The data for the triangles (contains all the vertices, indices, etc.).
      * @param   material    The material to use.
+     * @param   matrix      The transformation matrix to use.
 	 * @param   transform   The color transform to use, optional.
 	 */
-	overload extern public inline function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-		?position:FlxPoint, material:FlxMaterial, ?transform:ColorTransform):Void 
+	overload extern public inline function drawTriangles(graphic:FlxGraphic, data:FlxTrianglesData, material:FlxMaterial, matrix:FlxMatrix,
+		?transform:ColorTransform):Void 
     {
-        drawTrianglesInternal(graphic, vertices, indices, uvtData, colors, position, material, transform);
+        drawTrianglesInternal(graphic, data, material, matrix, transform);
     }
 		
-	function drawTrianglesInternal(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-		?position:FlxPoint, material:FlxMaterial, ?transform:ColorTransform):Void {}
+	function drawTrianglesInternal(graphic:FlxGraphic, data:FlxTrianglesData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void {}
 
     /**
      * Fills the current render target with `color`.

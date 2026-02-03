@@ -9,7 +9,7 @@ import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.system.render.FlxCameraView;
 import flixel.system.render.quad.FlxQuadView;
 import flixel.system.render.blit.FlxBlitView;
@@ -105,14 +105,14 @@ class FlxCamera extends FlxBasic
 	 * 
 	 * **NOTE**: May be null depending on the render implementation used.
 	 */
-	public var viewQuad(default, null):Null<FlxQuadView>;
+	public var viewQuad(get, null):Null<FlxQuadView>;
 
 	/**
 	 * This camera's `view`, typed as a `FlxBlitView`.
 	 * 
 	 * **NOTE**: May be null depending on the render implementation used.
 	 */
-	public var viewBlit(default, null):Null<FlxBlitView>;
+	public var viewBlit(get, null):Null<FlxBlitView>;
 
 	/**
 	 * Tells the camera to use this following style.
@@ -830,10 +830,6 @@ class FlxCamera extends FlxBasic
 		this.height = height;
 
 		view = FlxCameraView.create(this);
-		if (view is FlxQuadView)
-			viewQuad = cast view;
-		else if (view is FlxBlitView)
-			viewBlit = cast view;
 
 		pixelPerfectRender = FlxG.renderer.method == BLITTING;
 
@@ -2046,6 +2042,16 @@ class FlxCamera extends FlxBasic
 	inline function get_display():DisplayObjectContainer
 	{
 		return view.display;
+	}
+
+	inline function get_viewBlit():FlxBlitView
+	{
+		return cast view;
+	}
+
+	inline function get_viewQuad():FlxQuadView
+	{
+		return cast view;
 	}
 	
 	/**

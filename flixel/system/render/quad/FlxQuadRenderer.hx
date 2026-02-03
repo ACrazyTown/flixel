@@ -1,5 +1,6 @@
 package flixel.system.render.quad;
 
+import flixel.graphics.FlxTrianglesData;
 import openfl.geom.Point;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.FlxMaterial;
@@ -10,7 +11,7 @@ import flixel.system.render.quad.FlxDrawTrianglesItem;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
@@ -34,12 +35,15 @@ class FlxQuadRenderer extends FlxRenderer
 	@:noCompletion inline function get_view():FlxQuadView
 		return camera.viewQuad;
 
-	var _helperMatrix:FlxMatrix = new FlxMatrix();
-
 	/**
 	 * Helper rect for `drawTriangles()` visibility checks
 	 */
 	var _bounds:FlxRect = FlxRect.get();
+
+	/**
+	 * Helper point for `drawTriangles()`
+	 */
+	var _helperPoint:FlxPoint = FlxPoint.get();
 
     public function new()
     {
@@ -56,7 +60,7 @@ class FlxQuadRenderer extends FlxRenderer
 	{
 		super.destroy();
 		_bounds = FlxDestroyUtil.put(_bounds);
-		_helperMatrix = null;
+		_helperPoint = FlxDestroyUtil.put(_helperPoint);
 	}
 
 	override function clear():Void
@@ -118,16 +122,16 @@ class FlxQuadRenderer extends FlxRenderer
 		drawItem.addQuad(frame, _helperMatrix, transform);
 	}
 	
-	override function drawTrianglesInternal(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-			?position:FlxPoint, material:FlxMaterial, ?transform:ColorTransform):Void
+	override function drawTrianglesInternal(graphic:FlxGraphic, data:FlxTrianglesData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void
 	{
 		final cameraBounds = _bounds.set(camera.viewMarginLeft, camera.viewMarginTop, camera.viewWidth, camera.viewHeight);
-		
-		final isColored = (colors != null && colors.length != 0) || (transform != null && transform.hasRGBMultipliers());
+		final position = _helperPoint.set(matrix.tx, matrix.ty);
+
+		final isColored = (data.colors != null && data.colors.length != 0) || (transform != null && transform.hasRGBMultipliers());
 		final hasColorOffsets = (transform != null && transform.hasRGBAOffsets());
 	
 		final drawItem = view.startTrianglesBatch(graphic, material, isColored, hasColorOffsets);
-		drawItem.addTriangles(vertices, indices, uvtData, colors, position, cameraBounds, transform);
+		drawItem.addTriangles(data.vertices, data.indices, data.uvs, data.colors, position, cameraBounds, transform);
 	}
 
 	override function fill(color:FlxColor, blendAlpha:Bool = true):Void

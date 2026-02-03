@@ -3,12 +3,13 @@ package flixel.system.render.blit;
 import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
+import flixel.graphics.FlxTrianglesData;
 import flixel.system.render.quad.FlxDrawTrianglesItem.DrawData;
 import flixel.system.render.quad.FlxDrawTrianglesItem;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
@@ -57,8 +58,7 @@ class FlxBlitRenderer extends FlxRenderer
 	 * Helper rect for `drawTriangles()` visibility checks
 	 */
 	var _bounds:FlxRect = FlxRect.get();
-	
-	var _helperMatrix:FlxMatrix = new FlxMatrix();
+
 	var _helperPoint:Point = new Point();
 	
 	/**
@@ -86,7 +86,6 @@ class FlxBlitRenderer extends FlxRenderer
 	{
 		super.destroy();
 		_bounds = FlxDestroyUtil.put(_bounds);
-		_helperMatrix = null;
 		_helperPoint = null;
 		_flashPoint = null;
 	}
@@ -157,15 +156,14 @@ class FlxBlitRenderer extends FlxRenderer
 		}
 	}
 	
-	override function drawTrianglesInternal(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-			?position:FlxPoint, material:FlxMaterial, ?transform:ColorTransform):Void
+	override function drawTrianglesInternal(graphic:FlxGraphic, data:FlxTrianglesData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform):Void
 	{
 		final cameraBounds = _bounds.set(camera.viewMarginLeft, camera.viewMarginTop, camera.viewWidth, camera.viewHeight);
-		
-		if (position == null)
-			position = renderPoint.set();
+	
+		// TODO ant: apply the matrix?
+		var position = renderPoint.set(matrix.tx, matrix.ty);
 			
-		var verticesLength:Int = vertices.length;
+		var verticesLength:Int = data.vertices.length;
 		var currentVertexPosition:Int = 0;
 		
 		var tempX:Float, tempY:Float;
@@ -175,8 +173,8 @@ class FlxBlitRenderer extends FlxRenderer
 		
 		while (i < verticesLength)
 		{
-			tempX = position.x + vertices[i];
-			tempY = position.y + vertices[i + 1];
+			tempX = position.x + data.vertices[i];
+			tempY = position.y + data.vertices[i + 1];
 			
 			drawVertices[currentVertexPosition++] = tempX;
 			drawVertices[currentVertexPosition++] = tempY;
@@ -202,8 +200,8 @@ class FlxBlitRenderer extends FlxRenderer
 		else
 		{
 			trianglesSprite.graphics.clear();
-			trianglesSprite.graphics.beginBitmapFill(graphic.bitmap, null, material.repeat, material.smoothing);
-			trianglesSprite.graphics.drawTriangles(drawVertices, indices, uvtData);
+			trianglesSprite.graphics.beginBitmapFill(graphic.bitmap, null, material.wrap.isRepeat(), material.smoothing);
+			trianglesSprite.graphics.drawTriangles(drawVertices, data.indices, data.uvs);
 			trianglesSprite.graphics.endFill();
 			
 			// TODO: check this block of code for cases, when zoom < 1 (or initial zoom?)...
@@ -224,7 +222,7 @@ class FlxBlitRenderer extends FlxRenderer
 				var gfx:Graphics = FlxSpriteUtil.flashGfx;
 				gfx.clear();
 				gfx.lineStyle(1, FlxColor.BLUE, 0.5);
-				gfx.drawTriangles(drawVertices, indices);
+				gfx.drawTriangles(drawVertices, data.indices);
 				view.buffer.draw(FlxSpriteUtil.flashGfxSprite, _helperMatrix);
 			}
 			#end

@@ -7,7 +7,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.system.render.quad.FlxDrawBaseItem;
 import flixel.system.render.quad.FlxDrawQuadsItem;
 import flixel.system.render.quad.FlxDrawTrianglesItem;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.system.render.FlxCameraView;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -226,6 +226,8 @@ class FlxQuadView extends FlxCameraView
 	 */
 	static var _storageTrianglesHead:FlxDrawTrianglesItem;
 	
+	// TODO ant: rework all the batching methods to be backwards compatible
+
 	// @:noCompletion
 	// public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
 	// {
@@ -407,7 +409,7 @@ class FlxQuadView extends FlxCameraView
 		return itemToReturn;
 		#end
 	}
-	
+
 	@:noCompletion
 	public function startTrianglesBatch(graphic:FlxGraphic, material:FlxMaterial, isColored:Bool = false, ?hasColorOffsets:Bool):FlxDrawTrianglesItem
 	{
@@ -423,7 +425,7 @@ class FlxQuadView extends FlxCameraView
 		
 		return getNewDrawTrianglesItem(graphic, material, isColored, hasColorOffsets);
 	}
-	
+
 	@:noCompletion
 	public function getNewDrawTrianglesItem(graphic:FlxGraphic, material:FlxMaterial, isColored:Bool = false, ?hasColorOffsets:Bool):FlxDrawTrianglesItem
 	{

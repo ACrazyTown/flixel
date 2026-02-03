@@ -2,7 +2,7 @@ package flixel.graphics;
 
 import openfl.display.BlendMode;
 import openfl.display3D.Context3DWrapMode;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 
 class FlxMaterial implements IFlxDestroyable
@@ -44,11 +44,17 @@ class FlxMaterial implements IFlxDestroyable
 
     public function new() {}
 
+	public function destroy():Void
+	{
+		shader = null;
+		wrap = null;
+	}
+
 	/**
 	 * Helper function to check if two materials are equal.
      * 
-	 * @param   material         The `FlxMaterial` to compare against.
-     * @param   checkBatchable   Also checks if both materials are batchable, `true` by default.
+	 * @param    material         The `FlxMaterial` to compare against.
+	 * @param    checkBatchable   Also checks if both materials are batchable, `true` by default.
 	 * @return   Whether the two materials are equal.
 	 */
 	public inline function equals(material:FlxMaterial, checkBatchable:Bool = true):Bool
@@ -60,10 +66,15 @@ class FlxMaterial implements IFlxDestroyable
             && (checkBatchable ? batchable == material.batchable : true));
 	}
 
-    public function destroy():Void
-    {
-		shader = null;
-		wrap = null;
+	/**
+	 * Determines the texture wrap mode to use when rendering.
+	 * Uses the material's wrap if it's set, otherwise it will fall back to the texture's wrap
+	 * 
+	 * @return The texture wrapping mode to sue.
+	 */
+	public inline function getWrap():FlxTextureWrap
+	{
+		return wrap != null ? wrap : CLAMP(true, true); // TODO ant: temp fallback until FlxTexture is made
 	}
 }
 
@@ -71,43 +82,45 @@ class FlxMaterial implements IFlxDestroyable
 @:using(flixel.graphics.FlxMaterial.FlxTextureWrapTools)
 enum FlxTextureWrap
 {
-	CLAMP(s:Bool, t:Bool);
-	REPEAT(s:Bool, t:Bool);
-	MIRRORED_REPEAT(s:Bool, t:Bool);
+	CLAMP(u:Bool, v:Bool);
+	REPEAT(u:Bool, v:Bool);
+	MIRRORED_REPEAT(u:Bool, v:Bool);
 }
 
 private class FlxTextureWrapTools
 {
 	public static inline function toContext3DWrap(wrap:FlxTextureWrap):Context3DWrapMode
 	{
-		// return switch (wrap)
-		// {
-		// 	case CLAMP(s, t):
-		// 		if (s && t) CLAMP;
-		// 		if (s && !t) CLAMP_U_REPEAT_V;
-		// 		if (!s && t) CLAMP
-
-		// 	// OpenFL doesn't support mirrored repeat, fall back to repeat
-		// 	case MIRRORED_REPEAT(s, t):
-
-		// }
-
 		return switch (wrap)
 		{
-			case CLAMP(s, t):
-				if (s && t) CLAMP;
-				else if (s && !t) CLAMP_U_REPEAT_V;
-				else if (!s && t) REPEAT_U_CLAMP_V;
+			case CLAMP(u, v):
+				if (u && v) CLAMP; else if (u && !v) CLAMP_U_REPEAT_V; else if (!u && v) REPEAT_U_CLAMP_V;
 				else REPEAT;
 
-			// OpenFL doesn't support mirrored repeat, so we have to fall back to regular repeat
-			case MIRRORED_REPEAT(s, t), REPEAT(s, t):
-				if (s && t) REPEAT;
-				else if (s && !t) REPEAT_U_CLAMP_V;
-				else if (!s && t) CLAMP_U_REPEAT_V;
+			// Context3D doesn't support mirrored repeat, so we have to fall back to regular repeat
+			case MIRRORED_REPEAT(u, v), REPEAT(u, v):
+				if (u && v) REPEAT; else if (u && !v) REPEAT_U_CLAMP_V; else if (!u && v) CLAMP_U_REPEAT_V;
 				else CLAMP;
 		}
+	}
+	
+	/**
+	 * Determines whether there the `REPEAT` wrap mode is used in any form.
+	 * This is useful for targets like Flash where wrapping can't be done per-axis,
+	 * but is rather just enabled or disabled.
+	 * 
+	 * @param    wrap   The `FlxTextureWrap` to check.
+	 * @return   Whether the `REPEAT` wrap mode is used.
+	 */
+	public static inline function isRepeat(wrap:FlxTextureWrap):Bool
+	{
+		return switch (wrap)
+		{
+			// Context3D doesn't support mirrored repeat, so we have to fall back to regular repeat
+			case MIRRORED_REPEAT(u, v), REPEAT(u, v):
+				if (!u && !v) false; else true;
 
-		// return null;
+			default: false;
+		}
 	}
 }
