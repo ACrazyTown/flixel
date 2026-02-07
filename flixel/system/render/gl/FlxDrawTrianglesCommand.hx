@@ -30,6 +30,13 @@ class FlxDrawTrianglesCommand extends FlxGLDrawCommand
 	 */
 	public var color:ColorTransform;
 
+	/**
+	 * Transformation matrix for this item on camera.
+	 */
+	public var matrix(default, set):FlxMatrix;
+
+	var _matrix4:Matrix4 = new Matrix4();
+
 	public function new(renderer:FlxGLRenderer)
 	{
 		super(renderer);
@@ -106,9 +113,8 @@ class FlxDrawTrianglesCommand extends FlxGLDrawCommand
 		GL.uniform4f(shader.data.uColor.index, red, green, blue, alpha);
 		GL.uniform4f(shader.data.uColorOffset.index, redOffset, greenOffset, blueOffset, alphaOffset);
 
-		GLHelper.uniformMatrix4fv(shader.data.uProjection.index, false, __temp__uMat);
-		// set transform matrix for all triangles in this item:
-		GLHelper.uniformMatrix4fv(shader.data.uModel.index, false, _matrix4);
+		GLHelper.uniformMatrix4fv(shader.data.uMatrix.index, false, _matrix4);
+		// GLHelper.uniformMatrix4fv(shader.data.uModel.index, false, _matrix4);
 
 		context.setBlendMode(material.blendMode);
 
@@ -167,4 +173,21 @@ class FlxDrawTrianglesCommand extends FlxGLDrawCommand
 	// {
 	// 	return (data != null) ? data.numTriangles : 0;
 	// }
+
+	function set_matrix(value:FlxMatrix):FlxMatrix
+	{
+		if (value != null)
+		{
+			_matrix4.identity();
+			_matrix4[0] = value.a;
+			_matrix4[1] = value.b;
+			_matrix4[4] = value.c;
+			_matrix4[5] = value.d;
+			_matrix4[12] = value.tx;
+			_matrix4[13] = value.ty;
+			_matrix4.append(renderer.projection);
+		}
+
+		return matrix = value;
+	}
 }

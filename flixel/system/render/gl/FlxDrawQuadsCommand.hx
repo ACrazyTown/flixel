@@ -25,7 +25,6 @@ import lime.utils.Float32Array;
 
 // TODO ant: Beeble's branch has roundPixels, used by the debug layer
 // TODO ant: fix _colors & color offset
-// TODO ant: use uModel
 
 class FlxDrawQuadsCommand extends FlxGLDrawCommand
 {
@@ -438,8 +437,7 @@ class FlxDrawQuadsCommand extends FlxGLDrawCommand
 			GLHelper.bufferSubData(GL.ARRAY_BUFFER, 0, view, null, numBytes);
 		}
 
-		GLHelper.uniformMatrix4fv(shader.data.uProjection.index, false, __temp__uMat);
-        GLHelper.uniformMatrix4fv(shader.data.uModel.index, false, _matrix4);
+		GLHelper.uniformMatrix4fv(shader.data.uMatrix.index, false, renderer.projection);
     }
 
     /**

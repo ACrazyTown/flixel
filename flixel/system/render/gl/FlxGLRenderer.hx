@@ -22,8 +22,17 @@ class FlxGLRenderer extends FlxRenderer
 
     public var context:GLContext;
 
-    public var projection:Matrix4;
-    public var projectionFlipped:Matrix4;
+    public var projection(get, never):Matrix4;
+    inline function get_projection():Matrix4
+    {
+        return _needsFlippedProjection ? _projectionFlipped : _projection;
+    }
+
+    var _projection:Matrix4 = new Matrix4();
+    var _projectionFlipped:Matrix4 = new Matrix4();
+    var _projectionWidth:Int;
+    var _projectionHeight:Int;
+    var _needsFlippedProjection:Bool = true;
 
     var singleQuadCommand:FlxDrawQuadsCommand;
     var quadsCommand:FlxDrawQuadsCommand;
@@ -62,6 +71,12 @@ class FlxGLRenderer extends FlxRenderer
         _fillRect = FlxDestroyUtil.put(_fillRect);
     }
 
+    override function begin(camera:FlxCamera) 
+    {
+        super.begin(camera);
+        resizeProjectionMatrix(camera.width, camera.height);
+    }
+
     override function clear():Void
     {
         // GL.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -85,7 +100,6 @@ class FlxGLRenderer extends FlxRenderer
         // super.drawPixelsInternal(frame, pixels, material, matrix, transform);
 
         var c = getQuads(material);
-        c.__temp__uMat = view.mat4lmao;
         // c.matrix = matrix;
 
         c.addQuad(frame, material, matrix, transform);
@@ -95,7 +109,6 @@ class FlxGLRenderer extends FlxRenderer
     {
         var c = getTriangles();
         c.set(graphic, material, true, false);
-        c.__temp__uMat = view.mat4lmao;
         c.data = data;
         c.matrix = matrix;
         c.color = transform;
@@ -110,7 +123,6 @@ class FlxGLRenderer extends FlxRenderer
         _fillRect.set(camera.viewMarginLeft - 1, camera.viewMarginTop - 1, camera.viewWidth + 2, camera.viewHeight + 2);
 
         var cmd = getQuads(_fillMaterial);
-        cmd.__temp__uMat = view.mat4lmao;
         cmd.addColorQuad(_fillRect, _fillMaterial, _helperMatrix, color);
     }
 
@@ -136,5 +148,17 @@ class FlxGLRenderer extends FlxRenderer
 
         currentCommand = null;
         return trianglesCommand;
+    }
+
+    function resizeProjectionMatrix(width:Int, height:Int):Void
+    {
+        if (_projectionWidth == width && _projectionHeight == height)
+            return;
+        
+        _projection.createOrtho(0, width, 0, height, -1000, 1000);
+        _projectionFlipped.createOrtho(0, width, height, 0, -1000, 1000);
+
+        _projectionWidth = width;
+        _projectionHeight = height;
     }
 }

@@ -11,8 +11,7 @@ class FlxTexturedShader extends FlxShader
     attribute vec4 aColor;
     attribute vec4 aColorOffset;
     
-    uniform mat4 uProjection;
-	uniform mat4 uModel;
+    uniform mat4 uMatrix;
     uniform vec2 uTextureSize;
     
     varying vec2 vTexCoord;
@@ -25,7 +24,7 @@ class FlxTexturedShader extends FlxShader
         // OpenFl uses textures in bgra format, so we should convert colors...
         vColor = aColor.bgra;
         vColorOffset = aColorOffset.bgra;
-        gl_Position = uProjection * uModel * aPosition;
+        gl_Position = uMatrix * aPosition;
     }
     ')
 
@@ -55,6 +54,15 @@ class FlxTexturedShader extends FlxShader
         }
     }
     ')
+
+    // @:glFragmentHeader("
+    //     varying vec2 vTexCoord;
+    //     varying vec4 vColor;
+    //     varying vec4 vColorOffset
+    // ")
+    // @:glFragmentBody("
+    //     vec4 color = texture2D(uImage0, vTexCoord);
+    // ")
 
     public function new()
     {
