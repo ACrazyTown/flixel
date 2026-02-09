@@ -121,11 +121,11 @@ class GLContext
 
                 case REPEAT(u, v):
                     wrapS = u ? GL.REPEAT : GL.CLAMP_TO_EDGE;
-                    wrapT = u ? GL.REPEAT : GL.CLAMP_TO_EDGE;
+                    wrapT = v ? GL.REPEAT : GL.CLAMP_TO_EDGE;
 
                 case MIRRORED_REPEAT(u, v):
                     wrapS = u ? GL.MIRRORED_REPEAT : GL.REPEAT;
-                    wrapT = u ? GL.MIRRORED_REPEAT : GL.REPEAT;
+                    wrapT = v ? GL.MIRRORED_REPEAT : GL.REPEAT;
             }
 
             GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, minFilter);

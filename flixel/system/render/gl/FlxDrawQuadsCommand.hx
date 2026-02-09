@@ -101,9 +101,6 @@ class FlxDrawQuadsCommand extends FlxGLDrawCommand
         super(renderer);
         type = QUADS;
 
-        trace(defaultTexturedShader.glVertexSource);
-        trace(defaultTexturedShader.glFragmentSource);
-
         if (size <= 0)
             size = 2000; // QUADS_PER_BATCH
         this.size = size;
