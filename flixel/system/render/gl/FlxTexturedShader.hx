@@ -21,7 +21,7 @@ class FlxTexturedShader extends FlxShader
 
         vec4 flixel_texture2D(sampler2D sampler, vec2 coord)
         {
-            vec4 color = texture2D(uImage0, vTexCoord);
+            vec4 color = texture2D(sampler, coord);
 
             if (color.a == 0.0)
             {
