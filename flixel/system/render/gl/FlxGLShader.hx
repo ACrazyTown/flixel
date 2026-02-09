@@ -2,33 +2,23 @@ package flixel.system.render.gl;
 
 import openfl.display.Shader;
 
-// changing uniforms breaks the current batch
-//
-// QUADS:
-// - pass in color transform as vertices, therefore are batchable
-//
-// TRIANGLES:
-// - pass in color transform as a uniform, therefore aren't batchable (and weren't regardless)
-
+/**
+ * Basic shader for colored quads/triangles.
+ */
 class FlxGLShader extends Shader
 {
 	@:glVertexHeader("
 		attribute vec4 aPosition;    // Vertex position
-		attribute vec4 aColor; 	     // Vertex color (or color transform multiplier, for quads)
+		attribute vec4 aColor; 	     // Color (vertex color * multiplier + offset)
 
 		uniform mat4 uMatrix;     	 // Projection matrix (+ model matrix when rendering triangles)
 
-		uniform vec4 uColor;         // Color transform multiplier (Triangles only)
-		uniform vec4 uColorOffset;   // Color transform offset (Triangles only)
-
-		varying vec4 vColor;         // Final color (vertex color * multiplier + offset), passed down to fragment shader
-	")
+		varying vec4 vColor;         // aColor passed down to fragment shader
+	", true)
 	@:glVertexBody("
-		vec4 col = clamp(aColor.bgra * uColor + uColorOffset, 0.0, 1.0);
-		vColor = vec4(col.rgb * col.a, col.a);
-
+		vColor = vec4(aColor.bgr * aColor.a, aColor.a);
 		gl_Position = uMatrix * aPosition;
-	")
+	", true)
 	@:glVertexSource("
 		#pragma header
 
@@ -37,13 +27,13 @@ class FlxGLShader extends Shader
 			#pragma body
 
 		}
-	")
+	", true)
 	@:glFragmentHeader("
 		varying vec4 vColor;
-	")
+	", true)
 	@:glFragmentBody("
 		gl_FragColor = vColor;
-	")
+	", true)
 	#if emscripten
 	@:glFragmentSource("
 		#pragma header
@@ -54,7 +44,7 @@ class FlxGLShader extends Shader
 
 			gl_FragColor = gl_FragColor.bgra;
 		}
-	")
+	", true)
 	#else
 	@:glFragmentSource("
 		#pragma header
@@ -63,7 +53,7 @@ class FlxGLShader extends Shader
 		{
 			#pragma body
 		}
-	")
+	", true)
 	#end
 	public function new(?code)
 	{

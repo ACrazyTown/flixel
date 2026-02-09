@@ -24,13 +24,12 @@ import lime.utils.UInt16Array;
 import lime.utils.Float32Array;
 
 // TODO ant: Beeble's branch has roundPixels, used by the debug layer
-// TODO ant: fix _colors & color offset
 
 class FlxDrawQuadsCommand extends FlxGLDrawCommand
 {
     public static var defaultTexturedShader:FlxShader = new FlxTexturedShader();
 
-    public static var defaultColoredShader:FlxShader = new FlxColoredShader();
+    public static var defaultColoredShader:FlxShader = new FlxShader();
 
     static inline final VERTICES_PER_QUAD:Int = 4;
     static inline final INDICES_PER_QUAD:Int = 6;
@@ -41,10 +40,10 @@ class FlxDrawQuadsCommand extends FlxGLDrawCommand
     static inline final BYTES_PER_INDEX:Int = 2;
 
     /**
-     * Each vertex stores the (x, y) position, (u, v) texture coordinates, the color and color offset,
-     * totaling to 6 elements per vertex.
+     * Each vertex stores the (x, y) position, (u, v) texture coordinates and the color,
+     * totaling to 5 elements per vertex.
      */
-    static inline final ELEMENTS_PER_VERTEX:Int = 6;
+    static inline final ELEMENTS_PER_VERTEX:Int = 5;
 
     /**
      * The number of quads this command can hold.
@@ -101,6 +100,9 @@ class FlxDrawQuadsCommand extends FlxGLDrawCommand
     {
         super(renderer);
         type = QUADS;
+
+        trace(defaultTexturedShader.glVertexSource);
+        trace(defaultTexturedShader.glFragmentSource);
 
         if (size <= 0)
             size = 2000; // QUADS_PER_BATCH
@@ -357,30 +359,23 @@ class FlxDrawQuadsCommand extends FlxGLDrawCommand
         var x4 = scaledWX + scaledHX + matrix.tx;
         var y4 = scaledWY + scaledHY + matrix.ty;
 
-        var tint = 0xFFFFFF;
-        var color = 0xFFFFFFFF;
+        var color:FlxColor = 0xFFFFFFFF;
 
-		if (transform != null)
-		{
-			tint = Std.int(transform.redMultiplier * 255) << 16 | Std.int(transform.greenMultiplier * 255) << 8 | Std.int(transform.blueMultiplier * 255);
-			color = (Std.int(transform.alphaMultiplier * 255) & 0xFF) << 24 | tint;
-		}
-
-		tint = 0x000000;
-		var colorOffset = 0x00000000;
-
-		// update color offsets
-		if (transform != null)
-		{
-			tint = Std.int(transform.redOffset) << 16 | Std.int(transform.greenOffset) << 8 | Std.int(transform.blueOffset);
-			colorOffset = (Std.int(transform.alphaOffset) & 0xFF) << 24 | tint;
-		}
+        // todo: optimize???
+        color.redFloat *= transform.redMultiplier;
+        color.greenFloat *= transform.greenMultiplier;
+        color.blueFloat *= transform.blueMultiplier;
+        color.alphaFloat *= transform.alphaMultiplier;
+        color.red += Std.int(transform.redOffset);
+        color.green += Std.int(transform.greenOffset);
+        color.blue += Std.int(transform.blueOffset);
+        color.alpha += Std.int(transform.alphaOffset);
 
         startQuad(graphic, material);
-		addVertex(x1, y1, uvx, uvy, color, colorOffset);
-		addVertex(x2, y2, uvx2, uvy, color, colorOffset);
-		addVertex(x3, y3, uvx, uvy2, color, colorOffset);
-		addVertex(x4, y4, uvx2, uvy2, color, colorOffset);
+		addVertex(x1, y1, uvx, uvy, color);
+		addVertex(x2, y2, uvx2, uvy, color);
+		addVertex(x3, y3, uvx, uvy2, color);
+		addVertex(x4, y4, uvx2, uvy2, color);
     }
 
     /**
@@ -414,13 +409,6 @@ class FlxDrawQuadsCommand extends FlxGLDrawCommand
             // color attributes will be interpreted as unsigned bytes and normalized
             GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, stride, offset);
             GL.enableVertexAttribArray(shader.data.aColor.index);
-            offset += 4;
-
-            if (textured)
-            {
-                GL.vertexAttribPointer(shader.data.aColorOffset.index, 4, GL.UNSIGNED_BYTE, true, stride, offset); // offset by 4 bytes!
-                GL.enableVertexAttribArray(shader.data.aColorOffset.index);
-            }
         }
 
         // upload the verts to the buffer
@@ -486,14 +474,13 @@ class FlxDrawQuadsCommand extends FlxGLDrawCommand
 		numQuads++;
     }
 
-    function addVertex(x:Float = 0, y:Float = 0, u:Float = 0, v:Float = 0, color:FlxColor = FlxColor.WHITE, offset:FlxColor = FlxColor.TRANSPARENT)
+    function addVertex(x:Float = 0, y:Float = 0, u:Float = 0, v:Float = 0, color:FlxColor = FlxColor.WHITE):Void
     {
 		_positions[_vertexIndex++] = x;
 		_positions[_vertexIndex++] = y;
 		_positions[_vertexIndex++] = u;
 		_positions[_vertexIndex++] = v;
 		_colors[_vertexIndex++] = color;
-		_colors[_vertexIndex++] = offset;
     }
 
     public inline function canAddQuad():Bool

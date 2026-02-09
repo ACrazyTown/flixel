@@ -1150,8 +1150,9 @@ class FlxTrianglesData implements IFlxDestroyable
 	#if FLX_RENDER_OPENGL
 	/**
 	 * Update and upload vertex gl buffer to GPU.
+	 * Used internally by the renderer.
 	 */
-	public function updateVertices():Void
+	function updateVertices():Void
 	{
 		if (verticesArray == null || vertices == null)
 			return;
@@ -1170,8 +1171,9 @@ class FlxTrianglesData implements IFlxDestroyable
 
 	/**
 	 * Update and upload uv gl buffer to GPU.
+	 * Used internally by the renderer.
 	 */
-	public function updateUV():Void
+	function updateUV():Void
 	{
 		if (uvsArray == null)
 			return;
@@ -1190,8 +1192,9 @@ class FlxTrianglesData implements IFlxDestroyable
 
 	/**
 	 * Update and upload color gl buffer to GPU.
+	 * Used internally by the renderer.
 	 */
-	public function updateColors():Void
+	function updateColors():Void
 	{
 		if (colorsArray == null)
 			return;
@@ -1210,8 +1213,9 @@ class FlxTrianglesData implements IFlxDestroyable
 
 	/**
 	 * Update and upload index gl buffer to GPU.
+	 * Used internally by the renderer.
 	 */
-	public function updateIndices():Void
+	function updateIndices():Void
 	{
 		if (indicesArray == null || indices == null)
 			return;

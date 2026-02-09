@@ -111,7 +111,6 @@ class FlxGLRenderer extends FlxRenderer
         c.set(graphic, material, true, false);
         c.data = data;
         c.matrix = matrix;
-        c.color = transform;
         c.flush();
     }
 

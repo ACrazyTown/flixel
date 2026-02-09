@@ -4,65 +4,42 @@ import flixel.graphics.shaders.FlxShader;
 
 class FlxTexturedShader extends FlxShader
 {
-    @:glVertexSource('
-    // precision highp float;
-    attribute vec4 aPosition;
-    attribute vec2 aTexCoord;
-    attribute vec4 aColor;
-    attribute vec4 aColorOffset;
-    
-    uniform mat4 uMatrix;
-    uniform vec2 uTextureSize;
-    
-    varying vec2 vTexCoord;
-    varying vec4 vColor;
-    varying vec4 vColorOffset;
-    
-    void main(void)
-    {
+    @:glVertexHeader("
+        attribute vec2 aTexCoord;
+
+        uniform vec2 uTextureSize;
+
+        varying vec2 vTexCoord;
+    ", true)
+    @:glVertexBody("
         vTexCoord = aTexCoord;
-        // OpenFl uses textures in bgra format, so we should convert colors...
-        vColor = aColor.bgra;
-        vColorOffset = aColorOffset.bgra;
-        gl_Position = uMatrix * aPosition;
-    }
-    ')
+    ", true)
+    @:glFragmentHeader("
+        varying vec2 vTexCoord;
 
-    @:glFragmentSource('
-    // precision highp float;
-    varying vec2 vTexCoord;
-    varying vec4 vColor;
-    varying vec4 vColorOffset;
-    
-    uniform sampler2D uImage0;
-    
-    void main(void)
-    {
-        vec4 color = texture2D(uImage0, vTexCoord);
-        
-        if (color.a == 0.0)
+        uniform sampler2D uImage0;
+
+        vec4 flixel_texture2D(sampler2D sampler, vec2 coord)
         {
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-        }
-        else
-        {
-            color = vec4(color.rgb / color.a, color.a);
-            color = vColorOffset + (color * vColor);
+            vec4 color = texture2D(uImage0, vTexCoord);
+
+            if (color.a == 0.0)
+            {
+                return vec4(0.0, 0.0, 0.0, 0.0);
+            }
             
-            gl_FragColor = vec4(color.rgb * color.a, color.a);
-            // gl_FragColor = vec4(0.0, 1.0, 0.5, 1.0);
+            color *= vColor;
+            return vec4(color.rgb * color.a, color.a);
         }
-    }
-    ')
+    ", true)
+    @:glFragmentSource("
+        #pragma header
 
-    // @:glFragmentHeader("
-    //     varying vec2 vTexCoord;
-    //     varying vec4 vColor;
-    //     varying vec4 vColorOffset
-    // ")
-    // @:glFragmentBody("
-    //     vec4 color = texture2D(uImage0, vTexCoord);
-    // ")
+        void main()
+        {
+            gl_FragColor = flixel_texture2D(uImage0, vTexCoord);
+        }
+    ", true)
 
     public function new()
     {
