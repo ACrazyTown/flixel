@@ -22,6 +22,7 @@ import lime.utils.UInt32Array;
 import lime.graphics.RenderContext;
 #end
 
+// TODO ant: this doesn't work if the vectors are modified without the setter (see FlxBunnyMark for example)
 /**
  * Utility object class for holding information for drawing 2d meshes (vertex position, uv coordinates, vertex colors, index array).
  */

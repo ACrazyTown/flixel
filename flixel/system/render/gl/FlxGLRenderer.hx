@@ -97,12 +97,7 @@ class FlxGLRenderer extends FlxRenderer
 
     override function drawPixelsInternal(?frame:FlxFrame, ?pixels:BitmapData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform)
     {
-        // super.drawPixelsInternal(frame, pixels, material, matrix, transform);
-
-        var c = getQuads(material);
-        // c.matrix = matrix;
-
-        c.addQuad(frame, material, matrix, transform);
+        getQuads(material).addQuad(frame, material, matrix, transform);
     }
 
     override function drawTrianglesInternal(graphic:FlxGraphic, data:FlxTrianglesData, material:FlxMaterial, matrix:FlxMatrix, ?transform:ColorTransform) 

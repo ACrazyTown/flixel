@@ -57,7 +57,10 @@ class FlxStrip extends FlxSprite
 	public function new(x:Float = 0, y:Float = 0, ?graphic:FlxGraphicAsset)
 	{
 		super(x, y, graphic);
+
 		data = new FlxTrianglesData();
+
+		material.wrap = REPEAT(true, true);
 	}
 
 	override public function destroy():Void

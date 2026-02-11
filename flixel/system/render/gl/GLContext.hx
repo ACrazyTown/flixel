@@ -1,6 +1,6 @@
 package flixel.system.render.gl;
 
-import flixel.graphics.shaders.FlxShader;
+import flixel.graphics.shaders.FlxBaseShader;
 import flixel.FlxG;
 import lime.graphics.opengl.GLTexture;
 import flixel.graphics.FlxMaterial.FlxTextureWrap;
@@ -18,7 +18,7 @@ import lime.graphics.opengl.GL;
 class GLContext
 {
     var _currentBlendMode:BlendMode;
-    var _currentShader:FlxShader;
+    var _currentShader:FlxBaseShader;
 
     public function new() {}
 
@@ -33,7 +33,7 @@ class GLContext
         // GL.enable(GL.BLEND);
     }
 
-    public function setShader(shader:FlxShader):Void
+    public function setShader(shader:FlxBaseShader):Void
     {
         if (_currentShader == shader)
             return;
@@ -96,14 +96,23 @@ class GLContext
         FlxG.stage.__renderer.__blendMode = blend;
     }
 
-    public function setTexture(texture:BitmapData, smoothing:Bool, wrap:FlxTextureWrap)
+    // TODO ant: once FlxTexture is implemented, instead of messing with texture slots directly we might
+    // want to consider new methods useTexture and useTextureArray, that automatically set the slot and set it up
+    public function setTextureSlot(slot:Int = 0):Void
+    {
+        GL.activeTexture(GL.TEXTURE0 + slot);
+    }
+
+    public inline function setTexture(texture:BitmapData, smoothing:Bool, wrap:FlxTextureWrap)
+    {
+        setGLTexture(getGLTextureFromBitmap(texture), smoothing, wrap);
+    }
+
+    public function setGLTexture(texture:GLTexture, smoothing:Bool, wrap:FlxTextureWrap):Void
     {
         if (texture != null)
         {
-            GL.activeTexture(GL.TEXTURE0);
-
-            var glTexture = getGLTextureFromBitmap(texture);
-            GL.bindTexture(GL.TEXTURE_2D, glTexture);
+            GL.bindTexture(GL.TEXTURE_2D, texture);
 
             var minFilter:Int;
             var magFilter:Int;

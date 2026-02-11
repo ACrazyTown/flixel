@@ -5,6 +5,7 @@ import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
+import flixel.graphics.shaders.FlxBaseShader;
 import flixel.math.FlxMatrix;
 import openfl.geom.ColorTransform;
 import flixel.graphics.FlxMaterial;
@@ -15,7 +16,7 @@ class FlxDrawCommand implements IFlxDestroyable
     var type:FlxDrawCommandType;
 
 	var graphic:FlxGraphic;
-    var shader:FlxShader;
+    var shader:FlxBaseShader;
 	var material:FlxMaterial;
 	var colored:Bool;
 	var hasColorOffsets:Bool;

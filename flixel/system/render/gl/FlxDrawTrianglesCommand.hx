@@ -3,6 +3,7 @@ package flixel.system.render.gl;
 import flixel.graphics.FlxMaterial;
 import flixel.graphics.FlxTrianglesData;
 import flixel.graphics.shaders.FlxShader;
+import flixel.graphics.shaders.FlxBaseShader;
 import flixel.math.FlxMatrix;
 import lime.graphics.opengl.GL;
 import lime.math.Matrix4;
@@ -11,12 +12,9 @@ import lime.math.Matrix4;
 @:access(flixel.graphics.FlxTrianglesData)
 class FlxDrawTrianglesCommand extends FlxGLDrawCommand
 {
-	/**
-	 * Default tile shader.
-	 */
-	private static var defaultTexturedShader = new FlxTexturedShader(); //new FlxTexturedShader(); //new FlxTexturedShader();
+	public static var defaultTexturedShader:FlxBaseShader = new FlxTexturedShader();
 
-	private static var defaultColoredShader = new FlxShader(); //new FlxColoredShader();
+	public static var defaultColoredShader:FlxBaseShader = new FlxShader();
 
 	public var data:FlxTrianglesData;
 
@@ -49,9 +47,9 @@ class FlxDrawTrianglesCommand extends FlxGLDrawCommand
 	// 	super.prepare(context, buffer, transform);
 	// }
 
-    function setShader(material:FlxMaterial):FlxShader
+    function setShader(material:FlxMaterial):FlxBaseShader
     {
-        var shader = material.shader;
+        var shader:FlxBaseShader = material.shader;
 
         if (shader == null)
             shader = textured ? defaultTexturedShader : defaultColoredShader;
@@ -78,6 +76,7 @@ class FlxDrawTrianglesCommand extends FlxGLDrawCommand
 
 		if (textured)
 		{
+			context.setTextureSlot(0);
         	context.setTexture(graphic.bitmap, material.smoothing, material.getWrap());
 			GL.uniform1i(shader.data.uImage0.index, 0);
             GL.uniform2f(shader.data.uTextureSize.index, graphic.width, graphic.height);
@@ -110,37 +109,14 @@ class FlxDrawTrianglesCommand extends FlxGLDrawCommand
 		FlxRenderer.totalDrawCalls++;
 	}
 
-	override public function reset():Void
+	override function reset():Void
 	{
 		super.reset();
 		data = null;
 		_matrix4.identity();
 	}
 
-	// override private function setContext(context:GLContext):Void
-	// {
-	// 	super.setContext(context);
-
-	// 	if (data != null)
-	// 		data.setContext(cast context.GL());
-	// }
-
-	public function canAddTriangles(numTriangles:Int):Bool
-	{
-		return true;
-	}
-
-	// override private function get_numVertices():Int
-	// {
-	// 	return (data != null) ? data.vertexCount : 0;
-	// }
-
-	// override private function get_numTriangles():Int
-	// {
-	// 	return (data != null) ? data.numTriangles : 0;
-	// }
-
-	function set_matrix(value:FlxMatrix):FlxMatrix
+	@:noCompletion function set_matrix(value:FlxMatrix):FlxMatrix
 	{
 		if (value != null)
 		{
