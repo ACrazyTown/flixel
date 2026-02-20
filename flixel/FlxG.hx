@@ -70,8 +70,9 @@ class FlxG
 	public static var autoPause:Bool = true;
 	
 	/**
-	 * WARNING: Changing this can lead to issues with physics and the recording system. Setting this to
-	 * `false` might lead to smoother animations (even at lower fps) at the cost of physics accuracy.
+	 * WARNING: Changing this can lead to issues with physics and the recording system. Setting this to `false` might lead to smoother animations (even at lower fps) at the cost of physics accuracy.
+	 * 
+	 * UPDATE: The new mainloop inside lime should no longer require this and so rn it does nothing.
 	 */
 	public static var fixedTimestep:Bool = true;
 	
@@ -145,7 +146,6 @@ class FlxG
 	 * @since 4.2.0
 	 */
 	public static var onMobile(get, never):Bool;
-<<<<<<< HEAD
 
 	@:deprecated("renderMethod is deprecated, use FlxG.renderer.method, instead.")
 	public static var renderMethod(get, null):flixel.system.render.FlxRenderer.FlxRenderMethod;
@@ -175,14 +175,6 @@ class FlxG
 	 */
 	public static var renderer(default, null):FlxRenderer;
 
-=======
-	
-	public static var renderMethod(default, null):FlxRenderMethod;
-	
-	public static var renderBlit(default, null):Bool;
-	public static var renderTile(default, null):Bool;
-	
->>>>>>> 5ebf5032 (vuln patch p2)
 	/**
 	 * Represents the amount of time in seconds that passed since last frame.
 	 */
@@ -670,7 +662,6 @@ class FlxG
 		sound.destroy(true);
 		#end
 		autoPause = true;
-		fixedTimestep = true;
 		timeScale = 1.0;
 		animationTimeScale = 1.0;
 		elapsed = 0;
@@ -715,13 +706,6 @@ class FlxG
 			log.warn("FlxG.framerate: the game's framerate shouldn't be smaller than the flash framerate," + " since it can stop your game from updating.");
 			
 		updateFramerate = value;
-		
-		game._stepMS = Math.abs(1000 / value);
-		game._stepSeconds = game._stepMS / 1000;
-		
-		if (game._maxAccumulation < game._stepMS)
-			game._maxAccumulation = game._stepMS;
-			
 		return value;
 	}
 	
@@ -729,17 +713,12 @@ class FlxG
 	{
 		if (value > updateFramerate)
 			log.warn("FlxG.drawFramerate: the update framerate shouldn't be smaller than the draw framerate," + " since it can stop your game from updating.");
-			
-		drawFramerate = Std.int(Math.abs(value));
-		
+
+		drawFramerate = value;
+
 		if (game.stage != null)
 			game.stage.frameRate = drawFramerate;
-			
-		game._maxAccumulation = 2000 / drawFramerate - 1;
-		
-		if (game._maxAccumulation < game._stepMS)
-			game._maxAccumulation = game._stepMS;
-			
+
 		return value;
 	}
 	

@@ -100,43 +100,18 @@ class FlxGame extends Sprite
 	 */
 	var _state:FlxState;
 
+	#if flash
 	/**
 	 * Total number of milliseconds elapsed since game start.
 	 */
 	var _total:Float = 0;
+	#end
 
 	/**
 	 * Time stamp of game startup. Needed on JS where `Lib.getTimer()`
 	 * returns time stamp of current date, not the time passed since app start.
 	 */
 	var _startTime:Float = 0;
-
-	/**
-	 * Total number of milliseconds elapsed since last update loop.
-	 * Counts down as we step through the game loop.
-	 */
-	var _accumulator:Float;
-
-	/**
-	 * Milliseconds of time since last step.
-	 */
-	var _elapsedMS:Float;
-
-	/**
-	 * Milliseconds of time per step of the game loop. e.g. 60 fps = 16ms.
-	 */
-	var _stepMS:Float;
-
-	/**
-	 * Optimization so we don't have to divide step by 1000 to get its value in seconds every frame.
-	 */
-	var _stepSeconds:Float;
-
-	/**
-	 * Max allowable accumulation (see `_accumulator`).
-	 * Should always (and automatically) be set to roughly 2x the stage framerate.
-	 */
-	var _maxAccumulation:Float;
 
 	/**
 	 * Whether the game lost focus.
@@ -264,7 +239,6 @@ class FlxGame extends Sprite
 
 		FlxG.updateFramerate = updateFramerate;
 		FlxG.drawFramerate = drawFramerate;
-		_accumulator = _stepMS;
 		_skipSplash = skipSplash;
 
 		#if FLX_RECORD
@@ -296,7 +270,9 @@ class FlxGame extends Sprite
 		removeEventListener(Event.ADDED_TO_STAGE, create);
 
 		_startTime = getTimer();
+		#if flash
 		_total = getTicks();
+		#end
 
 		#if desktop
 		FlxG.fullscreen = _startFullscreen;
@@ -345,8 +321,14 @@ class FlxGame extends Sprite
 		if (FlxG.updateFramerate < FlxG.drawFramerate)
 			FlxG.log.warn("FlxG.updateFramerate: The update framerate shouldn't be smaller" + " than the draw framerate, since it can slow down your game.");
 
+		#if flash
 		// Finally, set up an event for the actual game loop stuff.
-		stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		stage.addEventListener(Event.ENTER_FRAME, (e) ->
+		{
+			ticks = getTicks();
+			__enterFrame(ticks - _total);
+			_total = ticks;
+		});
 		#if FLX_RENDER_OPENGL
 		stage.addEventListener(RenderEvent.RENDER_OPENGL, onRenderOpenGL);
 		#end
@@ -462,15 +444,16 @@ class FlxGame extends Sprite
 	/**
 	 * Handles the `onEnterFrame` call and figures out how many updates and draw calls to do.
 	 */
-	function onEnterFrame(_):Void
+	@SuppressWarnings("checkstyle:MethodName")
+	private #if !flash override #end function __enterFrame(deltaTime:Float):Void
 	{
+		#if !flash
 		ticks = getTicks();
-		_elapsedMS = ticks - _total;
-		_total = ticks;
+		#end
 
 		#if FLX_SOUND_TRAY
 		if (soundTray != null && soundTray.active)
-			soundTray.update(_elapsedMS);
+			soundTray.update(deltaTime);
 		#end
 
 		if (!_lostFocus || !FlxG.autoPause)
@@ -500,21 +483,7 @@ class FlxGame extends Sprite
 				}
 			}
 
-			if (FlxG.fixedTimestep)
-			{
-				_accumulator += _elapsedMS;
-				_accumulator = (_accumulator > _maxAccumulation) ? _maxAccumulation : _accumulator;
-
-				while (_accumulator >= _stepMS)
-				{
-					step();
-					_accumulator -= _stepMS;
-				}
-			}
-			else
-			{
-				step();
-			}
+			step(deltaTime);
 
 			#if FLX_DEBUG
 			FlxBasic.visibleCount = 0;
@@ -534,6 +503,8 @@ class FlxGame extends Sprite
 		#if FLX_RENDER_OPENGL
 		// Force a redraw every frame
 		invalidate();
+		#if !flash
+		super.__enterFrame(deltaTime);
 		#end
 	}
 
@@ -635,7 +606,7 @@ class FlxGame extends Sprite
 	 * the appropriate number of times each frame.
 	 * This block handles state changes, replays, all that good stuff.
 	 */
-	function step():Void
+	function step(deltaTime:Float):Void
 	{
 		// Handle game reset request
 		if (_resetGame)
@@ -651,7 +622,7 @@ class FlxGame extends Sprite
 		FlxBasic.activeCount = 0;
 		#end
 
-		update();
+		update(deltaTime);
 
 		#if FLX_DEBUG
 		debugger.stats.activeObjects(FlxBasic.activeCount);
@@ -692,7 +663,7 @@ class FlxGame extends Sprite
 	 * This function is called by `step()` and updates the actual game state.
 	 * May be called multiple times per "frame" or draw call.
 	 */
-	function update():Void
+	function update(deltaTime:Float):Void
 	{
 		if (!_state.active || !_state.exists)
 			return;
@@ -705,9 +676,9 @@ class FlxGame extends Sprite
 			ticks = getTicks();
 		#end
 
-		updateElapsed();
+		updateElapsed(deltaTime);
 
-		updateInput();
+		updateInput(deltaTime);
 		
 		FlxG.signals.preUpdate.dispatch();
 
@@ -738,23 +709,17 @@ class FlxGame extends Sprite
 		filters = filtersEnabled ? _filters : null;
 	}
 
-	function updateElapsed():Void
+	function updateElapsed(deltaTime:Float):Void
 	{
-		if (FlxG.fixedTimestep)
-		{
-			FlxG.elapsed = FlxG.timeScale * _stepSeconds; // fixed timestep
-		}
-		else
-		{
-			FlxG.elapsed = FlxG.timeScale * (_elapsedMS / 1000); // variable timestep
+		FlxG.elapsed = FlxG.timeScale * (deltaTime / 1000.0); // variable timestep
 
-			var max = FlxG.maxElapsed * FlxG.timeScale;
-			if (FlxG.elapsed > max)
-				FlxG.elapsed = max;
-		}
+		var max = FlxG.maxElapsed * FlxG.timeScale;
+
+		if (FlxG.elapsed > max)
+			FlxG.elapsed = max;
 	}
 
-	function updateInput():Void
+	function updateInput(deltaTime:Float):Void
 	{
 		#if FLX_RECORD
 		if (replaying)
@@ -763,7 +728,7 @@ class FlxGame extends Sprite
 
 			if (FlxG.vcr.timeout > 0)
 			{
-				FlxG.vcr.timeout -= _stepMS;
+				FlxG.vcr.timeout -= deltaTime;
 
 				if (FlxG.vcr.timeout <= 0)
 				{
@@ -791,7 +756,7 @@ class FlxGame extends Sprite
 			}
 
 			#if FLX_DEBUG
-			debugger.vcr.updateRuntime(_stepMS);
+			debugger.vcr.updateRuntime(deltaTime);
 			#end
 		}
 		else
@@ -808,7 +773,7 @@ class FlxGame extends Sprite
 			_replay.recordFrame();
 
 			#if FLX_DEBUG
-			debugger.vcr.updateRuntime(_stepMS);
+			debugger.vcr.updateRuntime(deltaTime);
 			#end
 		}
 		#end
