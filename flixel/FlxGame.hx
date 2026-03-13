@@ -359,6 +359,8 @@ class FlxGame extends Sprite
 		FlxG.signals.focusGained.dispatch();
 		_state.onFocus();
 
+		stage.frameRate = FlxG.drawFramerate;
+
 		if (!FlxG.autoPause)
 			return;
 
@@ -370,8 +372,6 @@ class FlxGame extends Sprite
 		#if FLX_DEBUG
 		debugger.stats.onFocus();
 		#end
-
-		stage.frameRate = FlxG.drawFramerate;
 		#if FLX_SOUND_SYSTEM
 		FlxG.sound.onFocus();
 		#end
@@ -389,6 +389,8 @@ class FlxGame extends Sprite
 		FlxG.signals.focusLost.dispatch();
 		_state.onFocusLost();
 
+		stage.frameRate = focusLostFramerate;
+
 		if (!FlxG.autoPause)
 			return;
 
@@ -400,8 +402,6 @@ class FlxGame extends Sprite
 		#if FLX_DEBUG
 		debugger.stats.onFocusLost();
 		#end
-
-		stage.frameRate = focusLostFramerate;
 		#if FLX_SOUND_SYSTEM
 		FlxG.sound.onFocusLost();
 		#end
