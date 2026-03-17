@@ -178,7 +178,7 @@ class FlxBar extends FlxSprite
 				_zeroOffset = new Point();
 				_emptyBarRect = new Rectangle();
 				makeGraphic(width, height, FlxColor.TRANSPARENT, true);
-			case DRAW_TILES | CUSTOM:
+			case DRAW_TILES, OPENGL | CUSTOM:
 				_filledFlxRect = FlxRect.get();
 		}
 
@@ -199,7 +199,7 @@ class FlxBar extends FlxSprite
 
 		switch FlxG.renderer.method
 		{
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				frontFrames = null;
 				_filledFlxRect = FlxDestroyUtil.put(_filledFlxRect);
 			case BLITTING:
@@ -353,7 +353,7 @@ class FlxBar extends FlxSprite
 	{
 		switch FlxG.renderer.method
 		{
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				var emptyKey:String = "empty: " + barWidth + "x" + barHeight + ":" + empty.toHexString();
 				if (showBorder)
 					emptyKey += ",border: " + border.toHexString() + "borderSize: " + borderSize;
@@ -407,7 +407,7 @@ class FlxBar extends FlxSprite
 	{
 		switch FlxG.renderer.method
 		{
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				var filledKey:String = "filled: " + barWidth + "x" + barHeight + ":" + fill.toHexString();
 				if (showBorder)
 					filledKey += ",border: " + border.toHexString() + "borderSize: " + borderSize;
@@ -485,7 +485,7 @@ class FlxBar extends FlxSprite
 	{
 		switch FlxG.renderer.method
 		{
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				var emptyKey:String = "Gradient:" + barWidth + "x" + barHeight + ",colors:[";
 				for (col in empty)
 				{
@@ -553,7 +553,7 @@ class FlxBar extends FlxSprite
 	{
 		switch FlxG.renderer.method
 		{
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				var filledKey:String = "Gradient:" + barWidth + "x" + barHeight + ",colors:[";
 				for (col in fill)
 				{
@@ -640,7 +640,7 @@ class FlxBar extends FlxSprite
 			
 			switch FlxG.renderer.method
 			{
-				case DRAW_TILES:
+				case DRAW_TILES, OPENGL:
 					frames = emptyGraphic.imageFrame;
 				case BLITTING:
 					_emptyBar = emptyGraphic.texture.getBitmap().clone();
@@ -682,7 +682,7 @@ class FlxBar extends FlxSprite
 			
 			switch FlxG.renderer.method
 			{
-				case DRAW_TILES:
+				case DRAW_TILES, OPENGL:
 					frontFrames = filledGraphic.imageFrame;
 				case BLITTING:
 					_filledBar = filledGraphic.texture.getBitmap().clone();
@@ -810,7 +810,7 @@ class FlxBar extends FlxSprite
 				case BLITTING:
 					pixels.copyPixels(_filledBar, _filledBarRect, _filledBarPoint, null, null, true);
 					dirty = true;
-				case DRAW_TILES:
+				case DRAW_TILES, OPENGL:
 					if (frontFrames != null)
 					{
 						_filledFlxRect.copyFromFlash(_filledBarRect).round();
@@ -1017,7 +1017,7 @@ class FlxBar extends FlxSprite
 	{
 		switch FlxG.renderer.method
 		{
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				frames = value;
 			case BLITTING:
 				createImageEmptyBar(value.frame.paint());

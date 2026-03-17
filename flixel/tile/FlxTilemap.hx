@@ -331,7 +331,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 				_debugTilePartial = FlxDestroyUtil.dispose(_debugTilePartial);
 				_debugTileSolid = FlxDestroyUtil.dispose(_debugTileSolid);
 				#end
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				_helperPoint = null;
 				_matrix = null;
 			case CUSTOM:

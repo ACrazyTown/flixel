@@ -2036,7 +2036,7 @@ class FlxSprite extends FlxObject
 	{
 		switch FlxG.renderer.method
 		{
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				if (value != useFramePixels)
 				{
 					useFramePixels = value;
