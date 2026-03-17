@@ -15,6 +15,9 @@ import openfl.filters.BitmapFilter;
 #if desktop
 import openfl.events.FocusEvent;
 #end
+#if FLX_RENDER_OPENGL
+import openfl.events.RenderEvent;
+#end
 #if FLX_DEBUG
 import flixel.system.debug.FlxDebugger;
 #end
@@ -344,6 +347,9 @@ class FlxGame extends Sprite
 
 		// Finally, set up an event for the actual game loop stuff.
 		stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		#if FLX_RENDER_OPENGL
+		stage.addEventListener(RenderEvent.RENDER_OPENGL, onRenderOpenGL);
+		#end
 
 		// We need to listen for resize event which means new context
 		// it means that we need to recreate BitmapDatas of dumped tilesheets
@@ -484,7 +490,10 @@ class FlxGame extends Sprite
 					// to game objects (e.g. moving things around).
 					if (debugger.interaction.isActive())
 					{
+						#if !FLX_RENDER_OPENGL
+						// TODO ant: properly seperate update and draw so we don't have to wrap this?
 						draw();
+						#end
 					}
 					#end
 					return;
@@ -511,14 +520,31 @@ class FlxGame extends Sprite
 			FlxBasic.visibleCount = 0;
 			#end
 
+			#if !FLX_RENDER_OPENGL
+			// TODO ant: properly seperate update and draw so we don't have to wrap this?
 			draw();
+			#end
 
 			#if FLX_DEBUG
 			debugger.stats.visibleObjects(FlxBasic.visibleCount);
 			debugger.update();
 			#end
 		}
+
+		#if FLX_RENDER_OPENGL
+		// Force a redraw every frame
+		invalidate();
+		#end
 	}
+
+	#if FLX_RENDER_OPENGL
+	function onRenderOpenGL(_):Void
+	{
+		// Draw the game when we're in a safe spot to mess with the OpenGL context
+		cast (FlxG.renderer, flixel.system.render.gl.FlxGLRenderer).context.invalidate();
+		draw();
+	}
+	#end
 
 	/**
 	 * Internal method to create a new instance of `_initialState` and reset the game.

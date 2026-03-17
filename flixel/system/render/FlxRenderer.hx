@@ -44,7 +44,11 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 		}
 		else
 		{
+			#if FLX_RENDER_OPENGL
+			return cast new flixel.system.render.gl.FlxGLRenderer();
+			#else
 			return cast new flixel.system.render.quad.FlxQuadRenderer();
+			#end
 		}
 	}
 	
@@ -68,7 +72,7 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	 * Convenience shortcut for `FlxG.renderer.method == DRAW_TILES`
 	 */
 	public var tile(get, never):Bool;
-	inline function get_tile() return method.match(DRAW_TILES);
+	inline function get_tile() return method.match(DRAW_TILES) || method.match(OPENGL); // TODO ant: temporary? opengl follows most stuff tile does
 	
 	/**
 	 * Returns whether the current renderer is hardware accelerated.
@@ -162,6 +166,13 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
  */
 enum FlxRenderMethod
 {
+	/**
+	 * Uses the OpenGL graphics API to achieve hardware accelerated rendering.
+	 * 
+	 * This method is supported by all targets, except for Flash.
+	 */
+	OPENGL;
+
 	/**
 	 * Uses the `drawQuads()` method from OpenFL's Graphics API to achieve hardware accelerated rendering.
 	 * 
