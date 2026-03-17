@@ -68,7 +68,7 @@ class FlxSubState extends FlxState
 			case BLITTING:
 				for (camera in getCamerasLegacy())
 					camera.view.fill(bgColor);
-			case DRAW_TILES:
+			case DRAW_TILES, OPENGL:
 				if (_bgSprite != null && _bgSprite.visible)
 				{
 					_bgSprite.cameras = getCameras();
