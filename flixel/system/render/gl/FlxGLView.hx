@@ -57,7 +57,10 @@ class FlxGLView extends FlxCameraView
     {
         // Submit all the collected sprites to the batcher
         for (data in _drawQueue)
+        {
             _renderer.quadBatcher.add(cast data);
+            data.put();
+        }
 
         // Force a flush to draw whatever was left in the buffer
         _renderer.quadBatcher.flush();
