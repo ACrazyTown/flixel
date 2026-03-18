@@ -117,6 +117,7 @@ class DrawCall implements IFlxDestroyable
     public static inline function get(count:Int, offset:Int, shader:Shader, blend:BlendMode, texture:FlxGraphic, textureRepeat:Bool, textureSmoothing:Bool):DrawCall
     {
         var dc = pool.get();
+        dc._inPool = false;
         dc.set(count, offset, shader, blend, texture, textureRepeat, textureSmoothing);
         return dc;
     }
@@ -131,6 +132,8 @@ class DrawCall implements IFlxDestroyable
 
     public var count:Int;
     public var offset:Int;
+
+    var _inPool:Bool = false;
 
     function new() {}
 
@@ -152,6 +155,10 @@ class DrawCall implements IFlxDestroyable
 
     public inline function put():Void
     {
-        pool.put(this);
+        if (!_inPool)
+        {
+            _inPool = true;
+            pool.putUnsafe(this);
+        }
     }
 }
