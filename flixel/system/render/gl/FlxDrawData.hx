@@ -32,6 +32,8 @@ class FlxDrawData implements IFlxPooled
     public var mc:Float;
     public var md:Float;
 
+    var _inPool:Bool = false;
+
     function new() {}
 
     public function destroy():Void {}
@@ -96,6 +98,8 @@ class FlxQuadDrawData extends FlxDrawData
 
         data.updateMatrix(matrix);
 
+        data._inPool = false;
+
         return data;
     }
 
@@ -108,6 +112,10 @@ class FlxQuadDrawData extends FlxDrawData
 
     override function put():Void
     {
-        pool.put(this);
+        if (!_inPool)
+        {
+            _inPool = true;
+            pool.putUnsafe(this);
+        }
     }
 }
