@@ -1,20 +1,19 @@
 package flixel.system.render.quad;
 
+// import flixel.graphics.FlxRenderTexture;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
-import flixel.graphics.FlxRenderTexture;
 import openfl.display.BitmapData;
 import flixel.FlxG;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.FlxTexture;
 import flixel.system.render.FlxRenderer;
+import lime.utils.UInt8Array;
 
 #if FLX_OPENGL_AVAILABLE
-import lime.utils.UInt8Array;
 import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
 import lime.graphics.opengl.GL;
-import flixel.system.render.gl.GLHelper;
 #end
 
 using flixel.util.FlxColorTransformUtil;
@@ -62,7 +61,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 
 	function destroyTextureBitmap(bitmap:FlxBitmap):Void 
 	{
-		#if FLX_RENDER_DRAWQUADS
+		#if (FLX_RENDER_DRAWQUADS && !flash)
 		// Since the bitmap is the same as the handle, we don't actually want to destroy it,
 		// just get rid of the image buffer
 		bitmap.disposeImage();
@@ -81,7 +80,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 
 	function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void 
 	{
-		#if FLX_OPENGL_AVAILABLE
+		#if (FLX_RENDER_DRAWQUADS && FLX_OPENGL_AVAILABLE)
 		final gl = FlxG.stage.window.context.webgl;
 
 		@:privateAccess
@@ -114,8 +113,8 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 	function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
 
 	// No-op, FlxRenderTexture is not supported with this renderer
-	function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle {return null;}
-	function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void {}
-	function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void {}
-	function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
+	// function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle {return null;}
+	// function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void {}
+	// function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void {}
+	// function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
 }

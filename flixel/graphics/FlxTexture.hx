@@ -240,7 +240,7 @@ class FlxTexture implements IFlxDestroyable
         {
             final pixels = readPixels();
 
-            #if FLX_RENDER_DRAWQUADS
+            #if (FLX_RENDER_DRAWQUADS && !flash)
             if (FlxG.renderer.tile)
             {
                 _bitmap = handle;

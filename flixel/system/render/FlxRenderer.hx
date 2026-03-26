@@ -1,8 +1,7 @@
 package flixel.system.render;
 
-import flixel.graphics.FlxRenderTexture;
+// import flixel.graphics.FlxRenderTexture;
 import flixel.math.FlxRect;
-import flixel.graphics.FlxRenderTexture.FlxRenderTargetHandle;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.FlxTexture;
 import flixel.graphics.FlxGraphic;
@@ -150,10 +149,10 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	abstract function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
 	abstract function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void;
 
-	abstract function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle;
-	abstract function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void;
-	abstract function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void;
-	abstract function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
+	// abstract function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle;
+	// abstract function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void;
+	// abstract function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void;
+	// abstract function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
 
 	// =============================================================================
 	//}endregion                           TEXTURES
