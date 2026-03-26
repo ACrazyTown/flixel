@@ -1,5 +1,9 @@
 package flixel.system.render.blit;
 
+import lime.utils.UInt8Array;
+import flixel.graphics.FlxRenderTexture;
+import flixel.graphics.FlxBitmap;
+import flixel.graphics.FlxTexture;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawTrianglesItem;
@@ -62,4 +66,19 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 	{
 		return new FlxBlitView(camera);
 	}
+
+	function createTextureHandle():FlxTextureHandle {return null;}
+	function destroyTextureHandle(handle:FlxTextureHandle):Void {}
+	function destroyTextureBitmap(bitmap:FlxBitmap):Void {}
+	function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle {return null;}
+	function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void {}
+	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void {}
+	function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void {}
+
+	function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+	function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+	function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
+
+	function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void {}
+	function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
 }

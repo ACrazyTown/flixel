@@ -1,5 +1,10 @@
 package flixel.system.render;
 
+import flixel.graphics.FlxRenderTexture;
+import flixel.math.FlxRect;
+import flixel.graphics.FlxRenderTexture.FlxRenderTargetHandle;
+import flixel.graphics.FlxBitmap;
+import flixel.graphics.FlxTexture;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
@@ -11,6 +16,7 @@ import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
+import lime.utils.UInt8Array;
 
 /**
  * `FlxRenderer` is a global, base class that handles rendering.
@@ -23,6 +29,8 @@ typedef FlxRenderer = FlxTypedRenderer<FlxCameraView>;
 /**
  * Typed Renderer, override this to handle specific backends that require specific cavera views
  */
+@:allow(flixel.graphics.FlxTexture)
+@:allow(flixel.graphics.FlxRenderTexture)
 abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 {
 	/**
@@ -121,6 +129,35 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	abstract public function endFrame():Void;
 	
 	abstract function createCameraView(camera:FlxCamera):TView;
+
+	// =============================================================================
+	//{region                             TEXTURES
+	// =============================================================================
+
+	// life cycle
+	abstract function createTextureHandle():FlxTextureHandle;
+	abstract function destroyTextureHandle(handle:FlxTextureHandle):Void;
+	abstract function destroyTextureBitmap(bitmap:FlxBitmap):Void;
+
+	// upload
+	abstract function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void;
+
+	// download
+	abstract function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void;
+
+	// properties
+	abstract function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void;
+	abstract function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
+	abstract function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void;
+
+	abstract function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle;
+	abstract function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void;
+	abstract function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void;
+	abstract function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
+
+	// =============================================================================
+	//}endregion                           TEXTURES
+	// =============================================================================
 }
 
 /**

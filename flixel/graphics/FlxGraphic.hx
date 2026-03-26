@@ -235,27 +235,28 @@ class FlxGraphic implements IFlxDestroyable
 	/**
 	 * Creates and caches the specified `BitmapData` object.
 	 *
-	 * @param   Bitmap   `BitmapData` to use as a graphic source for the new `FlxGraphic`.
-	 * @param   Key      Key to use as a cache key for the created `FlxGraphic`.
-	 * @param   Unique   Whether the new `FlxGraphic` object uses a unique `BitmapData` or not.
+	 * @param   bitmap   `BitmapData` to use as a graphic source for the new `FlxGraphic`.
+	 * @param   key      Key to use as a cache key for the created `FlxGraphic`.
+	 * @param   unique   Whether the new `FlxGraphic` object uses a unique `BitmapData` or not.
 	 *                   If `true`, the specified `BitmapData` will be cloned.
-	 * @param   Cache    Whether to use graphic caching or not. Default value is `true`, which means automatic caching.
+	 * @param   cache    Whether to use graphic caching or not. Default value is `true`, which means automatic caching.
 	 * @return  Created `FlxGraphic` object.
 	 */
-	static function createGraphic(Bitmap:BitmapData, Key:String, Unique:Bool = false, Cache:Bool = true):FlxGraphic
+	static function createGraphic(bitmap:BitmapData, key:String, unique:Bool = false, cache:Bool = true):FlxGraphic
 	{
-		Bitmap = FlxGraphic.getBitmap(Bitmap, Unique);
+		bitmap = FlxGraphic.getBitmap(bitmap, unique);
+		var texture = FlxTexture.fromBitmap(bitmap);
 		var graphic:FlxGraphic = null;
 
-		if (Cache)
+		if (cache)
 		{
-			graphic = new FlxGraphic(Key, Bitmap);
-			graphic.unique = Unique;
+			graphic = new FlxGraphic(key, texture);
+			graphic.unique = unique;
 			FlxG.bitmap.addGraphic(graphic);
 		}
 		else
 		{
-			graphic = new FlxGraphic(null, Bitmap);
+			graphic = new FlxGraphic(null, texture);
 		}
 
 		return graphic;
@@ -269,7 +270,13 @@ class FlxGraphic implements IFlxDestroyable
 	/**
 	 * The cached `BitmapData` object.
 	 */
-	public var bitmap(default, set):BitmapData;
+	@:deprecated("graphic.bitmap is deprecated, use graphic.texture.getBitmap() instead.")
+	public var bitmap(get, set):BitmapData;
+
+	/**
+	 * The cached `FlxTexture` object.
+	 */
+	public var texture(default, set):FlxTexture;
 
 	/**
 	 * Width of the cached `BitmapData`.
@@ -395,19 +402,19 @@ class FlxGraphic implements IFlxDestroyable
 	/**
 	 * `FlxGraphic` constructor
 	 *
-	 * @param   Key       Key string for this graphic object, with which you can get it from bitmap cache.
-	 * @param   Bitmap    `BitmapData` for this graphic object.
-	 * @param   Persist   Whether or not this graphic stay in the cache after resetting it.
+	 * @param   key       Key string for this graphic object, with which you can get it from bitmap cache.
+	 * @param   texture   `FlxTexture` for this graphic object.
+	 * @param   persist   Whether or not this graphic stay in the cache after resetting it.
 	 *                    Default value is `false`, which means that this graphic will be destroyed at the cache reset.
 	 */
-	function new(key:String, bitmap:BitmapData, ?persist:Bool)
+	function new(key:String, texture:FlxTexture, ?persist:Bool)
 	{
 		this.key = key;
 		this.persist = (persist != null) ? persist : defaultPersist;
 
 		frameCollections = new Map<FlxFrameCollectionType, Array<Dynamic>>();
 		frameCollectionTypes = new Array<FlxFrameCollectionType>();
-		this.bitmap = bitmap;
+		this.texture = texture;
 
 		shader = new FlxShader();
 	}
@@ -445,7 +452,7 @@ class FlxGraphic implements IFlxDestroyable
 	 */
 	public function destroy():Void
 	{
-		bitmap = FlxDestroyUtil.dispose(bitmap);
+		texture = FlxDestroyUtil.destroy(texture);
 
 		shader = null;
 
@@ -600,24 +607,28 @@ class FlxGraphic implements IFlxDestroyable
 		return FlxAtlasFrames.findFrame(this, null);
 	}
 
+	inline function get_bitmap():BitmapData
+	{
+		return texture.getBitmap();
+	}
+
 	function set_bitmap(value:BitmapData):BitmapData
 	{
 		if (value != null)
+			texture = FlxTexture.fromBitmap(value);
+
+		return value;
+	}
+
+	function set_texture(value:FlxTexture):FlxTexture 
+	{
+		if (value != null)
 		{
-			bitmap = value;
-			width = bitmap.width;
-			height = bitmap.height;
-
-			#if FLX_OPENGL_AVAILABLE
-			var max:Int = FlxG.renderer.maxTextureSize;
-			if (max > 0)
-			{
-				if (width > max || height > max)
-					FlxG.log.warn('Graphic dimensions (${width}x${height}) exceed the maximum allowed size (${max}x${max}), which may cause rendering issues.');
-			}
-			#end
+			texture = value;
+			width = value.width;
+			height = value.height;
 		}
-
+		
 		return value;
 	}
 }
