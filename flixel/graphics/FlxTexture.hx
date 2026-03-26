@@ -11,7 +11,7 @@ import lime.utils.UInt8Array;
  * Underlying representation of the texture.
  * The actual type is dependant on the renderer, and is determined at compile time.
  */
-typedef FlxTextureHandle = FlxBitmap;
+typedef FlxTextureHandle = #if FLX_RENDER_OPENGL lime.graphics.opengl.GLTexture #else FlxBitmap #end;
 
 /**
  * Represents a GPU texture used for rendering.

@@ -1,5 +1,6 @@
 package flixel.system.render.gl;
 
+#if FLX_RENDER_OPENGL
 import flixel.graphics.FlxGraphic;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.util.FlxPool;
@@ -85,7 +86,7 @@ abstract class FlxBatcher<T:FlxDrawData> implements IFlxDestroyable
 
         _renderer.context.setBlendMode(dc.blend);
 
-        _renderer.context.setTexture(dc.texture.bitmap, dc.textureRepeat, dc.textureSmoothing);
+        _renderer.context.bindTexture(dc.texture.texture);
         GL.activeTexture(GL.TEXTURE0);
         GL.uniform1i(shader.data.uImage0.index, 0);
         GL.uniform2f(shader.data.uTextureSize.index, dc.texture.width, dc.texture.height);
@@ -162,3 +163,4 @@ class DrawCall implements IFlxDestroyable
         }
     }
 }
+#end
