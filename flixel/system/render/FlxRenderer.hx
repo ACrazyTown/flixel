@@ -28,8 +28,7 @@ typedef FlxRenderer = FlxTypedRenderer<FlxCameraView>;
 /**
  * Typed Renderer, override this to handle specific backends that require specific cavera views
  */
-@:allow(flixel.graphics.FlxTexture)
-@:allow(flixel.graphics.FlxRenderTexture)
+@:allow(flixel.graphics)
 abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 {
 	/**
