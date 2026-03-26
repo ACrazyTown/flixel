@@ -1,8 +1,23 @@
 package flixel.system.render.gl;
 
+#if FLX_RENDER_OPENGL
+import lime.graphics.opengl.GLTexture;
 import flixel.system.render.FlxRenderer.FlxTypedRenderer;
 import lime.math.Matrix4;
+import flixel.graphics.FlxBitmap;
+import flixel.graphics.FlxTexture;
+import flixel.graphics.FlxRenderTexture;
+import flixel.util.FlxColor;
+import flixel.math.FlxRect;
+#if FLX_OPENGL_AVAILABLE
+import lime.utils.UInt8Array;
+import lime.graphics.Image;
+import lime.graphics.ImageBuffer;
+import lime.graphics.opengl.GL;
+#end
 
+@:access(flixel.system.render.gl)
+@:access(flixel.graphics)
 class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 {
     /**
@@ -92,4 +107,135 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         _projectionWidth = width;
         _projectionHeight = height;
     }
+
+    function createTextureHandle():FlxTextureHandle
+    {
+        #if FLX_RENDER_OPENGL
+        // return GL.createTexture();
+        final handle = GL.createTexture();
+        GL.bindTexture(GL.TEXTURE_2D, handle);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+        return handle;
+        #else
+        return null;
+        #end
+    }
+
+	function destroyTextureHandle(handle:FlxTextureHandle):Void
+    {
+        #if FLX_RENDER_OPENGL
+        GL.deleteTexture(handle);
+        #end
+    }
+
+    function destroyTextureBitmap(bitmap:FlxBitmap):Void
+    {
+        bitmap.destroy();
+    }
+
+	function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle
+    {
+        #if FLX_RENDER_OPENGL
+        return new FlxGLRenderTarget(texture, depth, stencil);
+        #else
+        return null;
+        #end
+    }
+
+	function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void
+    {
+        #if FLX_RENDER_OPENGL
+        handle.destroy();
+        #end
+    }
+
+	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void
+    {
+        #if FLX_RENDER_OPENGL
+        var dataFormat:Int = GL.RGBA;
+        #if sys
+        if (bitmap.image.format == BGRA32)
+        {
+            // On sys targets OpenFL stores bitmaps as BGRA...
+            var bgraExt = GL.getExtension("EXT_bgra");
+            if (bgraExt != null)
+                dataFormat = bgraExt.BGRA_EXT;
+        }
+        #end
+
+        if (!texture._allocated)
+            context.allocTextureData(texture, bitmap.data, dataFormat, GL.RGBA);
+        else
+            context.uploadTextureData(texture, bitmap.data, GL.RGBA);
+        #end
+    }
+
+	function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void
+    {
+        context.bindTexture(texture);
+
+        // Create dummy framebuffer we'll read from
+        var fb = GL.createFramebuffer();
+        GL.bindFramebuffer(GL.FRAMEBUFFER, fb);
+
+        // Attach texture to framebuffer and read the pixels from it into the buffer
+        GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, texture.handle, 0);
+        final x = rect != null ? Std.int(rect.x) : 0;
+        final y = rect != null ? Std.int(rect.y) : 0;
+        final w = rect != null ? Std.int(rect.width) : 0;
+        final h = rect != null ? Std.int(rect.height) : 0;
+        GLHelper.readPixels(x, y, w, h, GL.RGBA, GL.UNSIGNED_BYTE, buffer);
+
+        // Delete the framebuffer
+        GL.bindFramebuffer(GL.FRAMEBUFFER, null);
+        GL.deleteFramebuffer(fb);
+    }
+
+    inline function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void
+    {
+        context.bindTexture(texture);
+        context.setTextureWrapU(wrap);
+    }
+
+	inline function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void
+    {
+        context.bindTexture(texture);
+        context.setTextureWrapV(wrap);
+    }
+
+	// inline function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void
+    // {
+    //     context.bindTexture(texture);
+    //     context.setTextureFilter(filter);
+    // }
+
+    function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void
+    {
+        var glTexture = texture.handle;
+        GL.bindTexture(GL.TEXTURE_2D, glTexture);
+
+        // Reallocate texture with new size
+        GLHelper.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width, height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null);
+
+        // It's not safe to reuse render buffers so we have to recreate them
+        texture.renderTarget.initRenderBuffers();
+    }
+
+	function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void
+    {
+        GL.bindFramebuffer(GL.FRAMEBUFFER, texture.renderTarget.frameBuffer);
+
+        var mask:Int = GL.COLOR_BUFFER_BIT;
+        if (depth)
+            mask |= GL.DEPTH_BUFFER_BIT;
+        if (stencil)
+            mask |= GL.STENCIL_BUFFER_BIT;
+
+        GL.clearColor(color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat);
+        GL.clear(mask);
+    }
 }
+#end

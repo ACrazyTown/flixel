@@ -1,5 +1,6 @@
 package flixel.system.render.gl;
 
+#if FLX_RENDER_OPENGL
 import flixel.system.render.gl.FlxBatcher;
 import flixel.system.render.gl.FlxDrawData;
 import flixel.util.FlxColor;
@@ -324,3 +325,4 @@ class FlxQuadBatcher extends FlxBatcher<FlxQuadDrawData>
         return shader == null ? FlxGLRenderer.defaultShader : shader;
     }
 }
+#end
