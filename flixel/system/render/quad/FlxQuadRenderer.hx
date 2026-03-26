@@ -95,8 +95,8 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glTexture, 0);
         final x = rect != null ? Std.int(rect.x) : 0;
         final y = rect != null ? Std.int(rect.y) : 0;
-        final w = rect != null ? Std.int(rect.width) : 0;
-        final h = rect != null ? Std.int(rect.height) : 0;
+        final w = rect != null ? Std.int(rect.width) : texture.width;
+        final h = rect != null ? Std.int(rect.height) : texture.height;
         gl.readPixels(x, y, w, h, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
 
         // Delete the framebuffer
