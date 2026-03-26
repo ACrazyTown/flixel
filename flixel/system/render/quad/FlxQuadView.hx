@@ -206,7 +206,8 @@ class FlxQuadView extends FlxCameraView
 	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader)
 	{
 		// super.drawFrame(frame, matrix, transform, blend, smoothing, shader);
-		
+		frame.parent.texture.applyIfNeeded();
+
 		var isColored = (transform != null #if !html5 && transform.hasRGBMultipliers() #end);
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 		
@@ -223,7 +224,8 @@ class FlxQuadView extends FlxCameraView
 	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
 	{
 		// super.copyFrame(frame, destPoint, transform, blend, smoothing, shader);
-		
+		frame.parent.texture.applyIfNeeded();
+
 		_helperMatrix.identity();
 		_helperMatrix.translate(destPoint.x + frame.offset.x, destPoint.y + frame.offset.y);
 		
@@ -242,7 +244,8 @@ class FlxQuadView extends FlxCameraView
 			?position:FlxPoint, ?blend:BlendMode, repeat = false, smoothing = false, ?transform:ColorTransform, ?shader:FlxShader)
 	{
 		// super.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, shader);
-		
+		graphic.texture.applyIfNeeded();
+
 		final cameraBounds = FlxRect.weak(camera.viewMarginLeft, camera.viewMarginTop, camera.viewWidth, camera.viewHeight);
 		
 		final isColored = (colors != null && colors.length != 0) || (transform != null && transform.hasRGBMultipliers());
