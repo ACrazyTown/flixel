@@ -1,5 +1,6 @@
 package flixel;
 
+import flixel.graphics.FlxTexture;
 import flixel.FlxBasic.IFlxBasic;
 import flixel.animation.FlxAnimationController;
 import flixel.graphics.FlxGraphic;
@@ -132,7 +133,18 @@ class FlxSprite extends FlxObject
 	 * defaults to `false`.
 	 * @since 5.0.0
 	 */
-	public static var defaultAntialiasing:Bool = false;
+	@:deprecated("FlxSprite.defaultAntialiasing is deprecated, use FlxTexture.defaultFilter instead")
+	public static var defaultAntialiasing(get, set):Bool;
+	static inline function get_defaultAntialiasing():Bool
+	{
+		return FlxTexture.defaultFilter == LINEAR;
+	}
+	
+	static inline function set_defaultAntialiasing(value:Bool):Bool
+	{
+		FlxTexture.defaultFilter = value ? LINEAR : NEAREST;
+		return value;
+	}
 	
 	/**
 	 * Class that handles adding and playing animations on this sprite.
@@ -157,7 +169,9 @@ class FlxSprite extends FlxObject
 	/**
 	 * Controls whether the object is smoothed when rotated, affects performance.
 	 */
-	public var antialiasing(default, set):Bool = defaultAntialiasing;
+	@:isVar
+	@:deprecated("antialiasing is deprecated, change the texture's filter instead")
+	public var antialiasing(get, set):Bool;
 
 	/**
 	 * Set this flag to true to force the sprite to update during the `draw()` call.
@@ -2025,8 +2039,18 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
+	function get_antialiasing():Bool
+	{
+		if (graphic != null)
+			return graphic.texture.filter == LINEAR;
+		return false;
+	}
+
+	@:noCompletion
 	function set_antialiasing(value:Bool):Bool
 	{
+		if (graphic != null)
+			graphic.texture.filter = value ? LINEAR : NEAREST;
 		return antialiasing = value;
 	}
 
