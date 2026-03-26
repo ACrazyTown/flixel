@@ -183,7 +183,9 @@ class FlxTexture implements IFlxDestroyable
             readable = defaultReadable;
 
         FlxG.renderer.uploadTextureBitmap(this, bitmap);
+        #if !flash
         _version = bitmap.image.version;
+        #end
 
         if (!_allocated)
             _allocated = true;
@@ -253,7 +255,9 @@ class FlxTexture implements IFlxDestroyable
             #end
             {
                 _bitmap = FlxBitmap.fromBytes(pixels.toBytes());
+                #if !flash
                 _bitmap.image.version = _version;
+                #end
             }
         }
 
@@ -309,8 +313,10 @@ class FlxTexture implements IFlxDestroyable
             status = INVALID;
         else if (_bitmap == null)
             status = HARDWARE;
+        #if !flash
         else if (_bitmap.image != null && _bitmap.image.version > _version)
             status = READABLE(false);
+        #end
         else
             status = READABLE(true);
 
