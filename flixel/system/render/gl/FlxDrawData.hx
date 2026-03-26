@@ -1,5 +1,6 @@
 package flixel.system.render.gl;
 
+#if FLX_RENDER_OPENGL
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
@@ -119,3 +120,4 @@ class FlxQuadDrawData extends FlxDrawData
         }
     }
 }
+#end

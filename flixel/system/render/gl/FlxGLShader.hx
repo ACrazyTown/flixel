@@ -1,5 +1,7 @@
 package flixel.system.render.gl;
 
+#if FLX_RENDER_OPENGL
+
 import openfl.display.Shader;
 
 // TODO ant: add temporary compatibility for pre-GL shaders, and then remove it in 7.0.0
@@ -22,7 +24,6 @@ class FlxGLShader extends Shader
         varying vec2 vTexCoord;
 	", true)
 	@:glVertexBody("
-		// vColorMultiplier = vec4(aColorMultiplier.bgr * aColorMultiplier.a, aColorMultiplier.a);
 		vColorMultiplier = aColorMultiplier;
 		vColorOffset = aColorOffset;
 
@@ -84,3 +85,4 @@ class FlxGLShader extends Shader
 		super();
 	}
 }
+#end
