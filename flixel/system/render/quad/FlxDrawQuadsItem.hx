@@ -120,8 +120,9 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 			throw 'Attempted to render an invalid FlxDrawItem, did you destroy a cached sprite?';
 		
 		final shader = shader != null ? shader : graphics.shader;
-		shader.bitmap.input = graphics.bitmap;
+		shader.bitmap.input = graphics.texture.handle;
 		shader.bitmap.filter = (camera.view.antialiasing || antialiasing) ? LINEAR : NEAREST;
+		shader.bitmap.wrap = resolveWrap(graphics.texture);
 		shader.alpha.value = alphas;
 
 		if (colored || hasColorOffsets)
