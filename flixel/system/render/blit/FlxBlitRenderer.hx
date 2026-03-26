@@ -1,7 +1,8 @@
 package flixel.system.render.blit;
 
+
+// import flixel.graphics.FlxRenderTexture;
 import lime.utils.UInt8Array;
-import flixel.graphics.FlxRenderTexture;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.FlxTexture;
 import flixel.graphics.FlxGraphic;
@@ -86,8 +87,7 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 	function createTextureHandle():FlxTextureHandle {return null;}
 	function destroyTextureHandle(handle:FlxTextureHandle):Void {}
 	function destroyTextureBitmap(bitmap:FlxBitmap):Void {}
-	function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle {return null;}
-	function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void {}
+
 	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void {}
 	function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void {}
 
@@ -95,6 +95,8 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 	function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
 
-	function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void {}
-	function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
+	// function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle {return null;}
+	// function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void {}
+	// function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void {}
+	// function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
 }
