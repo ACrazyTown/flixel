@@ -1,5 +1,7 @@
 package flixel.system.render;
 
+import flixel.graphics.FlxRenderTexture;
+import flixel.math.FlxRect;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
@@ -105,6 +107,13 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	 */
 	public var textures(default, null):IFlxTextureSystem;
 
+	/**
+	 * Backend render target management.
+	 * 
+	 * Must be set by extending implementations.
+	 */
+	public var renderTargets(default, null):IFlxRenderTargetSystem;
+
 	function new() {}
 
 	/**
@@ -155,6 +164,14 @@ interface IFlxTextureSystem
 	// properties
 	function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void;
 	function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
+}
+
+interface IFlxRenderTargetSystem
+{
+	function createHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle;
+	function destroyHandle(handle:FlxRenderTargetHandle):Void;
+	function resize(texture:FlxRenderTexture, width:Int, height:Int):Void;
+	function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
 }
 
 /**

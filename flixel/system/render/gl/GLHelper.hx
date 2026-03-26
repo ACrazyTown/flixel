@@ -1,5 +1,6 @@
 package flixel.system.render.gl;
 
+#if FLX_RENDER_OPENGL
 import lime.graphics.WebGL2RenderContext;
 import lime.graphics.opengl.GLUniformLocation;
 import lime.graphics.opengl.GL;
@@ -11,6 +12,17 @@ import lime.graphics.opengl.GL;
  */
 class GLHelper
 {
+    public static inline function readPixels(x:Int, y:Int, width:Int, height:Int, format:Int, type:Int, pixels:Dynamic, ?dstOffset:Int):Void
+	{
+		cast (GL.context, WebGL2RenderContext).readPixels(x, y, width, height, format, type, pixels, dstOffset);
+	}
+
+    public static inline function texSubImage2D(target:Int, level:Int, xoffset:Int, yoffset:Int, width:Int, height:Int, format:Dynamic, ?type:Int,
+		?srcData:Dynamic, ?srcOffset:Int):Void
+	{
+		cast (GL.context, WebGL2RenderContext).texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, srcData, srcOffset);
+	}
+
     public static inline function texImage2D(target:Int, level:Int, internalformat:Int, width:Int, height:Int, border:Dynamic, ?format:Int, ?type:Int,
 		?srcData:Dynamic, ?srcOffset:Int):Void
     {
@@ -32,3 +44,4 @@ class GLHelper
         cast (GL.context, WebGL2RenderContext).uniformMatrix4fv(location, transpose, data, srcOffset, srcLength);
     }
 }
+#end

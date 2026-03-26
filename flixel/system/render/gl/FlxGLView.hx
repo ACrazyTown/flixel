@@ -1,5 +1,8 @@
 package flixel.system.render.gl;
 
+#if FLX_RENDER_OPENGL
+import lime.graphics.opengl.GL;
+import flixel.graphics.FlxRenderTexture;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
@@ -86,6 +89,7 @@ class FlxGLView extends FlxCameraView
 	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader)
 	{
 		// super.drawFrame(frame, matrix, transform, blend, smoothing, shader);
+        frame.parent.texture.applyIfNeeded();
 
         // Queue a quad to be drawn when the camera renders
         var quad = FlxQuadDrawData.get(frame, smoothing, false, shader, blend, transform, matrix);
@@ -97,6 +101,7 @@ class FlxGLView extends FlxCameraView
 	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
 	{
 		// super.copyFrame(frame, destPoint, transform, blend, smoothing, shader);
+        frame.parent.texture.applyIfNeeded();
 
         // Queue a quad to be drawn when the camera renders
         var quad = FlxQuadDrawData.get(frame, smoothing, false, shader, blend, transform, null);
@@ -176,3 +181,4 @@ class FlxGLView extends FlxCameraView
 	//} endregion                          GETTERS
 	// =============================================================================
 }
+#end
