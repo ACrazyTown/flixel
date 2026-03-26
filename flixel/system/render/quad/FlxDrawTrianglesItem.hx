@@ -59,7 +59,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		
 		#if !flash
 		var shader = shader != null ? shader : graphics.shader;
-		shader.bitmap.input = graphics.bitmap;
+		shader.bitmap.input = graphics.texture.handle;
 		shader.bitmap.filter = (camera.view.antialiasing || antialiasing) ? LINEAR : NEAREST;
 		shader.bitmap.wrap = REPEAT; // in order to prevent breaking tiling behaviour in classes that use drawTriangles
 		shader.alpha.value = alphas;
