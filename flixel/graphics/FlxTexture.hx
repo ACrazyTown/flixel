@@ -13,7 +13,7 @@ import lime.graphics.ImageBuffer;
  * Underlying representation of the texture.
  * The actual type is dependant on the renderer, and is determined at compile time.
  */
-typedef FlxTextureHandle = #if FLX_RENDER_OPENGL lime.graphics.opengl.GLTexture #else FlxBitmap #end;
+typedef FlxTextureHandle = FlxBitmap;
 
 /**
  * Represents a GPU texture used for rendering.
@@ -33,7 +33,7 @@ class FlxTexture implements IFlxDestroyable
      * The default value of the `readable` parameter in the upload methods.
      * Defaults to `true` for backwards compatibility.
      */
-    public static var defaultReadable:Bool = false;
+    public static var defaultReadable:Bool = true;
 
     /**
      * The initial value of `texture.filter`, for all textures.
