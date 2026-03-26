@@ -5,18 +5,6 @@ import lime.utils.UInt8Array;
 import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 
-
-// Forwards everything except for
-// - dispose()
-// - disposeImage()
-// - rect
-// - transparent
-// - image
-// - readable
-// @:forward(width, height, setPixel, setPixel32, getPixel, getPixel32, fillRect, draw, applyFilter, colorTransform, compare, copyChannel, copyPixels, drawWithQuality, encode,
-// 	floodFill, generateFilterRect, getColorBoundsRect, getPixels, getVector, histogram, hitTest, lock, merge, noise, paletteMap, perlinNoise, scroll,
-// 	setPixels, setVector, unlock)
-
 /**
  * A FlxBitmap provides methods to read and manipulate the pixel data of the image.
  * Currently an abstract over `BitmapData`; in the next major version it will be changed to a seperate class.
