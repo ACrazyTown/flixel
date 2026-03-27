@@ -13,7 +13,7 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDirection;
 import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxStringUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 using StringTools;
 using flixel.tile.FlxBaseTilemap.AmbiIntIterator;

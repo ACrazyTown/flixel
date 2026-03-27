@@ -21,7 +21,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxSpriteUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.display.Graphics;
 import openfl.geom.ColorTransform;
@@ -32,7 +32,7 @@ using flixel.util.FlxColorTransformUtil;
 
 #if html5
 /**
- * BitmapData loaded via @:bitmap is loaded asynchronously, this allows us to apply frame
+ * FlxBitmap loaded via @:bitmap is loaded asynchronously, this allows us to apply frame
  * padding to the bitmap once it's loaded rather
  */
 private interface IEmbeddedBitmapData
@@ -41,7 +41,7 @@ private interface IEmbeddedBitmapData
 }
 
 @:keep @:bitmap("assets/images/tile/autotiles.png")
-private class RawGraphicAuto extends BitmapData {}
+private class RawGraphicAuto extends openfl.display.BitmapData {}
 class GraphicAuto extends RawGraphicAuto implements IEmbeddedBitmapData
 {
 	static inline var WIDTH = 128;
@@ -58,7 +58,7 @@ class GraphicAuto extends RawGraphicAuto implements IEmbeddedBitmapData
 }
 
 @:keep @:bitmap("assets/images/tile/autotiles_alt.png")
-private class RawGraphicAutoAlt extends BitmapData {}
+private class RawGraphicAutoAlt extends openfl.display.BitmapData {}
 class GraphicAutoAlt extends RawGraphicAutoAlt implements IEmbeddedBitmapData
 {
 	static inline var WIDTH = 128;
@@ -75,7 +75,7 @@ class GraphicAutoAlt extends RawGraphicAutoAlt implements IEmbeddedBitmapData
 }
 
 @:keep @:bitmap("assets/images/tile/autotiles_full.png")
-private class RawGraphicAutoFull extends BitmapData {}
+private class RawGraphicAutoFull extends openfl.display.BitmapData {}
 class GraphicAutoFull extends RawGraphicAutoFull implements IEmbeddedBitmapData
 {
 	static inline var WIDTH = 256;
@@ -92,13 +92,13 @@ class GraphicAutoFull extends RawGraphicAutoFull implements IEmbeddedBitmapData
 }
 #else
 @:keep @:bitmap("assets/images/tile/autotiles.png")
-class GraphicAuto extends BitmapData {}
+class GraphicAuto extends openfl.display.BitmapData {}
 
 @:keep @:bitmap("assets/images/tile/autotiles_alt.png")
-class GraphicAutoAlt extends BitmapData {}
+class GraphicAutoAlt extends openfl.display.BitmapData {}
 
 @:keep @:bitmap("assets/images/tile/autotiles_full.png")
-class GraphicAutoFull extends BitmapData {}
+class GraphicAutoFull extends openfl.display.BitmapData {}
 #end
 
 /**
@@ -262,9 +262,9 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	var _buffers:Array<FlxTilemapBuffer> = [];
 
 	#if FLX_DEBUG
-	var _debugTileNotSolid:BitmapData;
-	var _debugTilePartial:BitmapData;
-	var _debugTileSolid:BitmapData;
+	var _debugTileNotSolid:FlxBitmap;
+	var _debugTilePartial:FlxBitmap;
+	var _debugTileSolid:FlxBitmap;
 	var _debugRect:Rectangle;
 	#end
 
@@ -498,7 +498,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		_debugTilePartial = updateDebugTile(_debugTilePartial, debugBoundingBoxColorPartial);
 	}
 
-	function updateDebugTile(tileBitmap:BitmapData, color:FlxColor):BitmapData
+	function updateDebugTile(tileBitmap:FlxBitmap, color:FlxColor):FlxBitmap
 	{
 		if (!FlxG.renderer.blit)
 			return null;
@@ -1069,7 +1069,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 		var frame:FlxFrame;
 
 		#if FLX_DEBUG
-		var debugTile:BitmapData;
+		var debugTile:FlxBitmap;
 		#end
 
 		for (row in 0...screenRows)
@@ -1162,17 +1162,17 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	 * Just generates a wireframe box the size of a tile with the specified color.
 	 */
 	#if FLX_DEBUG
-	function makeDebugTile(color:FlxColor):BitmapData
+	function makeDebugTile(color:FlxColor):FlxBitmap
 	{
 		if (FlxG.renderer.tile)
 			return null;
 
-		var debugTile = new BitmapData(tileWidth, tileHeight, true, 0);
+		var debugTile = new FlxBitmap(tileWidth, tileHeight, 0);
 		drawDebugTile(debugTile, color);
 		return debugTile;
 	}
 
-	function drawDebugTile(debugTile:BitmapData, color:FlxColor):Void
+	function drawDebugTile(debugTile:FlxBitmap, color:FlxColor):Void
 	{
 		if (color == FlxColor.TRANSPARENT)
 		{

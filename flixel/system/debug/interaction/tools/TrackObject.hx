@@ -4,7 +4,7 @@ import flixel.FlxG;
 import flixel.math.FlxRect;
 import flixel.system.debug.interaction.Interaction;
 import openfl.display.Graphics;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 using flixel.util.FlxArrayUtil;
 

@@ -1,6 +1,6 @@
 package flixel.system.debug.interaction.tools;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Graphics;
 import openfl.display.LineScaleMode;
 import openfl.display.CapsStyle;

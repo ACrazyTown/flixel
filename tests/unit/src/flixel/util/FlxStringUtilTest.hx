@@ -2,7 +2,7 @@ package flixel.util;
 
 import flixel.system.debug.FlxDebugger.FlxDebuggerLayout;
 import massive.munit.Assert;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 class FlxStringUtilTest
 {
@@ -15,7 +15,7 @@ class FlxStringUtilTest
 	@Test
 	function testBitmapToCSVSimple()
 	{
-		var bitmapData = new BitmapData(3, 3);
+		var bitmapData = new FlxBitmap(3, 3);
 		bitmapData.setPixel32(0, 0, FlxColor.BLACK);
 		bitmapData.setPixel32(1, 1, FlxColor.BLACK);
 		bitmapData.setPixel32(2, 2, FlxColor.BLACK);
@@ -29,7 +29,7 @@ class FlxStringUtilTest
 	@Test
 	function testBitmapToCSVInverted()
 	{
-		var bitmapData = new BitmapData(3, 3, true, FlxColor.BLACK);
+		var bitmapData = new FlxBitmap(3, 3, FlxColor.BLACK);
 		bitmapData.setPixel32(0, 0, FlxColor.WHITE);
 		bitmapData.setPixel32(1, 1, FlxColor.WHITE);
 		bitmapData.setPixel32(2, 2, FlxColor.WHITE);
@@ -43,7 +43,7 @@ class FlxStringUtilTest
 	@Test
 	function testBitmapToCSVWithScale()
 	{
-		var bitmapData = new BitmapData(2, 2);
+		var bitmapData = new FlxBitmap(2, 2);
 		bitmapData.setPixel32(0, 0, FlxColor.BLACK);
 		bitmapData.setPixel32(1, 1, FlxColor.BLACK);
 
@@ -56,7 +56,7 @@ class FlxStringUtilTest
 	@Test
 	function testBitmapToCSVWithColorMap()
 	{
-		var bitmapData = new BitmapData(3, 3);
+		var bitmapData = new FlxBitmap(3, 3);
 		bitmapData.setPixel32(0, 0, FlxColor.BLACK);
 		bitmapData.setPixel32(1, 1, FlxColor.RED);
 		bitmapData.setPixel32(2, 1, 0x80ff0000); // ignore alpha
@@ -73,7 +73,7 @@ class FlxStringUtilTest
 	@Test
 	function testBitmap32ToCSV()
 	{
-		final bitmapData = new BitmapData(3, 3);
+		final bitmapData = new FlxBitmap(3, 3);
 		bitmapData.setPixel32(0, 0, FlxColor.BLACK);
 		bitmapData.setPixel32(1, 1, FlxColor.RED);
 		bitmapData.setPixel32(2, 1, 0x80ff0000); // honor alpha
@@ -90,7 +90,7 @@ class FlxStringUtilTest
 	@:haxe.warning("-WDeprecated")
 	function testBitmapToCSVOverloads()
 	{
-		final bitmapData = new BitmapData(3, 3);
+		final bitmapData = new FlxBitmap(3, 3);
 		final colorMap = [FlxColor.WHITE, FlxColor.BLACK, FlxColor.RED, FlxColor.YELLOW];
 		FlxStringUtil.bitmapToCSV(bitmapData, false, 1, colorMap); // deprecated
 		FlxStringUtil.bitmapToCSV(bitmapData, false, 1);
@@ -109,7 +109,7 @@ class FlxStringUtilTest
 	{
 		final bitManips = [0x00000000, 0x01000000, 0x00010000, 0x00000100, 0x00000001];
 		final columns = bitManips.length;
-		final bitmapData = new BitmapData(columns, 2);
+		final bitmapData = new FlxBitmap(columns, 2);
 		for (i in 0...columns * bitmapData.height)
 		{
 			final column = i % columns;

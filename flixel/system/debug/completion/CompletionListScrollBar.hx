@@ -2,7 +2,7 @@ package flixel.system.debug.completion;
 
 import flixel.math.FlxMath;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 
 class CompletionListScrollBar extends Sprite
@@ -19,8 +19,8 @@ class CompletionListScrollBar extends Sprite
 		this.x = x;
 		this.y = y;
 
-		addChild(new Bitmap(new BitmapData(width, height, true, BG_COLOR)));
-		handle = new Bitmap(new BitmapData(width, 1, true, HANDLE_COLOR));
+		addChild(new Bitmap(new FlxBitmap(width, height, BG_COLOR)));
+		handle = new Bitmap(new FlxBitmap(width, 1, HANDLE_COLOR));
 		addChild(handle);
 	}
 

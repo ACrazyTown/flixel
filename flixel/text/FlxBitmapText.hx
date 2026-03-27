@@ -13,7 +13,7 @@ import flixel.text.FlxText.FlxTextAlign;
 import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -214,7 +214,7 @@ class FlxBitmapText extends FlxSprite
 	/**
 	 * Helper bitmap buffer for text pixels but without any color transformations
 	 */
-	var textBitmap:BitmapData;
+	var textBitmap:FlxBitmap;
 
 	/**
 	 * Constructs a new text field component.
@@ -237,7 +237,7 @@ class FlxBitmapText extends FlxSprite
 
 		if (FlxG.renderer.method == BLITTING)
 		{
-			pixels = new BitmapData(1, 1, true, FlxColor.TRANSPARENT);
+			pixels = new FlxBitmap(1, 1, FlxColor.TRANSPARENT);
 		}
 		else
 		{
@@ -1015,7 +1015,7 @@ class FlxBitmapText extends FlxSprite
 
 			if (textBitmap == null)
 			{
-				textBitmap = new BitmapData(frameWidth, frameHeight, true, FlxColor.TRANSPARENT);
+				textBitmap = new FlxBitmap(frameWidth, frameHeight, FlxColor.TRANSPARENT);
 			}
 			else
 			{
@@ -1173,13 +1173,13 @@ class FlxBitmapText extends FlxSprite
 		pendingPixelsChange = false;
 
 		var colorForFill:Int = background ? backgroundColor : FlxColor.TRANSPARENT;
-		var bitmap:BitmapData = null;
+		var bitmap:FlxBitmap = null;
 
 		if (FlxG.renderer.method == BLITTING)
 		{
 			if (pixels == null || (frameWidth != pixels.width || frameHeight != pixels.height))
 			{
-				pixels = new BitmapData(frameWidth, frameHeight, true, colorForFill);
+				pixels = new FlxBitmap(frameWidth, frameHeight, colorForFill);
 			}
 			else
 			{
@@ -1195,7 +1195,7 @@ class FlxBitmapText extends FlxSprite
 				if (framePixels == null || (frameWidth != framePixels.width || frameHeight != framePixels.height))
 				{
 					framePixels = FlxDestroyUtil.dispose(framePixels);
-					framePixels = new BitmapData(frameWidth, frameHeight, true, colorForFill);
+					framePixels = new FlxBitmap(frameWidth, frameHeight, colorForFill);
 				}
 				else
 				{
@@ -1320,7 +1320,7 @@ class FlxBitmapText extends FlxSprite
 		centerOrigin();
 	}
 	
-	function drawText(posX:Int, posY:Int, isFront:Bool = true, ?bitmap:BitmapData, useTiles:Bool = false):Void
+	function drawText(posX:Int, posY:Int, isFront:Bool = true, ?bitmap:FlxBitmap, useTiles:Bool = false):Void
 	{
 		if (FlxG.renderer.method == BLITTING)
 		{
@@ -1339,7 +1339,7 @@ class FlxBitmapText extends FlxSprite
 
 	// TODO: Make this a local statics when min haxe-ver is 4.3
 	static final matrixBlitHelper = new FlxMatrix();
-	function blitText(posX:Int, posY:Int, isFront:Bool = true, ?bitmap:BitmapData):Void
+	function blitText(posX:Int, posY:Int, isFront:Bool = true, ?bitmap:FlxBitmap):Void
 	{
 		var colorToApply = FlxColor.WHITE;
 

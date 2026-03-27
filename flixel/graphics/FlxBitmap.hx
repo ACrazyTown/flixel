@@ -26,7 +26,7 @@ abstract FlxBitmap(BitmapData) from BitmapData to BitmapData
     inline function set_data(value:UInt8Array):UInt8Array
         return this.image.data = value;
 
-    public function new(width:Int, height:Int, fillColor:FlxColor)
+    public function new(width:Int, height:Int, ?fillColor:FlxColor = FlxColor.WHITE)
     {
         this = new BitmapData(width, height, true, fillColor);
     }

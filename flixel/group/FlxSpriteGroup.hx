@@ -13,7 +13,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxSort;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 
 /**
@@ -1152,7 +1152,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 		return this;
 	}
 
-	override function set_pixels(Value:BitmapData):BitmapData
+	override function set_pixels(Value:FlxBitmap):FlxBitmap
 	{
 		return Value;
 	}
@@ -1162,7 +1162,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 		return Value;
 	}
 
-	override function get_pixels():BitmapData
+	override function get_pixels():FlxBitmap
 	{
 		return null;
 	}

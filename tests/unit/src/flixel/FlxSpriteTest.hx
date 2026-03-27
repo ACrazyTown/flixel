@@ -8,7 +8,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import haxe.PosInfos;
 import massive.munit.Assert;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 class FlxSpriteTest extends FlxTest
 {
@@ -70,13 +70,13 @@ class FlxSpriteTest extends FlxTest
 	function testHeight():Void
 	{
 		var heightSprite = new FlxSprite();
-		var bitmapData = new BitmapData(1, 1);
+		var bitmapData = new FlxBitmap(1, 1);
 		heightSprite.loadGraphic(bitmapData);
 
 		Assert.areEqual(1, heightSprite.height);
 
 		heightSprite = new FlxSprite();
-		bitmapData = new BitmapData(100, 100, true, 0xFFFF0000);
+		bitmapData = new FlxBitmap(100, 100, 0xFFFF0000);
 		heightSprite.loadGraphic(bitmapData);
 
 		Assert.areEqual(100, heightSprite.height);
@@ -90,13 +90,13 @@ class FlxSpriteTest extends FlxTest
 	function testWidth():Void
 	{
 		var widthSprite = new FlxSprite();
-		var bitmapData = new BitmapData(1, 1);
+		var bitmapData = new FlxBitmap(1, 1);
 		widthSprite.loadGraphic(bitmapData);
 
 		Assert.areEqual(1, widthSprite.width);
 
 		widthSprite = new FlxSprite();
-		bitmapData = new BitmapData(100, 100, true, 0xFFFF0000);
+		bitmapData = new FlxBitmap(100, 100, 0xFFFF0000);
 		widthSprite.loadGraphic(bitmapData);
 
 		Assert.areEqual(100, widthSprite.width);
@@ -110,7 +110,7 @@ class FlxSpriteTest extends FlxTest
 	function testSetSize():Void
 	{
 		var sizeSprite = new FlxSprite();
-		var bitmapData = new BitmapData(100, 130);
+		var bitmapData = new FlxBitmap(100, 130);
 		sizeSprite.loadGraphic(bitmapData);
 
 		Assert.areEqual(100, sizeSprite.width);
@@ -125,7 +125,7 @@ class FlxSpriteTest extends FlxTest
 	@Test
 	function testLoadGraphicFromSpriteCopyAnimations():Void
 	{
-		var graphic = new BitmapData(3, 1);
+		var graphic = new FlxBitmap(3, 1);
 		sprite1.loadGraphic(graphic, true, 1, 1);
 		sprite1.animation.add("animation", [0, 1, 2]);
 
@@ -138,14 +138,14 @@ class FlxSpriteTest extends FlxTest
 	@Test
 	function testLoadGraphic()
 	{
-		sprite1.loadGraphic(new BitmapData(1, 1));
+		sprite1.loadGraphic(new FlxBitmap(1, 1));
 		assert1x1GraphicLoaded();
 	}
 
 	@Test
 	function testLoadGraphicFromSprite()
 	{
-		sprite2.loadGraphic(new BitmapData(1, 1));
+		sprite2.loadGraphic(new FlxBitmap(1, 1));
 		sprite1.loadGraphicFromSprite(sprite2);
 		assert1x1GraphicLoaded();
 	}
@@ -153,7 +153,7 @@ class FlxSpriteTest extends FlxTest
 	@Test
 	function testLoadRotatedGraphic()
 	{
-		sprite1.loadRotatedGraphic(new BitmapData(1, 1));
+		sprite1.loadRotatedGraphic(new FlxBitmap(1, 1));
 		assert1x1GraphicLoaded();
 	}
 
@@ -161,7 +161,7 @@ class FlxSpriteTest extends FlxTest
 	function testLoadRotatedFrame()
 	{
 		var atlas = new FlxAtlas("atlas");
-		atlas.addNode(new BitmapData(1, 1), "node");
+		atlas.addNode(new FlxBitmap(1, 1), "node");
 		sprite1.loadRotatedFrame(atlas.getAtlasFrames().getByName("node"));
 		assert1x1GraphicLoaded();
 	}
@@ -207,7 +207,7 @@ class FlxSpriteTest extends FlxTest
 	@Test // #1526
 	function testCreateSpriteSkipPosition()
 	{
-		var sprite = new FlxSprite(new BitmapData(10, 20));
+		var sprite = new FlxSprite(new FlxBitmap(10, 20));
 
 		Assert.areEqual(0, sprite.x);
 		Assert.areEqual(0, sprite.y);

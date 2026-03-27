@@ -1,7 +1,7 @@
 package flixel.system.ui;
 
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 import openfl.events.MouseEvent;
 import flixel.system.debug.DebuggerUtil;
@@ -52,7 +52,7 @@ class FlxSystemButton extends Sprite implements IFlxDestroyable
 	 * @param	UpHandler	The function to be called when the button is pressed.
 	 * @param	ToggleMode	Whether this is a toggle button or not.
 	 */
-	public function new(Icon:BitmapData, ?UpHandler:Void->Void, ToggleMode:Bool = false)
+	public function new(Icon:FlxBitmap, ?UpHandler:Void->Void, ToggleMode:Bool = false)
 	{
 		super();
 
@@ -77,7 +77,7 @@ class FlxSystemButton extends Sprite implements IFlxDestroyable
 	 *
 	 * @param	Icon	The new icon to use for the button.
 	 */
-	public function changeIcon(Icon:BitmapData):Void
+	public function changeIcon(Icon:FlxBitmap):Void
 	{
 		if (_icon != null)
 			removeChild(_icon);

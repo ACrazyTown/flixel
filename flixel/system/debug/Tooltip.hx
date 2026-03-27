@@ -1,7 +1,7 @@
 package flixel.system.debug;
 
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 import openfl.events.MouseEvent;
 import openfl.geom.Point;
@@ -128,8 +128,8 @@ class TooltipOverlay extends Sprite
 
 		maxSize = new Point(width, height);
 
-		_shadow = new Bitmap(new BitmapData(1, 2, true, FlxColor.BLACK));
-		_background = new Bitmap(new BitmapData(1, 1, true, BG_COLOR));
+		_shadow = new Bitmap(new FlxBitmap(1, 2, FlxColor.BLACK));
+		_background = new Bitmap(new FlxBitmap(1, 1, BG_COLOR));
 
 		textField = DebuggerUtil.createTextField(2, 1);
 		textField.alpha = TEXT_ALPHA;

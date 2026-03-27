@@ -15,6 +15,7 @@ import flixel.system.render.quad.FlxDrawTrianglesItem;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.Vector;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.display.Sprite;
 import openfl.geom.ColorTransform;

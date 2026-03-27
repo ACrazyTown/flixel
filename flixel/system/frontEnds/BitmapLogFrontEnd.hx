@@ -2,7 +2,7 @@ package flixel.system.frontEnds;
 
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 /**
  * Accessed via `FlxG.bitmapLog`.
@@ -14,7 +14,7 @@ class BitmapLogFrontEnd
 	inline function get_window() return FlxG.game.debugger.bitmapLog;
 	#end
 	
-	public overload inline extern function add(data:BitmapData, name = ""):Void
+	public overload inline extern function add(data:FlxBitmap, name = ""):Void
 	{
 		#if FLX_DEBUG
 		window.add(data, name);

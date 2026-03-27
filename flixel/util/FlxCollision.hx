@@ -1,6 +1,6 @@
 package flixel.util;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.Rectangle;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -71,8 +71,8 @@ class FlxCollision
 		contact.drawFrame();
 		target.drawFrame();
 
-		var testA:BitmapData = contact.framePixels;
-		var testB:BitmapData = target.framePixels;
+		var testA:FlxBitmap = contact.framePixels;
+		var testB:FlxBitmap = target.framePixels;
 
 		var overlapWidth:Int = Std.int(intersect.width);
 		var overlapHeight:Int = Std.int(intersect.height);
@@ -93,7 +93,7 @@ class FlxCollision
 			testMatrix.translate(boundsA.width / 2, boundsA.height / 2);
 
 			// prepare an empty canvas
-			var testA2:BitmapData = FlxBitmapDataPool.get(Math.floor(boundsA.width), Math.floor(boundsA.height), true, FlxColor.TRANSPARENT, false);
+			var testA2:FlxBitmap = FlxBitmapDataPool.get(Math.floor(boundsA.width), Math.floor(boundsA.height), true, FlxColor.TRANSPARENT, false);
 
 			// plot the sprite using the matrix
 			testA2.draw(testA, testMatrix, null, null, null, false);
@@ -106,7 +106,7 @@ class FlxCollision
 			testMatrix.scale(target.scale.x, target.scale.y);
 			testMatrix.translate(boundsB.width / 2, boundsB.height / 2);
 
-			var testB2:BitmapData = FlxBitmapDataPool.get(Math.floor(boundsB.width), Math.floor(boundsB.height), true, FlxColor.TRANSPARENT, false);
+			var testB2:FlxBitmap = FlxBitmapDataPool.get(Math.floor(boundsB.width), Math.floor(boundsB.height), true, FlxColor.TRANSPARENT, false);
 			testB2.draw(testB, testMatrix, null, null, null, false);
 			testB = testB2;
 		}
