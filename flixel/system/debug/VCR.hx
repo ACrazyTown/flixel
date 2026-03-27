@@ -1,7 +1,7 @@
 package flixel.system.debug;
 
 #if FLX_DEBUG
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.text.TextField;
 import flixel.FlxG;
 import flixel.system.ui.FlxSystemButton;

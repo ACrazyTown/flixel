@@ -10,7 +10,7 @@ import flixel.system.debug.interaction.Interaction;
 import flixel.system.render.FlxCanvas;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.CapsStyle;
 import openfl.display.Graphics;
 import openfl.display.LineScaleMode;

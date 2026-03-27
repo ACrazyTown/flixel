@@ -10,7 +10,7 @@ import flixel.tile.FlxTilemap;
 import flixel.util.FlxDirectionFlags;
 import haxe.PosInfos;
 import massive.munit.Assert;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 class FlxObjectTest extends FlxTest
 {
@@ -282,7 +282,7 @@ class FlxObjectTest extends FlxTest
 	{
 		var object1 = new FlxObject(8, 4, 8, 12);
 		var level = new FlxTilemap();
-		level.loadMapFromCSV("0,0,1\n0,0,1\n1,1,1", new BitmapData(16, 8));
+		level.loadMapFromCSV("0,0,1\n0,0,1\n1,1,1", new FlxBitmap(16, 8));
 
 		FlxG.state.add(object1);
 		FlxG.state.add(level);

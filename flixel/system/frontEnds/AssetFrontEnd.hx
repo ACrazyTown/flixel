@@ -7,7 +7,7 @@ import haxe.Json;
 import haxe.io.Bytes;
 import haxe.io.Path;
 import haxe.xml.Access;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.media.Sound;
 import openfl.text.Font;
 import openfl.utils.AssetCache;
@@ -130,7 +130,7 @@ class AssetFrontEnd
 			
 			// Get asset and set cache
 			case IMAGE:
-				final bitmap = BitmapData.fromFile(getPath(id));
+				final bitmap = FlxBitmap.fromFile(getPath(id));
 				if (canUseCache)
 					Assets.cache.setBitmapData(id, bitmap);
 				bitmap;
@@ -315,9 +315,9 @@ class AssetFrontEnd
 	 * 
 	 * @param   id        The ID or asset path for the bitmap
 	 * @param   useCache  Whether to allow use of the asset cache (if one exists)
-	 * @return  A new BitmapData object
+	 * @return  A new FlxBitmap object
 	 */
-	public inline function getBitmapDataUnsafe(id:String, useCache = false):BitmapData
+	public inline function getBitmapDataUnsafe(id:String, useCache = false):FlxBitmap
 	{
 		return cast getAssetUnsafe(id, IMAGE, useCache);
 	}
@@ -327,9 +327,9 @@ class AssetFrontEnd
 	 * 
 	 * @param   id        The ID or asset path for the bitmap
 	 * @param   useCache  Whether to allow use of the asset cache (if one exists)
-	 * @return  A new BitmapData object
+	 * @return  A new FlxBitmap object
 	 */
-	public inline function getBitmapData(id:String, useCache = false, ?logStyle:LogStyle):BitmapData
+	public inline function getBitmapData(id:String, useCache = false, ?logStyle:LogStyle):FlxBitmap
 	{
 		return cast getAsset(id, IMAGE, useCache, logStyle);
 	}
@@ -648,7 +648,7 @@ class AssetFrontEnd
 	 * @param   useCache  Whether to allow use of the asset cache (if one exists)
 	 * @return  Returns a `Future` which allows listeners to be added via methods like `onComplete`
 	 */
-	public inline function loadBitmapData(id:String, useCache = false):Future<BitmapData>
+	public inline function loadBitmapData(id:String, useCache = false):Future<FlxBitmap>
 	{
 		return cast loadAsset(id, IMAGE, useCache);
 	}

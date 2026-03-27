@@ -17,7 +17,7 @@ import flixel.util.FlxBitmapDataUtil;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDirectionFlags;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
@@ -147,7 +147,7 @@ class FlxSprite extends FlxObject
 	 * The current display state of the sprite including current animation frame,
 	 * tint, flip etc... may be `null` unless `useFramePixels` is `true`.
 	 */
-	public var framePixels:BitmapData;
+	public var framePixels:FlxBitmap;
 
 	/**
 	 * Always `true` when using the blitting renderer. On other renderers it determines whether
@@ -167,10 +167,10 @@ class FlxSprite extends FlxObject
 	public var dirty:Bool = true;
 
 	/**
-	 * This sprite's graphic / `BitmapData` object.
+	 * This sprite's graphic / `FlxBitmap` object.
 	 * Automatically adjusts graphic size and render helpers if changed.
 	 */
-	public var pixels(get, set):BitmapData;
+	public var pixels(get, set):FlxBitmap;
 
 	/**
 	 * Link to current `FlxFrame` from loaded atlas
@@ -496,8 +496,8 @@ class FlxSprite extends FlxObject
 	 *                       (helps figure out what to do with non-square sprites or sprite sheets).
 	 * @param   unique       Whether the graphic should be a unique instance in the graphics cache.
 	 *                       Set this to `true` if you want to modify the `pixels` field without changing
-	 *                       the `pixels` of other sprites with the same `BitmapData`.
-	 * @param   key          Set this parameter if you're loading `BitmapData`.
+	 *                       the `pixels` of other sprites with the same `FlxBitmap`.
+	 * @param   key          Set this parameter if you're loading `FlxBitmap`.
 	 * @return  This `FlxSprite` instance (nice for chaining stuff together, if you're into that).
 	 */
 	public function loadGraphic(graphic:FlxGraphicAsset, animated = false, frameWidth = 0, frameHeight = 0, unique = false, ?key:String):FlxSprite
@@ -543,7 +543,7 @@ class FlxSprite extends FlxObject
 	 * @param   AntiAliasing   Whether to use high quality rotations when creating the graphic. Default is `false`.
 	 * @param   AutoBuffer     Whether to automatically increase the image size to accommodate rotated corners.
 	 *                         Will create frames that are 150% larger on each axis than the original frame or graphic.
-	 * @param   Key            Optional, set this parameter if you're loading `BitmapData`.
+	 * @param   Key            Optional, set this parameter if you're loading `FlxBitmap`.
 	 * @return  This `FlxSprite` instance (nice for chaining stuff together, if you're into that).
 	 */
 	public function loadRotatedGraphic(Graphic:FlxGraphicAsset, Rotations:Int = 16, Frame:Int = -1, AntiAliasing:Bool = false, AutoBuffer:Bool = false,
@@ -553,7 +553,7 @@ class FlxSprite extends FlxObject
 		if (brushGraphic == null)
 			return this;
 
-		var brush:BitmapData = brushGraphic.bitmap;
+		var brush:FlxBitmap = brushGraphic.bitmap;
 		var key:String = brushGraphic.key;
 
 		if (Frame >= 0)
@@ -564,8 +564,8 @@ class FlxSprite extends FlxObject
 			Frame = (framesNum > Frame || framesNum == 0) ? Frame : (Frame % framesNum);
 			key += ":" + Frame;
 
-			var full:BitmapData = brush;
-			brush = new BitmapData(brushSize, brushSize, true, FlxColor.TRANSPARENT);
+			var full:FlxBitmap = brush;
+			brush = new FlxBitmap(brushSize, brushSize, FlxColor.TRANSPARENT);
 			_flashRect.setTo(Frame * brushSize, 0, brushSize, brushSize);
 			brush.copyPixels(full, _flashRect, _flashPointZero);
 		}
@@ -576,7 +576,7 @@ class FlxSprite extends FlxObject
 		var tempGraph:FlxGraphic = FlxG.bitmap.get(key);
 		if (tempGraph == null)
 		{
-			var bitmap:BitmapData = FlxBitmapDataUtil.generateRotations(brush, Rotations, AntiAliasing, AutoBuffer);
+			var bitmap:FlxBitmap = FlxBitmapDataUtil.generateRotations(brush, Rotations, AntiAliasing, AutoBuffer);
 			tempGraph = FlxGraphic.fromBitmapData(bitmap, false, key);
 		}
 		
@@ -646,7 +646,7 @@ class FlxSprite extends FlxObject
 	 * @param   Color    Specifies the color of the generated block (ARGB format).
 	 * @param   Unique   Whether the graphic should be a unique instance in the graphics cache. Default is `false`.
 	 *                   Set this to `true` if you want to modify the `pixels` field without changing the
-	 *                   `pixels` of other sprites with the same `BitmapData`.
+	 *                   `pixels` of other sprites with the same `FlxBitmap`.
 	 * @param   Key      An optional `String` key to identify this graphic in the cache.
 	 *                   If `null`, the key is determined by `Width`, `Height` and `Color`.
 	 *                   If `Unique` is `true` and a graphic with this `Key` already exists,
@@ -671,7 +671,7 @@ class FlxSprite extends FlxObject
 	public function graphicLoaded():Void {}
 
 	/**
-	 * Resets some internal variables used for frame `BitmapData` calculation.
+	 * Resets some internal variables used for frame `FlxBitmap` calculation.
 	 */
 	public inline function resetSize():Void
 	{
@@ -1076,7 +1076,7 @@ class FlxSprite extends FlxObject
 		if (graphic == null || Brush.graphic == null)
 			throw "Cannot stamp to or from a FlxSprite with no graphics.";
 
-		var bitmapData:BitmapData = Brush.framePixels;
+		var bitmapData:FlxBitmap = Brush.framePixels;
 
 		if (isSimpleRenderBlit()) // simple render
 		{
@@ -1576,9 +1576,9 @@ class FlxSprite extends FlxObject
 	}
 
 	/**
-	 * Retrieves the `BitmapData` of the current `FlxFrame`. Updates `framePixels`.
+	 * Retrieves the `FlxBitmap` of the current `FlxFrame`. Updates `framePixels`.
 	 */
-	public function updateFramePixels():BitmapData
+	public function updateFramePixels():FlxBitmap
 	{
 		if (_frame == null || !dirty)
 			return framePixels;
@@ -1805,13 +1805,13 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
-	function get_pixels():BitmapData
+	function get_pixels():FlxBitmap
 	{
 		return (graphic == null) ? null : graphic.bitmap;
 	}
 
 	@:noCompletion
-	function set_pixels(Pixels:BitmapData):BitmapData
+	function set_pixels(Pixels:FlxBitmap):FlxBitmap
 	{
 		var key:String = FlxG.bitmap.findKeyForBitmap(Pixels);
 

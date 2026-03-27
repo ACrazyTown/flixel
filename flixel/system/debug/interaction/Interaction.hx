@@ -17,7 +17,7 @@ import flixel.system.debug.interaction.tools.Transform;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.DisplayObject;
 import openfl.display.Graphics;
 import openfl.display.Sprite;
@@ -447,7 +447,7 @@ class Interaction extends Window
 		}
 	}
 
-	public function registerCustomCursor(name:String, icon:BitmapData, offsetX = 0.0, offsetY = 0.0):Void
+	public function registerCustomCursor(name:String, icon:FlxBitmap, offsetX = 0.0, offsetY = 0.0):Void
 	{
 		if (icon == null)
 			return;

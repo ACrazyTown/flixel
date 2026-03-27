@@ -1,6 +1,6 @@
 package flixel.graphics.frames;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 import flixel.FlxSprite;
@@ -79,7 +79,7 @@ class FlxFilterFrames extends FlxFramesCollection
 	 *
 	 * @param   spr              Sprite to apply this frame collection.
 	 * @param   saveAnimations   Whether to save sprite's animations or not.
-	 * @param   updateFrames     Whether to regenerate frame `BitmapData`s or not.
+	 * @param   updateFrames     Whether to regenerate frame `FlxBitmap`s or not.
 	 */
 	public function applyToSprite(spr:FlxSprite, saveAnimations:Bool = false, updateFrames:Bool = false):Void
 	{
@@ -95,13 +95,13 @@ class FlxFilterFrames extends FlxFramesCollection
 
 	function genFrames():Void
 	{
-		var canvas:BitmapData;
+		var canvas:FlxBitmap;
 		var graph:FlxGraphic;
 		var filterFrame:FlxFrame;
 
 		for (frame in sourceFrames.frames)
 		{
-			canvas = new BitmapData(Std.int(frame.sourceSize.x + widthInc), Std.int(frame.sourceSize.y + heightInc), true, FlxColor.TRANSPARENT);
+			canvas = new FlxBitmap(Std.int(frame.sourceSize.x + widthInc), Std.int(frame.sourceSize.y + heightInc), FlxColor.TRANSPARENT);
 			graph = FlxGraphic.fromBitmapData(canvas, false, null, false);
 
 			filterFrame = graph.imageFrame.frame;
@@ -186,7 +186,7 @@ class FlxFilterFrames extends FlxFramesCollection
 
 	function applyFilter(filter:BitmapFilter)
 	{
-		var bitmap:BitmapData;
+		var bitmap:FlxBitmap;
 
 		for (frame in frames)
 		{

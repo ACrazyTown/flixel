@@ -1,6 +1,6 @@
 package flixel.util;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 import flixel.math.FlxAngle;
@@ -9,7 +9,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 
 /**
- * Just a collection of BitmapData utility methods.
+ * Just a collection of FlxBitmap utility methods.
  * Just for cross-platform stuff, since not all methods are implemented across all targets.
  */
 class FlxBitmapDataUtil
@@ -19,16 +19,16 @@ class FlxBitmapDataUtil
 	/**
 	 * Performs per-channel blending from a source image to a destination image.
 	 *
-	 * @param	sourceBitmapData	The input bitmap image to use. The source image can be a different BitmapData object, or it can refer to the current BitmapData object.
+	 * @param	sourceBitmapData	The input bitmap image to use. The source image can be a different FlxBitmap object, or it can refer to the current FlxBitmap object.
 	 * @param	sourceRect			A rectangle that defines the area of the source image to use as input.
 	 * @param	destBitmapData		The output bitmap image to use.
-	 * @param	destPoint			The point within the destination image (the current BitmapData instance) that corresponds to the upper-left corner of the source rectangle.
+	 * @param	destPoint			The point within the destination image (the current FlxBitmap instance) that corresponds to the upper-left corner of the source rectangle.
 	 * @param	redMultiplier		A hexadecimal uint value by which to multiply the red channel value.
 	 * @param	greenMultiplier		A hexadecimal uint value by which to multiply the green channel value.
 	 * @param	blueMultiplier		A hexadecimal uint value by which to multiply the blue channel value.
 	 * @param	alphaMultiplier		A hexadecimal uint value by which to multiply the alpha transparency value.
 	 */
-	public static function merge(sourceBitmapData:BitmapData, sourceRect:Rectangle, destBitmapData:BitmapData, destPoint:Point, redMultiplier:Int,
+	public static function merge(sourceBitmapData:FlxBitmap, sourceRect:Rectangle, destBitmapData:FlxBitmap, destPoint:Point, redMultiplier:Int,
 			greenMultiplier:Int, blueMultiplier:Int, alphaMultiplier:Int):Void
 	{
 		#if flash
@@ -155,17 +155,17 @@ class FlxBitmapDataUtil
 	}
 
 	/**
-	 * Compares two BitmapData objects.
+	 * Compares two FlxBitmap objects.
 	 *
-	 * @param	Bitmap1		The source BitmapData object to compare with.
-	 * @param	Bitmap2		The BitmapData object to compare with the source BitmapData object.
-	 * @return	If the two BitmapData objects have the same dimensions (width and height),
-	 * the method returns a new BitmapData object that has the difference between the two objects.
-	 * If the BitmapData objects are equivalent, the method returns the number 0.
-	 * If the widths of the BitmapData objects are not equal, the method returns the number -3.
-	 * If the heights of the BitmapData objects are not equal, the method returns the number -4.
+	 * @param	Bitmap1		The source FlxBitmap object to compare with.
+	 * @param	Bitmap2		The FlxBitmap object to compare with the source FlxBitmap object.
+	 * @return	If the two FlxBitmap objects have the same dimensions (width and height),
+	 * the method returns a new FlxBitmap object that has the difference between the two objects.
+	 * If the FlxBitmap objects are equivalent, the method returns the number 0.
+	 * If the widths of the FlxBitmap objects are not equal, the method returns the number -3.
+	 * If the heights of the FlxBitmap objects are not equal, the method returns the number -4.
 	 */
-	public static function compare(Bitmap1:BitmapData, Bitmap2:BitmapData):Dynamic
+	public static function compare(Bitmap1:FlxBitmap, Bitmap2:FlxBitmap):Dynamic
 	{
 		#if flash
 		return Bitmap1.compare(Bitmap2);
@@ -186,7 +186,7 @@ class FlxBitmapDataUtil
 		{
 			var width:Int = Bitmap1.width;
 			var height:Int = Bitmap1.height;
-			var result = new BitmapData(width, height, true, 0x0);
+			var result = new FlxBitmap(width, height, 0x0);
 			var identical:Bool = true;
 
 			for (i in 0...width)
@@ -238,23 +238,23 @@ class FlxBitmapDataUtil
 	/**
 	 * Returns the amount of bytes a bitmapData occupies in memory.
 	 */
-	public static inline function getMemorySize(bitmapData:BitmapData):Float
+	public static inline function getMemorySize(bitmapData:FlxBitmap):Float
 	{
 		return bitmapData.width * bitmapData.height * 4;
 	}
 
 	/**
-	 * Replaces all BitmapData's pixels with specified color with newColor pixels.
+	 * Replaces all FlxBitmap's pixels with specified color with newColor pixels.
 	 * WARNING: very expensive (especially on big graphics) as it iterates over every single pixel.
 	 *
-	 * @param	bitmapData			BitmapData to change
+	 * @param	bitmapData			FlxBitmap to change
 	 * @param	color				Color to replace
 	 * @param	newColor			New color
 	 * @param	fetchPositions		Whether we need to store positions of pixels which colors were replaced
 	 * @param	rect				area to apply color replacement. Optional, uses whole image area if the rect is null
 	 * @return	Array replaced pixels positions
 	 */
-	public static function replaceColor(bitmapData:BitmapData, color:FlxColor, newColor:FlxColor, fetchPositions:Bool = false, ?rect:FlxRect):Array<FlxPoint>
+	public static function replaceColor(bitmapData:FlxBitmap, color:FlxColor, newColor:FlxColor, fetchPositions:Bool = false, ?rect:FlxRect):Array<FlxPoint>
 	{
 		var positions:Array<FlxPoint> = null;
 		if (fetchPositions)
@@ -323,7 +323,7 @@ class FlxBitmapDataUtil
 	 * @param	region		region of image to use as a source graphics for spritesheet. Default value is null, which means that whole image will be used.
 	 * @return	Image for spritesheet with inserted spaces between tiles.
 	 */
-	public static function addSpacesAndBorders(bitmapData:BitmapData, ?frameSize:FlxPoint, ?spacing:FlxPoint, ?border:FlxPoint, ?region:FlxRect):BitmapData
+	public static function addSpacesAndBorders(bitmapData:FlxBitmap, ?frameSize:FlxPoint, ?spacing:FlxPoint, ?border:FlxPoint, ?region:FlxRect):FlxBitmap
 	{
 		if (region == null)
 		{
@@ -360,8 +360,8 @@ class FlxBitmapDataUtil
 			borderY = Std.int(border.y);
 		}
 
-		var result = new BitmapData(Std.int(region.width + (numHorizontalFrames - 1) * spaceX + 2 * numHorizontalFrames * borderX),
-			Std.int(region.height + (numVerticalFrames - 1) * spaceY + 2 * numVerticalFrames * borderY), true, FlxColor.TRANSPARENT);
+		var result = new FlxBitmap(Std.int(region.width + (numHorizontalFrames - 1) * spaceX + 2 * numHorizontalFrames * borderX),
+			Std.int(region.height + (numVerticalFrames - 1) * spaceY + 2 * numVerticalFrames * borderY), FlxColor.TRANSPARENT);
 
 		result.lock();
 		var tempRect:Rectangle = new Rectangle(0, 0, frameWidth, frameHeight);
@@ -403,8 +403,8 @@ class FlxBitmapDataUtil
 	 * @return	Modified spritesheet with copied pixels around tile images.
 	 * @since   4.1.0
 	 */
-	public static function copyBorderPixels(bitmapData:BitmapData, frameWidth:Int, frameHeight:Int, spaceX:Int, spaceY:Int, borderX:Int, borderY:Int,
-			horizontalFrames:Int, verticalFrames:Int):BitmapData
+	public static function copyBorderPixels(bitmapData:FlxBitmap, frameWidth:Int, frameHeight:Int, spaceX:Int, spaceY:Int, borderX:Int, borderY:Int,
+			horizontalFrames:Int, verticalFrames:Int):FlxBitmap
 	{
 		// copy borders
 		var tempRect:Rectangle = new Rectangle(0, 0, 1, bitmapData.height);
@@ -456,15 +456,15 @@ class FlxBitmapDataUtil
 	}
 
 	/**
-	 * Generates BitmapData with prerotated brush stamped on it
+	 * Generates FlxBitmap with prerotated brush stamped on it
 	 *
 	 * @param	brush			The image you want to rotate and stamp.
 	 * @param	rotations		The number of rotation frames the final sprite should have. For small sprites this can be quite a large number (360 even) without any problems.
 	 * @param	antiAliasing	Whether to use high quality rotations when creating the graphic.  Default is false.
 	 * @param	autoBuffer		Whether to automatically increase the image size to accommodate rotated corners.  Default is false.  Will create frames that are 150% larger on each axis than the original frame or graphic.
-	 * @return	Created BitmapData with stamped prerotations on it.
+	 * @return	Created FlxBitmap with stamped prerotations on it.
 	 */
-	public static function generateRotations(brush:BitmapData, rotations:Int = 16, antiAliasing:Bool = false, autoBuffer:Bool = false):BitmapData
+	public static function generateRotations(brush:FlxBitmap, rotations:Int = 16, antiAliasing:Bool = false, autoBuffer:Bool = false):FlxBitmap
 	{
 		var brushWidth:Int = brush.width;
 		var brushHeight:Int = brush.height;
@@ -478,7 +478,7 @@ class FlxBitmapDataUtil
 		var width:Int = max * columns;
 		var height:Int = max * rows;
 
-		var result:BitmapData = new BitmapData(width, height, true, FlxColor.TRANSPARENT);
+		var result:FlxBitmap = new FlxBitmap(width, height, FlxColor.TRANSPARENT);
 
 		var row:Int = 0;
 		var column:Int = 0;

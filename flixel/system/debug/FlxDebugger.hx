@@ -1,6 +1,6 @@
 package flixel.system.debug;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 #if FLX_DEBUG
 import flixel.FlxG;
@@ -384,7 +384,7 @@ class FlxDebugger extends openfl.display.Sprite
 	 * @param   UpdateLayout   Whether to update the button layout.
 	 * @return  The added button.
 	 */
-	public function addButton(Position:FlxHorizontalAlign, ?Icon:BitmapData, ?UpHandler:Void->Void, ToggleMode:Bool = false,
+	public function addButton(Position:FlxHorizontalAlign, ?Icon:FlxBitmap, ?UpHandler:Void->Void, ToggleMode:Bool = false,
 			UpdateLayout:Bool = false):FlxSystemButton
 	{
 		var button = new FlxSystemButton(Icon, UpHandler, ToggleMode);

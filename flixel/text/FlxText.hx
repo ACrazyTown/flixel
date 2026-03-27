@@ -14,7 +14,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.helpers.FlxRange;
 import openfl.Assets;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.ColorTransform;
 import openfl.text.TextField;
 import openfl.text.TextFieldAutoSize;
@@ -187,7 +187,7 @@ class FlxText extends FlxSprite
 	/**
 	 * Helper vars to draw border styles with transparency.
 	 */
-	var _borderPixels:BitmapData;
+	var _borderPixels:FlxBitmap;
 
 	var _borderColorTransform:ColorTransform;
 
@@ -968,7 +968,7 @@ class FlxText extends FlxSprite
 			if (_hasBorderAlpha)
 			{
 				if (_borderPixels == null)
-					_borderPixels = new BitmapData(frameWidth, frameHeight, true);
+					_borderPixels = new FlxBitmap(frameWidth, frameHeight);
 				else
 					_borderPixels.fillRect(_flashRect, FlxColor.TRANSPARENT);
 			}
@@ -992,9 +992,9 @@ class FlxText extends FlxSprite
 	}
 
 	/**
-	 * Internal function to draw textField to a BitmapData, if flash it calculates every line x to avoid blurry lines.
+	 * Internal function to draw textField to a FlxBitmap, if flash it calculates every line x to avoid blurry lines.
 	 */
-	function drawTextFieldTo(graphic:BitmapData):Void
+	function drawTextFieldTo(graphic:FlxBitmap):Void
 	{
 		#if flash
 		if (alignment == FlxTextAlign.CENTER && isTextBlurry())
@@ -1217,7 +1217,7 @@ class FlxText extends FlxSprite
 	 */
 	inline function copyTextWithOffset(x:Float, y:Float)
 	{
-		var graphic:BitmapData = _hasBorderAlpha ? _borderPixels : graphic.bitmap;
+		var graphic:FlxBitmap = _hasBorderAlpha ? _borderPixels : graphic.bitmap;
 		_matrix.translate(x, y);
 		drawTextFieldTo(graphic);
 	}

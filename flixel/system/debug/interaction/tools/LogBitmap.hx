@@ -3,7 +3,7 @@ package flixel.system.debug.interaction.tools;
 import flixel.FlxG;
 import flixel.FlxG;
 import openfl.display.Graphics;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import flixel.system.debug.interaction.Interaction;
 // import flixel.system.debug.Tooltip;
 

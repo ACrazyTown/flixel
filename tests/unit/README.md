@@ -18,7 +18,7 @@ Alternatively, this can be done from within Visual Studio Code - (`F1` -> `Tasks
 
 ### Limitations
 
-- there are various issues with including assets, which is why tests that need graphic assets generally create `BitmapData` objects at runtime rather than loading `.png` files
+- there are various issues with including assets, which is why tests that need graphic assets generally create `FlxBitmap` objects at runtime rather than loading `.png` files
 
 ### Code Style
 

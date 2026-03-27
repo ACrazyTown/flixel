@@ -326,7 +326,7 @@ class FlxG
 	public static var vcr(default, null):VCRFrontEnd;
 
 	/**
-	 * Contains things related to bitmaps, for example regarding the `BitmapData` cache and the cache itself.
+	 * Contains things related to bitmaps, for example regarding the `FlxBitmap` cache and the cache itself.
 	 */
 	public static var bitmap(default, null):BitmapFrontEnd = new BitmapFrontEnd();
 
