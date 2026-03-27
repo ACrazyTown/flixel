@@ -343,7 +343,7 @@ class FlxAssets
 	{
 		if ((graphic is FlxGraphic))
 		{
-			return cast(graphic, FlxGraphic).bitmap;
+			return cast(graphic, FlxGraphic).texture.getBitmap();
 		}
 		else if ((graphic is BitmapData))
 		{

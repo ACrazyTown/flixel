@@ -136,12 +136,14 @@ class BitmapFrontEnd
 	 */
 	public function findKeyForBitmap(bmd:FlxBitmap):String
 	{
+		#if FLX_RENDER_DRAWQUADS
 		for (key in _cache.keys())
 		{
 			var obj = _cache.get(key);
-			if (obj != null && obj.bitmap == bmd)
+			if (obj != null && obj.texture.handle == bmd)
 				return key;
 		}
+		#end
 		return null;
 	}
 
