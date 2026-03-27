@@ -110,7 +110,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 	// No-op, handled in the FlxDrawItems
 	function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
-	function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
+	// function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
 
 	// No-op, FlxRenderTexture is not supported with this renderer
 	// function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle {return null;}

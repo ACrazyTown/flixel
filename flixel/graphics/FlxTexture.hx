@@ -35,11 +35,12 @@ class FlxTexture implements IFlxDestroyable
      */
     public static var defaultReadable:Bool = true;
 
+    // TODO: expose in 7.0.0 once sprite.antialiasing is removed
     /**
      * The initial value of `texture.filter`, for all textures.
      * Defaults to `NEAREST`.
      */
-    public static var defaultFilter:FlxTextureFilter = NEAREST;
+    // public static var defaultFilter:FlxTextureFilter = NEAREST;
 
     /**
      * Creates a `FlxTexture` and uploads pixel data to it from the provided `bitmap`.
@@ -94,12 +95,13 @@ class FlxTexture implements IFlxDestroyable
      */
     public var wrapV(default, set):FlxTextureWrap = CLAMP;
 
+    // TODO: expose in 7.0.0 once sprite.antialiasing is removed
     /**
      * The texture filtering mode used when scaling the texture.
      * 
      * @see `FlxTextureFilter`
      */
-    public var filter(default, set):FlxTextureFilter = defaultFilter;
+    // public var filter(default, set):FlxTextureFilter = defaultFilter;
 
     /**
      * Reference to the internal bitmap, which is used to allow read/write operations when the texture is readable.
@@ -145,7 +147,7 @@ class FlxTexture implements IFlxDestroyable
         // Invoke the setters to properly set up the texture state
         set_wrapU(wrapU);
         set_wrapV(wrapV);
-        set_filter(filter);
+        // set_filter(filter);
     }
 
     /**
@@ -343,15 +345,16 @@ class FlxTexture implements IFlxDestroyable
         return value;
     }
 
-    function set_filter(value:FlxTextureFilter):FlxTextureFilter 
-    {
-        if (filter != value)
-        {
-            FlxG.renderer.setTextureFilter(this, value);
-            filter = value;
-        }
-        return value;
-    }
+    // TODO: expose in 7.0.0 once sprite.antialiasing is removed
+    // function set_filter(value:FlxTextureFilter):FlxTextureFilter 
+    // {
+    //     if (filter != value)
+    //     {
+    //         FlxG.renderer.setTextureFilter(this, value);
+    //         filter = value;
+    //     }
+    //     return value;
+    // }
 }
 
 /**
@@ -400,18 +403,19 @@ enum FlxTextureWrap
     // MIRRORED_REPEAT;
 }
 
+// TODO: expose in 7.0.0 once sprite.antialiasing is removed
 /**
  * The texture filtering mode used when scaling the texture.
  */
-enum FlxTextureFilter
-{
-    /**
-     * Picks the pixel closest to the current texture coordinate. Produces a sharp, pixelated look.
-     */
-    NEAREST;
+// enum FlxTextureFilter
+// {
+//     /**
+//      * Picks the pixel closest to the current texture coordinate. Produces a sharp, pixelated look.
+//      */
+//     NEAREST;
 
-    /**
-     * Interpolates between the neighbouring pixels at the current texture coordinate. Produces a blurry, smooth (antialiased) look.
-     */
-    LINEAR;
-}
+//     /**
+//      * Interpolates between the neighbouring pixels at the current texture coordinate. Produces a blurry, smooth (antialiased) look.
+//      */
+//     LINEAR;
+// }

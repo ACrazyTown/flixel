@@ -77,7 +77,7 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 
 	function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
-	function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
+	// function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
 
 	// function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle {return null;}
 	// function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void {}
