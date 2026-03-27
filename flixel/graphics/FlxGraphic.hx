@@ -190,7 +190,7 @@ class FlxGraphic implements IFlxDestroyable
 			return Source;
 
 		var key:String = FlxG.bitmap.generateKey(Source.key, Key, Unique);
-		var graphic:FlxGraphic = createGraphic(Source.bitmap, key, Unique);
+		var graphic:FlxGraphic = createGraphic(Source.texture.getBitmap(), key, Unique);
 		graphic.unique = Unique;
 		graphic.assetsClass = Source.assetsClass;
 		graphic.assetsKey = Source.assetsKey;
@@ -422,6 +422,7 @@ class FlxGraphic implements IFlxDestroyable
 	/**
 	 * Refreshes the `FlxBitmap` of this graphic.
 	 */
+	@:haxe.warning("-WDeprecated")
 	public function refresh():Void
 	{
 		var newBitmap:FlxBitmap = getBitmapFromSystem();
@@ -549,6 +550,7 @@ class FlxGraphic implements IFlxDestroyable
 
 	inline function get_isLoaded()
 	{
+		final bitmap = texture.getBitmap();
 		return bitmap != null && !bitmap.rect.isEmpty();
 	}
 	

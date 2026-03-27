@@ -553,7 +553,7 @@ class FlxSprite extends FlxObject
 		if (brushGraphic == null)
 			return this;
 
-		var brush:FlxBitmap = brushGraphic.bitmap;
+		var brush:FlxBitmap = brushGraphic.texture.getBitmap();
 		var key:String = brushGraphic.key;
 
 		if (Frame >= 0)
@@ -1084,9 +1084,9 @@ class FlxSprite extends FlxObject
 			_flashPoint.y = Y + frame.frame.y;
 			_flashRect2.width = bitmapData.width;
 			_flashRect2.height = bitmapData.height;
-			graphic.bitmap.copyPixels(bitmapData, _flashRect2, _flashPoint, null, null, true);
-			_flashRect2.width = graphic.bitmap.width;
-			_flashRect2.height = graphic.bitmap.height;
+			graphic.texture.getBitmap().copyPixels(bitmapData, _flashRect2, _flashPoint, null, null, true);
+			_flashRect2.width = graphic.texture.getBitmap().width;
+			_flashRect2.height = graphic.texture.getBitmap().height;
 		}
 		else // complex render
 		{
@@ -1099,7 +1099,7 @@ class FlxSprite extends FlxObject
 			}
 			_matrix.translate(X + frame.frame.x + Brush.origin.x, Y + frame.frame.y + Brush.origin.y);
 			var brushBlend:BlendMode = Brush.blend;
-			graphic.bitmap.draw(bitmapData, _matrix, null, brushBlend, null, Brush.antialiasing);
+			graphic.texture.getBitmap().draw(bitmapData, _matrix, null, brushBlend, null, Brush.antialiasing);
 		}
 
 		if (FlxG.renderer.blit)
@@ -1168,7 +1168,7 @@ class FlxSprite extends FlxObject
 	 */
 	public function replaceColor(Color:FlxColor, NewColor:FlxColor, FetchPositions:Bool = false):Array<FlxPoint>
 	{
-		var positions = FlxBitmapDataUtil.replaceColor(graphic.bitmap, Color, NewColor, FetchPositions);
+		var positions = FlxBitmapDataUtil.replaceColor(graphic.texture.getBitmap(), Color, NewColor, FetchPositions);
 		if (positions != null)
 			dirty = true;
 		return positions;
@@ -1810,7 +1810,7 @@ class FlxSprite extends FlxObject
 	@:noCompletion
 	function get_pixels():FlxBitmap
 	{
-		return (graphic == null) ? null : graphic.bitmap;
+		return (graphic == null) ? null : graphic.texture.getBitmap();
 	}
 
 	@:noCompletion
