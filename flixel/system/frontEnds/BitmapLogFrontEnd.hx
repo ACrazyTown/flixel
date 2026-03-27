@@ -29,12 +29,12 @@ class BitmapLogFrontEnd
 	function addGraphic(graphic:FlxGraphic, ?name:String):Void
 	{
 		#if FLX_DEBUG
-		if (graphic != null && graphic.bitmap != null)
+		if (graphic != null && graphic.texture.getBitmap() != null)
 		{
 			if (name == null)
 				name = getGraphicName(graphic);
 			
-			add(graphic.bitmap, name);
+			add(graphic.texture.getBitmap(), name);
 		}
 		#end
 	}
@@ -88,7 +88,7 @@ class BitmapLogFrontEnd
 		clear();
 		for (cachedGraphic in FlxG.bitmap._cache)
 		{
-			add(cachedGraphic.bitmap, cachedGraphic.key);
+			add(cachedGraphic.texture.getBitmap(), cachedGraphic.key);
 		}
 		#end
 	}

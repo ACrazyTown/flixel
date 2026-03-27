@@ -220,7 +220,7 @@ class FlxBitmapFont extends FlxFramesCollection
 		font = new FlxBitmapFont(frame);
 		font.fontName = graphic.key;
 
-		var bmd:FlxBitmap = graphic.bitmap;
+		var bmd:FlxBitmap = graphic.texture.getBitmap();
 
 		var p:Point = new Point();
 		p.setTo(0, 0);

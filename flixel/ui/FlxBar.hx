@@ -643,7 +643,7 @@ class FlxBar extends FlxSprite
 				case DRAW_TILES:
 					frames = emptyGraphic.imageFrame;
 				case BLITTING:
-					_emptyBar = emptyGraphic.bitmap.clone();
+					_emptyBar = emptyGraphic.texture.getBitmap().clone();
 					
 					barWidth = _emptyBar.width;
 					barHeight = _emptyBar.height;
@@ -685,7 +685,7 @@ class FlxBar extends FlxSprite
 				case DRAW_TILES:
 					frontFrames = filledGraphic.imageFrame;
 				case BLITTING:
-					_filledBar = filledGraphic.bitmap.clone();
+					_filledBar = filledGraphic.texture.getBitmap().clone();
 					
 					_filledBarRect.setTo(0, 0, barWidth, barHeight);
 					

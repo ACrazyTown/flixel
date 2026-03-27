@@ -960,6 +960,7 @@ class FlxAtlas implements IFlxDestroyable
 		return result;
 	}
 
+	@:haxe.warning("-WDeprecated")
 	function set_bitmapData(value:FlxBitmap):FlxBitmap
 	{
 		// update graphic bitmapData

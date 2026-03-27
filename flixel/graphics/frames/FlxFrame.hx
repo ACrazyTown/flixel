@@ -322,7 +322,7 @@ class FlxFrame implements IFlxDestroyable
 	{
 		final sourceX = Std.int(toSourceXHelper(frameX, frameY));
 		final sourceY = Std.int(toSourceYHelper(frameX, frameY));
-		return parent.bitmap.getPixel32(sourceX, sourceY);
+		return parent.texture.getBitmap().getPixel32(sourceX, sourceY);
 	}
 	
 	/**
@@ -402,7 +402,7 @@ class FlxFrame implements IFlxDestroyable
 			if (point != null)
 				_point.offset(point.x, point.y);
 				
-			bmd.copyPixels(parent.bitmap, frame.copyToFlash(_rect), _point, null, null, mergeAlpha);
+			bmd.copyPixels(parent.texture.getBitmap(), frame.copyToFlash(_rect), _point, null, null, mergeAlpha);
 		}
 		else
 		{
@@ -410,7 +410,7 @@ class FlxFrame implements IFlxDestroyable
 			if (point != null)
 				_matrix.translate(point.x, point.y);
 				
-			bmd.draw(parent.bitmap, _matrix, null, null, getDrawFrameRect(_matrix, _rect));
+			bmd.draw(parent.texture.getBitmap(), _matrix, null, null, getDrawFrameRect(_matrix, _rect));
 		}
 
 		return bmd;
@@ -450,7 +450,7 @@ class FlxFrame implements IFlxDestroyable
 		if (point != null)
 			_matrix.translate(point.x, point.y);
 			
-		bmd.draw(parent.bitmap, _matrix, null, null, getDrawFrameRect(_matrix, _rect));
+		bmd.draw(parent.texture.getBitmap(), _matrix, null, null, getDrawFrameRect(_matrix, _rect));
 		return bmd;
 	}
 
