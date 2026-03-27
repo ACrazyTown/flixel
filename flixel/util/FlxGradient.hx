@@ -1,7 +1,7 @@
 package flixel.util;
 
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.GradientType;
 import openfl.display.InterpolationMethod;
 import openfl.display.Shape;
@@ -67,7 +67,7 @@ class FlxGradient
 	public static function createGradientArray(width:Int, height:Int, colors:Array<FlxColor>, chunkSize:UInt = 1, rotation:Int = 90,
 			interpolate:Bool = true):Array<FlxColor>
 	{
-		var data:BitmapData = createGradientBitmapData(width, height, colors, chunkSize, rotation, interpolate);
+		var data:FlxBitmap = createGradientBitmapData(width, height, colors, chunkSize, rotation, interpolate);
 		var result = new Array<Int>();
 
 		for (y in 0...data.height)
@@ -92,14 +92,14 @@ class FlxGradient
 	public static function createGradientFlxSprite(width:Int, height:Int, colors:Array<FlxColor>, chunkSize:UInt = 1, rotation:Int = 90,
 			interpolate:Bool = true):FlxSprite
 	{
-		var data:BitmapData = createGradientBitmapData(width, height, colors, chunkSize, rotation, interpolate);
+		var data:FlxBitmap = createGradientBitmapData(width, height, colors, chunkSize, rotation, interpolate);
 		var dest = new FlxSprite();
 		dest.pixels = data;
 		return dest;
 	}
 
 	public static function createGradientBitmapData(width:UInt, height:UInt, colors:Array<FlxColor>, chunkSize:UInt = 1, rotation:Int = 90,
-			interpolate:Bool = true):BitmapData
+			interpolate:Bool = true):FlxBitmap
 	{
 		//	Sanity checks
 		if (width < 1)
@@ -124,7 +124,7 @@ class FlxGradient
 
 		shape.graphics.drawRect(0, 0, width, height / chunkSize);
 
-		var data = new BitmapData(width, height, true, FlxColor.TRANSPARENT);
+		var data = new FlxBitmap(width, height,  FlxColor.TRANSPARENT);
 
 		if (chunkSize == 1)
 		{
@@ -132,7 +132,7 @@ class FlxGradient
 		}
 		else
 		{
-			var tempBitmap = new Bitmap(new BitmapData(width, Std.int(height / chunkSize), true, FlxColor.TRANSPARENT));
+			var tempBitmap = new Bitmap(new FlxBitmap(width, Std.int(height / chunkSize), FlxColor.TRANSPARENT));
 			tempBitmap.bitmapData.draw(shape);
 			tempBitmap.scaleY = chunkSize;
 
@@ -184,10 +184,10 @@ class FlxGradient
 	}
 
 	/**
-	 * Creates a new gradient and overlays that on-top of the given BitmapData at the destX/destY coordinates (default 0,0)
+	 * Creates a new gradient and overlays that on-top of the given FlxBitmap at the destX/destY coordinates (default 0,0)
 	 * Use low alpha values in the colours to have the gradient overlay and not destroy the image below
 	 *
-	 * @param   dest          The BitmapData to overlay the gradient onto
+	 * @param   dest          The FlxBitmap to overlay the gradient onto
 	 * @param   width         The width of the FlxSprite (and therefore gradient)
 	 * @param   height        The height of the FlxSprite (and therefore gradient)
 	 * @param   colors        An array of colour values for the gradient to cycle through
@@ -196,10 +196,10 @@ class FlxGradient
 	 * @param   chunkSize     If you want a more old-skool looking chunky gradient, increase this value!
 	 * @param   rotation      Angle of the gradient in degrees. 90 = top to bottom, 180 = left to right. Any angle is valid
 	 * @param   interpolate   Interpolate the colours? True uses RGB interpolation, false uses linear RGB
-	 * @return  The composited BitmapData
+	 * @return  The composited FlxBitmap
 	 */
-	public static function overlayGradientOnBitmapData(dest:BitmapData, width:Int, height:Int, colors:Array<FlxColor>, destX:Int = 0, destY:Int = 0,
-			chunkSize:UInt = 1, rotation:Int = 90, interpolate:Bool = true):BitmapData
+	public static function overlayGradientOnBitmapData(dest:FlxBitmap, width:Int, height:Int, colors:Array<FlxColor>, destX:Int = 0, destY:Int = 0,
+			chunkSize:UInt = 1, rotation:Int = 90, interpolate:Bool = true):FlxBitmap
 	{
 		if (width > dest.width)
 		{
@@ -211,7 +211,7 @@ class FlxGradient
 			height = dest.height;
 		}
 
-		var source:BitmapData = createGradientBitmapData(width, height, colors, chunkSize, rotation, interpolate);
+		var source:FlxBitmap = createGradientBitmapData(width, height, colors, chunkSize, rotation, interpolate);
 		dest.copyPixels(source, new Rectangle(0, 0, source.width, source.height), new Point(destX, destY), null, null, true);
 		source.dispose();
 		return dest;

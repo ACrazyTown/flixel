@@ -1,6 +1,6 @@
 package flixel.system.debug.interaction.tools;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 import flixel.system.FlxAssets;
 import flixel.system.debug.interaction.Interaction;
@@ -15,7 +15,7 @@ import flixel.util.FlxDestroyUtil;
 class Tool extends Sprite implements IFlxDestroyable
 {
 	public var button(default, null):FlxSystemButton;
-	public var cursor(default, null):BitmapData;
+	public var cursor(default, null):FlxBitmap;
 	public var cursorInUse(default, null):String = "";
 
 	var _name:String = "(Unknown tool)";
@@ -61,7 +61,7 @@ class Tool extends Sprite implements IFlxDestroyable
 	 * that a specific action is happening. Use `setCursorInUse()` to
 	 * learn more about custom cursors.
 	 */
-	function setCursor(Icon:BitmapData, offsetX = 0.0, offsetY = 0.0):Void
+	function setCursor(Icon:FlxBitmap, offsetX = 0.0, offsetY = 0.0):Void
 	{
 		cursor = Icon;
 		_brain.registerCustomCursor(_name, cursor, offsetX, offsetY);

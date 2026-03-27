@@ -1,6 +1,6 @@
 package flixel.animation;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import flixel.FlxSprite;
 import massive.munit.Assert;
 
@@ -281,7 +281,7 @@ class FlxAnimationControllerTest extends FlxTest
 	@Test // #3554
 	function testAddAllValidFrames()
 	{
-		var bitmapData = new BitmapData(4, 1);
+		var bitmapData = new FlxBitmap(4, 1);
 		sprite.loadGraphic(bitmapData, true, 1, 1);
 		
 		sprite.animation.add("test", [0, 1, 2, 3]);
@@ -294,7 +294,7 @@ class FlxAnimationControllerTest extends FlxTest
 	@Test // #3554
 	function testAddSomeInvalidFrames()
 	{
-		var bitmapData = new BitmapData(4, 1);
+		var bitmapData = new FlxBitmap(4, 1);
 		sprite.loadGraphic(bitmapData, true, 1, 1);
 		
 		sprite.animation.add("test", [0, 4, 2, 5, 3]);
@@ -307,7 +307,7 @@ class FlxAnimationControllerTest extends FlxTest
 	@Test // #3554
 	function testAddSingleValidFrame()
 	{
-		var bitmapData = new BitmapData(4, 1);
+		var bitmapData = new FlxBitmap(4, 1);
 		sprite.loadGraphic(bitmapData, true, 1, 1);
 		
 		sprite.animation.add("test", [0]);
@@ -331,7 +331,7 @@ class FlxAnimationControllerTest extends FlxTest
 	@Test // #3554
 	function testFrameIndexNegativeClampsToZero()
 	{
-		var bitmapData = new BitmapData(4, 1);
+		var bitmapData = new FlxBitmap(4, 1);
 		sprite.loadGraphic(bitmapData, true, 1, 1);
 		
 		sprite.animation.add("test", [0, 1, 2, 3]);
@@ -346,7 +346,7 @@ class FlxAnimationControllerTest extends FlxTest
 
 	function loadSpriteSheet():Void
 	{
-		var bitmapData = new BitmapData(2, 1);
+		var bitmapData = new FlxBitmap(2, 1);
 		bitmapData.setPixel(0, 0, 0xffffff);
 		bitmapData.setPixel(1, 0, 0x000000);
 		sprite.loadGraphic(bitmapData, true, 1, 1);

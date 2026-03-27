@@ -10,7 +10,7 @@ import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;

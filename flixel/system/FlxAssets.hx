@@ -5,6 +5,7 @@ import haxe.macro.Expr;
 #if !macro
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.FlxBitmap;
 import flixel.graphics.atlas.AseAtlas;
 import flixel.graphics.atlas.TexturePackerAtlas;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -12,16 +13,17 @@ import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.graphics.frames.bmfont.BMFont;
 import flixel.system.frontEnds.AssetFrontEnd;
+import flixel.util.typeLimit.OneOfFive;
 import flixel.util.typeLimit.OneOfFour;
 import flixel.util.typeLimit.OneOfThree;
 import flixel.util.typeLimit.OneOfTwo;
 import haxe.Json;
 import haxe.io.Bytes;
 import haxe.xml.Access;
-import openfl.display.BitmapData;
 import openfl.display.Graphics;
 import openfl.media.Sound;
 import openfl.utils.ByteArray;
+import openfl.display.BitmapData;
 
 using StringTools;
 
@@ -36,10 +38,11 @@ class VirtualInputData extends #if nme ByteArray #else ByteArrayData #end {}
 
 typedef FlxTexturePackerJsonAsset = FlxJsonAsset<TexturePackerAtlas>;
 typedef FlxAsepriteJsonAsset = FlxJsonAsset<AseAtlas>;
-typedef FlxTilemapGraphicAsset = OneOfFour<FlxFramesCollection, FlxGraphic, BitmapData, String>;
-typedef FlxBitmapFontGraphicAsset = OneOfFour<FlxFrame, FlxGraphic, BitmapData, String>;
+typedef FlxTilemapGraphicAsset = OneOfFive<FlxFramesCollection, FlxGraphic, FlxBitmap, BitmapData, String>;
+typedef FlxBitmapFontGraphicAsset = OneOfFive<FlxFrame, FlxGraphic, FlxBitmap, BitmapData, String>;
 
-abstract FlxGraphicAsset(OneOfFour<FlxGraphic, BitmapData, String, Class<Dynamic>>) from FlxGraphic to FlxGraphic from BitmapData to BitmapData from String to String from Class<Dynamic> to Class<Dynamic>
+abstract FlxGraphicAsset(OneOfFive<FlxGraphic, FlxBitmap, BitmapData, String, Class<Dynamic>>) from FlxGraphic to FlxGraphic from FlxBitmap to FlxBitmap from BitmapData to BitmapData from String
+	to String from Class<Dynamic> to Class<Dynamic>
 {
 	public inline function resolveBitmapData(?log, ?pos):Null<BitmapData>
 	{

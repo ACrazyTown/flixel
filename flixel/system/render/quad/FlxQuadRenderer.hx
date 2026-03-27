@@ -3,7 +3,7 @@ package flixel.system.render.quad;
 // import flixel.graphics.FlxRenderTexture;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import flixel.FlxG;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.FlxTexture;

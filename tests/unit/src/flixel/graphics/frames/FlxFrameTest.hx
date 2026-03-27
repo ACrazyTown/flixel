@@ -7,7 +7,7 @@ import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import haxe.PosInfos;
 import massive.munit.Assert;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.Rectangle;
 
 @:access(flixel.graphics.frames.FlxFrame.new)
@@ -105,7 +105,7 @@ class FlxFrameTest extends FlxTest
 	function testGetPixelAt()
 	{
 		final p = 3;
-		final bitmap = new BitmapData(p * 2, p * 2, false);
+		final bitmap = new FlxBitmap(p * 2, p * 2);
 		bitmap.fillRect(new Rectangle(0, 0, p, p), FlxColor.RED);
 		bitmap.fillRect(new Rectangle(p, 0, p, p), FlxColor.GREEN);
 		bitmap.fillRect(new Rectangle(0, p, p, p), FlxColor.BLUE);
@@ -241,7 +241,7 @@ class FlxFrameTest extends FlxTest
 	function createFrames(name:String, width = 100, height = 100, cols = 10, rows = 10, buffer = 0):Array<FlxFrame>
 	{
 		final sprite = new FlxSprite(0, 0);
-		sprite.loadGraphic(new BitmapData(width * cols, height * rows), true, width, height, true, name);
+		sprite.loadGraphic(new FlxBitmap(width * cols, height * rows), true, width, height, true, name);
 		if (buffer > 0)
 		{
 			for (frame in sprite.frames.frames)

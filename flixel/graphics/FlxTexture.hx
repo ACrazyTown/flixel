@@ -1,7 +1,7 @@
 package flixel.graphics;
 
 import lime.graphics.ImageBuffer;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import lime.utils.UInt8Array;
 import flixel.math.FlxRect;
 import lime.graphics.opengl.GLFramebuffer;
@@ -290,7 +290,7 @@ class FlxTexture implements IFlxDestroyable
     }
 
     /**
-     * `BitmapData` synced the bitmap and texture automatically while `FlxTexture` requires you to manually apply your changes.
+	 * `FlxBitmap` synced the bitmap and texture automatically while `FlxTexture` requires you to manually apply your changes.
      * This is called by draw methods to avoid a breaking change between the two, and should be removed in the next major version.
      */
     @:allow(flixel.system.render)

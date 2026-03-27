@@ -1,6 +1,6 @@
 package flixel.system.debug;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.text.TextField;
 import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFormat;
@@ -37,7 +37,7 @@ class DebuggerUtil
 	}
 
 	@:allow(flixel.system)
-	static function fixSize(bitmapData:BitmapData):BitmapData
+	static function fixSize(bitmapData:FlxBitmap):FlxBitmap
 	{
 		#if html5 // dirty hack for openfl/openfl#682
 		Reflect.setProperty(bitmapData, "width", 11);

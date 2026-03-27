@@ -5,7 +5,7 @@ import flixel.math.FlxMath;
 import flixel.system.FlxAssets;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.util.typeLimit.OneOfTwo;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 using StringTools;
 
@@ -397,17 +397,17 @@ class FlxStringUtil
 	}
 	
 	/**
-	 * Converts a BitmapData object to a comma-separated string. Black pixels are flagged as 'solid' by default,
+	 * Converts a FlxBitmap object to a comma-separated string. Black pixels are flagged as 'solid' by default,
 	 * non-black pixels are set as non-colliding. Black pixels must be PURE BLACK.
 	 *
-	 * @param   bitmap        A Flash BitmapData object, preferably black and white.
+	 * @param   bitmap        A Flash FlxBitmap object, preferably black and white.
 	 * @param   whiteIsSolid  Whether to load white pixels as solid and black and empty
 	 * @param   scale         Default is 1. Scale of 2 means each pixel forms a 2x2 block of tiles, and so on.
 	 * @param	colorMap  	  An array of color values (ignores alpha) in the order they're intended to be assigned as indices
 	 * @return  A comma-separated string containing the level data in a FlxTilemap-friendly format.
 	 */
 	@:deprecated("bitmapToCSV with both bitmap and colorMap is deprecated, use a different overload of bitmapToCSV")
-	overload public static inline extern function bitmapToCSV(bitmap:BitmapData, whiteIsSolid:Bool, scale:Int, colorMap:Null<Array<FlxColor>>):String
+	overload public static inline extern function bitmapToCSV(bitmap:FlxBitmap, whiteIsSolid:Bool, scale:Int, colorMap:Null<Array<FlxColor>>):String
 	{
 		if (colorMap == null)
 			colorMap = whiteIsSolid ? invertColorMap : defaultColorMap;
@@ -416,15 +416,15 @@ class FlxStringUtil
 	}
 	
 	/**
-	 * Converts a BitmapData object to a comma-separated string. Black pixels are flagged as
+	 * Converts a FlxBitmap object to a comma-separated string. Black pixels are flagged as
 	 * 'solid' by default, non-black pixels are set as non-colliding. Black pixels must be PURE BLACK
 	 *
-	 * @param   bitmap        A Flash BitmapData object, preferably black and white
+	 * @param   bitmap        A Flash FlxBitmap object, preferably black and white
 	 * @param   whiteIsSolid  Whether to load white pixels as solid and black and empty
 	 * @param   scale         Default is 1. Scale of 2 means each pixel forms a 2x2 block of tiles
 	 * @return  A comma-separated string containing the level data in a FlxTilemap-friendly format
 	 */
-	overload public static inline extern function bitmapToCSV(bitmap:BitmapData, whiteIsSolid = false, scale = 1):String
+	overload public static inline extern function bitmapToCSV(bitmap:FlxBitmap, whiteIsSolid = false, scale = 1):String
 	{
 		return bitmapToCSVHelper(bitmap, scale, whiteIsSolid ? invertColorMap : defaultColorMap, true);
 	}
@@ -433,35 +433,35 @@ class FlxStringUtil
 	static final invertColorMap = [FlxColor.BLACK, FlxColor.WHITE];
 
 	/**
-	 * Converts a BitmapData object to a comma-separated string.
+	 * Converts a FlxBitmap object to a comma-separated string.
 	 *
-	 * @param	bitmap   A Flash BitmapData object, preferably black and white.
+	 * @param	bitmap   A Flash FlxBitmap object, preferably black and white.
 	 * @param	scale    Default is 1. Scale of 2 means each pixel forms a 2x2 block of tiles, and so on.
 	 * @param	colorMap An array of rgb color values in the order, they're intended to be assigned as indices
 	 * @return	A comma-separated string containing the level data in a FlxTilemap-friendly format.
 	 */
-	overload public static inline extern function bitmapToCSV(bitmap:BitmapData, scale = 1, colorMap:Array<FlxColor>):String
+	overload public static inline extern function bitmapToCSV(bitmap:FlxBitmap, scale = 1, colorMap:Array<FlxColor>):String
 	{
 		return bitmapToCSVHelper(bitmap, scale, colorMap, true);
 	}
 
 	/**
-	 * Converts a BitmapData object to a comma-separated string.
+	 * Converts a FlxBitmap object to a comma-separated string.
 	 * 
 	 * **NOTE:** Due to OpenFL premultiplying all pixel colors on set,
 	 * any pixel with a 0 alpha and non-zero color components will be treated as 0x00000000
 	 * 
-	 * @param	bitmap   A Flash BitmapData object, preferably black and white.
+	 * @param	bitmap   A Flash FlxBitmap object, preferably black and white.
 	 * @param	scale    Default is 1. Scale of 2 means each pixel forms a 2x2 block of tiles, and so on.
 	 * @param	colorMap An array of rgba color values in the order they're intended to be assigned as indices
 	 * @return	A comma-separated string containing the level data in a FlxTilemap-friendly format.
 	 */
-	public static inline function bitmap32ToCSV(bitmap:BitmapData, scale = 1, colorMap:Array<FlxColor>):String
+	public static inline function bitmap32ToCSV(bitmap:FlxBitmap, scale = 1, colorMap:Array<FlxColor>):String
 	{
 		return bitmapToCSVHelper(bitmap, scale, colorMap, false);
 	}
 	
-	static function bitmapToCSVHelper(bitmap:BitmapData, scale:Int, colors:Array<FlxColor>, ignoreAlpha:Bool):String
+	static function bitmapToCSVHelper(bitmap:FlxBitmap, scale:Int, colors:Array<FlxColor>, ignoreAlpha:Bool):String
 	{
 		final colorMap = generateColorMapFromArray(colors, ignoreAlpha);
 		final array = bitmapToArray2d(bitmap, colorMap, ignoreAlpha, 0);
@@ -469,7 +469,7 @@ class FlxStringUtil
 		return scaledArray.map(row->row.join(", ")).join("\n");
 	}
 	
-	static function bitmapToArray2d<T>(bitmap:BitmapData, colorMap:Map<FlxColor, T>, ignoreAlpha:Bool, backupValue:T):Array<Array<T>>
+	static function bitmapToArray2d<T>(bitmap:FlxBitmap, colorMap:Map<FlxColor, T>, ignoreAlpha:Bool, backupValue:T):Array<Array<T>>
 	{
 		final bitmapColors = bitmap.getVector(bitmap.rect);
 		final columns = bitmap.width;
@@ -513,7 +513,7 @@ class FlxStringUtil
 		{
 			final width = 100;
 			final height = 100;
-			final bmd = new openfl.display.BitmapData(width, height, true);
+			final bmd = new flixel.graphics.FlxBitmap(width, height);
 			final pixels = width * height;
 			for (color in [FlxColor.WHITE, FlxColor.BLACK, FlxColor.MAGENTA])
 			{
@@ -561,7 +561,7 @@ class FlxStringUtil
 		// check for farbling, try to account
 		final width = 100;
 		final height = 100;
-		final bmd = new openfl.display.BitmapData(width, height, true);
+		final bmd = new flixel.graphics.FlxBitmap(width, height);
 		final pixels = width * height;
 		var mapModified = false;
 		for (color => index in colorMap)

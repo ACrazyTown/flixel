@@ -1,5 +1,6 @@
 package flixel.system.frontEnds;
 
+import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxPoint;
@@ -7,7 +8,7 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import openfl.Assets;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 /**
  * Internal storage system to prevent graphics from being used repeatedly in memory.
@@ -128,12 +129,12 @@ class BitmapFrontEnd
 	}
 
 	/**
-	 * Gets a key from a cached BitmapData.
+	 * Gets a key from a cached FlxBitmap.
 	 *
-	 * @param   bmd  BitmapData to find in the cache.
-	 * @return  The BitmapData's key or null if there isn't such BitmapData in cache.
+	 * @param   bmd  FlxBitmap to find in the cache.
+	 * @return  The FlxBitmap's key or null if there isn't such FlxBitmap in cache.
 	 */
-	public function findKeyForBitmap(bmd:BitmapData):String
+	public function findKeyForBitmap(bmd:FlxBitmap):String
 	{
 		for (key in _cache.keys())
 		{
@@ -147,7 +148,7 @@ class BitmapFrontEnd
 	/**
 	 * Helper method for getting cache key for FlxGraphic objects created from the class.
 	 *
-	 * @param   source  BitmapData source class.
+	 * @param   source  FlxBitmap source class.
 	 * @return  Full name for provided class.
 	 */
 	public inline function getKeyForClass(source:Class<Dynamic>):String
@@ -346,7 +347,7 @@ class BitmapFrontEnd
 	{
 		if (_whitePixel == null)
 		{
-			var bd = new BitmapData(10, 10, true, FlxColor.WHITE);
+			var bd = new FlxBitmap(10, 10, FlxColor.WHITE);
 			var graphic:FlxGraphic = FlxG.bitmap.add(bd, true, "whitePixels");
 			graphic.persist = true;
 			_whitePixel = graphic.imageFrame.frame;

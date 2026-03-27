@@ -1,6 +1,6 @@
 package flixel.system.debug.interaction.tools;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.ui.Keyboard;
 import flixel.FlxBasic;
 import flixel.FlxG;
