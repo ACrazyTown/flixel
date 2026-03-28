@@ -1,7 +1,5 @@
 package flixel.system.render.blit;
 
-
-// import flixel.graphics.FlxRenderTexture;
 import lime.utils.UInt8Array;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.FlxTexture;
@@ -78,9 +76,4 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 	function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	// function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
-
-	// function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle {return null;}
-	// function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void {}
-	// function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void {}
-	// function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
 }
