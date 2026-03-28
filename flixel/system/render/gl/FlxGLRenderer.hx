@@ -108,27 +108,31 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         _projectionHeight = height;
     }
 
+    public inline function setRenderTexture(texture:Null<FlxRenderTexture>):Void
+    {
+        context.setRenderTexture(texture);
+        _needsFlippedProjection = texture == null;
+        // trace(_needsFlippedProjection);
+    }
+
     function createTextureHandle():FlxTextureHandle
     {
-        #if FLX_RENDER_OPENGL
         // return GL.createTexture();
         final handle = GL.createTexture();
         GL.bindTexture(GL.TEXTURE_2D, handle);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+
+        // TODO ant: remove this in v7.0.0 when texture filtering is real
+        // GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+        // GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
         GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
         GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+
         return handle;
-        #else
-        return null;
-        #end
     }
 
 	function destroyTextureHandle(handle:FlxTextureHandle):Void
     {
-        #if FLX_RENDER_OPENGL
         GL.deleteTexture(handle);
-        #end
     }
 
     function destroyTextureBitmap(bitmap:FlxBitmap):Void
@@ -136,25 +140,8 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         bitmap.destroy();
     }
 
-	function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle
-    {
-        #if FLX_RENDER_OPENGL
-        return new FlxGLRenderTarget(texture, depth, stencil);
-        #else
-        return null;
-        #end
-    }
-
-	function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void
-    {
-        #if FLX_RENDER_OPENGL
-        handle.destroy();
-        #end
-    }
-
 	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void
     {
-        #if FLX_RENDER_OPENGL
         var dataFormat:Int = GL.RGBA;
         #if sys
         if (bitmap.image.format == BGRA32)
@@ -170,7 +157,6 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
             context.allocTextureData(texture, bitmap.data, dataFormat, GL.RGBA);
         else
             context.uploadTextureData(texture, bitmap.data, GL.RGBA);
-        #end
     }
 
 	function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void
@@ -212,21 +198,56 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     //     context.setTextureFilter(filter);
     // }
 
+    function createRenderTargetHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle
+    {
+        var handle = new FlxGLRenderTarget();
+        handle.texture = texture;
+
+        handle.framebuffer = GL.createFramebuffer();
+        GL.bindFramebuffer(GL.FRAMEBUFFER, handle.framebuffer);
+        GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, texture.handle, 0);
+
+        // resizeRenderTarget(texture, texture.width, texture.height);
+        return handle;
+    }
+
+	function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void
+    {
+        if (handle.framebuffer != null)
+        {
+            GL.deleteFramebuffer(handle.framebuffer);
+            handle.framebuffer = null;
+        }
+
+        if (handle.renderbuffer != null)
+        {
+            GL.deleteRenderbuffer(handle.renderbuffer);
+            handle.renderbuffer = null;
+        }
+    }
+
     function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void
     {
-        var glTexture = texture.handle;
-        GL.bindTexture(GL.TEXTURE_2D, glTexture);
+        final target = texture.renderTarget;
+        context.bindTexture(texture);
 
         // Reallocate texture with new size
         GLHelper.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width, height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null);
 
-        // It's not safe to reuse render buffers so we have to recreate them
-        texture.renderTarget.initRenderBuffers();
+        // Delete previous render buffer because it's not safe to reuse
+        if (target.renderbuffer != null)
+        {
+            GL.deleteRenderbuffer(target.renderbuffer);
+            target.renderbuffer = null;
+        }
+
+        // Initialize the new render buffers
+        setupRenderTargetBuffers(texture, width, height);
     }
 
 	function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void
     {
-        GL.bindFramebuffer(GL.FRAMEBUFFER, texture.renderTarget.frameBuffer);
+        GL.bindFramebuffer(GL.FRAMEBUFFER, texture.renderTarget.framebuffer);
 
         var mask:Int = GL.COLOR_BUFFER_BIT;
         if (depth)
@@ -236,6 +257,22 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
         GL.clearColor(color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat);
         GL.clear(mask);
+    }
+
+    function setupRenderTargetBuffers(texture:FlxRenderTexture, width:Int, height:Int):Void
+    {
+        final target = texture.renderTarget;
+
+        if (texture.hasDepthStencil)
+        {
+            // Create depth/stencil buffer
+            target.renderbuffer = GL.createRenderbuffer();
+            GL.bindRenderbuffer(GL.RENDERBUFFER, target.renderbuffer);
+            GL.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH24_STENCIL8, texture.width, texture.height);
+
+            // Attach it to the framebuffer
+            GL.framebufferRenderbuffer(GL.RENDERBUFFER, GL.DEPTH_STENCIL_ATTACHMENT, GL.RENDERBUFFER, target.renderbuffer);
+        }
     }
 }
 #end

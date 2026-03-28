@@ -84,6 +84,9 @@ abstract class FlxBatcher<T:FlxDrawData> implements IFlxDestroyable
         if (_renderer.context.setShader(shader))
             initShader(shader);
 
+        // Set matrix uniform
+        GLHelper.uniformMatrix4fv(shader.data.uMatrix.index, false, _renderer.projection);
+
         _renderer.context.setBlendMode(dc.blend);
 
         _renderer.context.bindTexture(dc.texture.texture);
@@ -96,9 +99,6 @@ abstract class FlxBatcher<T:FlxDrawData> implements IFlxDestroyable
         FlxG.renderer.totalDrawCalls++;
 
         dc.put();
-
-        // _offset += _count;
-        // _count = 0;
     }
 
     /**
