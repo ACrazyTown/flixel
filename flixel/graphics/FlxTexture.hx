@@ -1,13 +1,11 @@
 package flixel.graphics;
 
-import lime.graphics.ImageBuffer;
 import flixel.graphics.FlxBitmap;
-import lime.utils.UInt8Array;
 import flixel.math.FlxRect;
-import lime.graphics.opengl.GLFramebuffer;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
+import lime.utils.UInt8Array;
 
 /**
  * Underlying representation of the texture.

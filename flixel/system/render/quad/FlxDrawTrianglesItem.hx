@@ -57,7 +57,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		@:privateAccess
 		final view = camera.viewQuad;
 		
-		#if !flash
+		#if (!flash && FLX_RENDER_DRAWQUADS)
 		var shader = shader != null ? shader : graphics.shader;
 		shader.bitmap.input = graphics.texture.handle;
 		shader.bitmap.filter = (camera.view.antialiasing || antialiasing) ? LINEAR : NEAREST;
@@ -82,7 +82,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 
 		view.canvas.graphics.beginShaderFill(shader);
 		#else
-		view.canvas.graphics.beginBitmapFill(graphics.bitmap, null, true, (camera.antialiasing || antialiasing));
+		view.canvas.graphics.beginBitmapFill(graphics.texture.getBitmap(), null, true, (camera.antialiasing || antialiasing));
 		#end
 
 		view.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);
