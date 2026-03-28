@@ -24,14 +24,7 @@ class FlxDrawData implements IFlxPooled
     public var blend:BlendMode;
     public var colorTransform:ColorTransform;
 
-    // FlxSprite.drawComplexMatrix (the matrix we receive when drawing)
-    // is static so we store the values here to avoid issues where the ref changes 
-    public var mtx:Float;
-    public var mty:Float;
-    public var ma:Float;
-    public var mb:Float;
-    public var mc:Float;
-    public var md:Float;
+    public var matrix:FlxMatrix = new FlxMatrix();
 
     var _inPool:Bool = false;
 
@@ -47,30 +40,10 @@ class FlxDrawData implements IFlxPooled
         this.shader = shader;
         this.blend = blend;
         this.colorTransform = transform;
-        
-        updateMatrix(matrix);
-    }
 
-    public inline function updateMatrix(matrix:FlxMatrix):Void
-    {
-        if (matrix == null)
-        {
-            mtx = 0;
-            mty = 0;
-            ma = 1;
-            mb = 0;
-            mc = 0;
-            md = 1;
-        }
-        else
-        {
-            mtx = matrix.tx;
-            mty = matrix.ty;
-            ma = matrix.a;
-            mb = matrix.b;
-            mc = matrix.c;
-            md = matrix.d;
-        }
+        this.matrix.identity();
+        if (matrix != null)
+            this.matrix.copyFrom(matrix);
     }
 
     public function put():Void {}
@@ -90,14 +63,7 @@ class FlxQuadDrawData extends FlxDrawData
         var data = pool.get();
         
         data.frame = frame;
-        data.textureSmoothing = smoothing;
-        data.textureRepeat = repeat;
-
-        data.shader = shader;
-        data.blend = blend;
-        data.colorTransform = transform;
-
-        data.updateMatrix(matrix);
+        data.set(frame.parent, smoothing, repeat, shader, blend, transform, matrix);
 
         data._inPool = false;
 

@@ -22,6 +22,13 @@ class FlxGLView extends FlxCameraView
     // TODO: abstract away the camera adding so that we don't need a flash sprite
     var dummySprite:Sprite = new Sprite();
 
+    var _useRenderMatrix:Bool = false;
+    var _renderMatrix:FlxMatrix = new FlxMatrix();
+
+    var renderTextureFrame:FlxFrame;
+    var renderTextureGraphic:FlxGraphic;
+    var renderTexture:FlxRenderTexture;
+
     /**
      * An array containing the draw data for all the sprites drawn to this camera.
      * 
@@ -38,6 +45,13 @@ class FlxGLView extends FlxCameraView
         super(camera);
 
         dummySprite.visible = false;
+
+        renderTexture = new FlxRenderTexture(camera.width, camera.height, true);
+        
+        // TODO ant: bruh
+        @:privateAccess 
+        renderTextureGraphic = new FlxGraphic(null, renderTexture);
+        renderTextureFrame = renderTextureGraphic.imageFrame.frame;
     }
 
     // =============================================================================
@@ -54,10 +68,14 @@ class FlxGLView extends FlxCameraView
         _drawQueue.resize(0);
 
         _renderer.resize(camera.width, camera.height);
+        _renderer.setRenderTexture(renderTexture);
+        renderTexture.clear(0);
     }
 
     override function render()
     {
+        _renderer.setRenderTexture(renderTexture);
+
         // Submit all the collected sprites to the batcher
         for (data in _drawQueue)
         {
@@ -66,6 +84,13 @@ class FlxGLView extends FlxCameraView
         }
 
         // Force a flush to draw whatever was left in the buffer
+        _renderer.quadBatcher.flush();
+
+        // Now swap back to drawing on the screen because we're about to draw the camera's texture
+        _renderer.setRenderTexture(null);
+
+        var quad = FlxQuadDrawData.get(renderTextureFrame, antialiasing, false, null, null, null, null);
+        _renderer.quadBatcher.add(quad);
         _renderer.quadBatcher.flush();
     }
 
@@ -105,8 +130,8 @@ class FlxGLView extends FlxCameraView
 
         // Queue a quad to be drawn when the camera renders
         var quad = FlxQuadDrawData.get(frame, smoothing, false, shader, blend, transform, null);
-        quad.mtx = destPoint.x;
-        quad.mty = destPoint.y;
+        quad.matrix.tx = destPoint.x;
+        quad.matrix.ty = destPoint.y;
         _drawQueue.push(quad);
 	}
 	
@@ -160,9 +185,23 @@ class FlxGLView extends FlxCameraView
 
     function updatePosition():Void {}
     
-    function updateScale():Void {}
+    function updateScale():Void 
+    {
+        updateRenderMatrix();
+    }
 
     function updateScrollRect():Void {}
+
+    inline function updateRenderMatrix():Void
+    {
+        _useRenderMatrix = (camera.scaleX < camera.initialZoom) || (camera.scaleY < camera.initialZoom);
+
+		_renderMatrix.identity();
+		_renderMatrix.translate(-camera.viewMarginLeft, -camera.viewMarginTop);
+
+		if (_useRenderMatrix)
+			_renderMatrix.scale(camera.scaleX, camera.scaleY);
+    }
 
     // =============================================================================
 	//} endregion                          HELPERS
