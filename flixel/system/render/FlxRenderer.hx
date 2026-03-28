@@ -166,12 +166,14 @@ interface IFlxTextureSystem
 	function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
 }
 
-interface IFlxRenderTargetSystem
-{
-	function createHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle;
-	function destroyHandle(handle:FlxRenderTargetHandle):Void;
-	function resize(texture:FlxRenderTexture, width:Int, height:Int):Void;
-	function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
+	abstract function createRenderTargetHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle;
+	abstract function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void;
+	abstract function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void;
+	abstract function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
+
+	// =============================================================================
+	//}endregion                           TEXTURES
+	// =============================================================================
 }
 
 /**
