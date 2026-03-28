@@ -139,27 +139,32 @@ class FlxQuadBatcher extends FlxBatcher<FlxQuadDrawData>
         final uv = data.frame.uv;
         final transform = data.colorTransform;
 
-        final scaledWX = rect.width * data.ma;
-        final scaledWY = rect.width * data.mb;
-        final scaledHX = rect.height * data.mc;
-        final scaledHY = rect.height * data.md;
+        final scaledWX = rect.width * data.matrix.a;
+        final scaledWY = rect.width * data.matrix.b;
+        final scaledHX = rect.height * data.matrix.c;
+        final scaledHY = rect.height * data.matrix.d;
 
         // TODO ant: do i also need to add the rect position here
-        final x1 = data.mtx;
-        final y1 = data.mty;
+        final x1 = data.matrix.tx;
+        final y1 = data.matrix.ty;
 
-        final x2 = scaledWX + data.mtx;
-        final y2 = scaledWY + data.mty;
+        final x2 = scaledWX + data.matrix.tx;
+        final y2 = scaledWY + data.matrix.ty;
 
-        final x3 = scaledHX + data.mtx;
-        final y3 = scaledHY + data.mty;
+        final x3 = scaledHX + data.matrix.tx;
+        final y3 = scaledHY + data.matrix.ty;
 
-        final x4 = scaledWX + scaledHX + data.mtx;
-        final y4 = scaledWY + scaledHY + data.mty;
+        final x4 = scaledWX + scaledHX + data.matrix.tx;
+        final y4 = scaledWY + scaledHY + data.matrix.ty;
 
-        final colorMult = FlxColor.fromRGBFloat(transform.redMultiplier, transform.greenMultiplier, transform.redMultiplier, transform.alphaMultiplier);
-        final colorOffset = FlxColor.fromRGB(Std.int(transform.redOffset), Std.int(transform.greenOffset), Std.int(transform.blueOffset), Std.int(transform.alphaOffset));
-
+        var colorMult = FlxColor.WHITE;
+        var colorOffset = FlxColor.TRANSPARENT;
+        if (transform != null)
+        {
+            colorMult = FlxColor.fromRGBFloat(transform.redMultiplier, transform.greenMultiplier, transform.redMultiplier, transform.alphaMultiplier);
+            colorOffset = FlxColor.fromRGB(Std.int(transform.redOffset), Std.int(transform.greenOffset), Std.int(transform.blueOffset), Std.int(transform.alphaOffset));
+        }
+    
         // Set up the render state
         _currentTexture = data.texture;
         _currentTextureRepeat = data.textureRepeat;
@@ -180,9 +185,6 @@ class FlxQuadBatcher extends FlxBatcher<FlxQuadDrawData>
     // Inlined cause we're calling it once!
     public function initShader(shader:Shader):Void
     {
-        // Set matrix uniform
-        GLHelper.uniformMatrix4fv(shader.data.uMatrix.index, false, _renderer.projection);
-
         final stride = attributesPerVertex * Float32Array.BYTES_PER_ELEMENT;
         var offset = 0;
 

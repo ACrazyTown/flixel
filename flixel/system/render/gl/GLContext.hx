@@ -1,8 +1,10 @@
 package flixel.system.render.gl;
 
+import lime.graphics.opengl.GLFramebuffer;
 #if FLX_RENDER_OPENGL
 import lime.utils.UInt8Array;
 import flixel.graphics.FlxTexture;
+import flixel.graphics.FlxRenderTexture;
 import lime.graphics.opengl.GLTexture;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
@@ -71,50 +73,34 @@ class GLContext
     {
         GL.bindTexture(GL.TEXTURE_2D, texture.handle);
 
-        // var wrap = repeat ? GL.REPEAT : GL.CLAMP_TO_EDGE;
-        // var filter = smoothing ? GL.LINEAR : GL.NEAREST;
+        var wrap = repeat ? GL.REPEAT : GL.CLAMP_TO_EDGE;
+        var filter = smoothing ? GL.LINEAR : GL.NEAREST;
 
-        // GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, wrap);
-        // GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, wrap);
-        // GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
-        // GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
-
-        /*
-        GL.bindTexture(GL.TEXTURE_2D, texture);
-
-        var minFilter:Int;
-        var magFilter:Int;
-
-        minFilter = magFilter = smoothing ? GL.LINEAR : GL.NEAREST;
-
-        var wrapS:Int;
-        var wrapT:Int;
-
-        switch (wrap)
-        {
-            case CLAMP(u, v):
-                wrapS = u ? GL.CLAMP_TO_EDGE : GL.REPEAT;
-                wrapT = v ? GL.CLAMP_TO_EDGE : GL.REPEAT;
-
-            case REPEAT(u, v):
-                wrapS = u ? GL.REPEAT : GL.CLAMP_TO_EDGE;
-                wrapT = v ? GL.REPEAT : GL.CLAMP_TO_EDGE;
-
-            case MIRRORED_REPEAT(u, v):
-                wrapS = u ? GL.MIRRORED_REPEAT : GL.REPEAT;
-                wrapT = v ? GL.MIRRORED_REPEAT : GL.REPEAT;
-        }
-
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, minFilter);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, magFilter);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, wrapS);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, wrapT);
-        */
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, wrap);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, wrap);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
     }
 
     // =============================================================================
 	//}endregion                          TEXTURES
 	// =============================================================================
+
+    /**
+     * Binds and uses `texture` as the render target. If `texture` is `null`,
+     * the rendering is done on the screen (back buffer).
+     * 
+     * Also resizes the viewport to match the texture's dimensions.
+     * 
+     * @param   texture   The `FlxRenderTexture` to render to.
+     */
+    public function setRenderTexture(texture:Null<FlxRenderTexture>):Void
+    {
+        GL.bindFramebuffer(GL.FRAMEBUFFER, (texture != null) ? texture.renderTarget.framebuffer : null);
+
+        if (texture != null)
+            GL.viewport(0, 0, texture.width, texture.height);
+    }
 
     /**
      * Sets `shader` as the currently active shader.
@@ -155,14 +141,5 @@ class GLContext
             case REPEAT: GL.REPEAT;
         }
     }
-
-    // inline function getGLFilter(filter:FlxTextureFilter):Int
-    // {
-    //     return switch(filter)
-    //     {
-    //         case NEAREST: GL.NEAREST;
-    //         case LINEAR: GL.LINEAR;
-    //     }
-    // }
 }
 #end

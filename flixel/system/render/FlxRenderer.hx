@@ -157,7 +157,7 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	// TODO: expose in 7.0.0 once sprite.antialiasing is removed
 	// abstract function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void;
 
-	abstract function createRenderTargetHandle(texture:FlxRenderTexture, depth:Bool, stencil:Bool):FlxRenderTargetHandle;
+	abstract function createRenderTargetHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle;
 	abstract function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void;
 	abstract function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void;
 	abstract function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;

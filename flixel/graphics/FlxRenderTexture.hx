@@ -12,10 +12,18 @@ class FlxRenderTexture extends FlxTexture
 {
     public var renderTarget(default, null):FlxRenderTargetHandle;
 
-    public function new(width:Int, height:Int, depth:Bool = true, stencil:Bool = true)
+    /**
+     * Whether the render texture has a depth/stencil buffer.
+     */
+    public var hasDepthStencil(default, null):Bool;
+
+    public function new(width:Int, height:Int, depthStencil:Bool = true)
     {
         super(width, height);
-        renderTarget = FlxG.renderer.createRenderTargetHandle(this, depth, stencil);
+        hasDepthStencil = depthStencil;
+
+        renderTarget = FlxG.renderer.createRenderTargetHandle(this, depthStencil);
+        FlxG.renderer.resizeRenderTarget(this, width, height);
     }
 
     override function destroy():Void
