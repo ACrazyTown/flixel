@@ -377,10 +377,30 @@ class FlxBatcher implements IFlxDestroyable
     {
         // TODO: upload portion of buffer?
         GL.bindBuffer(GL.ARRAY_BUFFER, _glVertexBuffer);
-        GLHelper.bufferSubData(GL.ARRAY_BUFFER, 0, _positions);
+
+        if (_numVertices == maxVertices)
+        {
+            // "orphan" (reallocate) the entire buffer to prevent stalls
+            GLHelper.bufferData(GL.ARRAY_BUFFER, _positions, GL.STREAM_DRAW);
+        }
+        else
+        {
+            var portion = _positions.subarray(0, _numVertices * attributesPerVertex);
+            GLHelper.bufferSubData(GL.ARRAY_BUFFER, 0, portion);
+        }
         
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, _glIndexBuffer);
-        GLHelper.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, 0, _indices);
+
+        if (_numIndices == maxIndices)
+        {
+            // "orphan" (reallocate) the entire buffer to prevent stalls
+            GLHelper.bufferData(GL.ELEMENT_ARRAY_BUFFER, _indices, GL.STREAM_DRAW);
+        }
+        else
+        {
+            var portion = _indices.subarray(0, _numIndices);
+            GLHelper.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, 0, portion);
+        }
     }
 
     inline function addVertex(x:Float, y:Float, u:Float, v:Float, colorMult:FlxColor, colorOffset:FlxColor, textureSlot:Int = -1):Void

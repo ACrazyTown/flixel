@@ -39,9 +39,9 @@ class FlxDrawData implements IFlxPooled
 
     function new() {}
 
-    public function destroy():Void {}
+    public inline function destroy():Void {}
 
-    public function set(texture:FlxGraphic, smoothing:Bool, repeat:Bool, shader:Shader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
+    public inline function set(texture:FlxGraphic, smoothing:Bool, repeat:Bool, shader:Shader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
     {
         this.texture = texture;
         this.textureSmoothing = smoothing;
