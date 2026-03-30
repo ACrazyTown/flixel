@@ -267,7 +267,7 @@ class FlxGLRenderTargetSystem implements IFlxRenderTargetSystem
             GL.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH24_STENCIL8, texture.width, texture.height);
 
             // Attach it to the framebuffer
-            GL.framebufferRenderbuffer(GL.RENDERBUFFER, GL.DEPTH_STENCIL_ATTACHMENT, GL.RENDERBUFFER, target.renderbuffer);
+            GL.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_STENCIL_ATTACHMENT, GL.RENDERBUFFER, target.renderbuffer);
         }
     }
 }
