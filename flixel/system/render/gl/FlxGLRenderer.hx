@@ -26,9 +26,19 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     public static inline final VERTICES_PER_QUAD:Int = 4;
 
     /**
+     * The amount of vertices needed for a single triangle.
+     */
+    public static inline final VERTICES_PER_TRIANGLE:Int = 3;
+
+    /**
      * The amount of indices needed for a single quad.
      */
     public static inline final INDICES_PER_QUAD:Int = 6;
+
+    /**
+     * The amount of vertices needed for a signel triangle.
+     */
+    public static inline final INDICES_PER_TRIANGLE:Int = 3;
 
     /**
      * The maximum amount of vertices that can fit in a index buffer.
@@ -65,12 +75,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         return _needsFlippedProjection ? _projectionFlipped : _projection;
     }
 
-    /**
-     * A quad batcher that can only fit a single quad.
-     * Used for optimization purposes when drawing unbatchable quads.
-     */
-    public var singleQuadBatcher:FlxQuadBatcher;
-    public var quadBatcher:FlxQuadBatcher;
+    public var batcher:FlxBatcher;
 
     var _projection:Matrix4 = new Matrix4();
     var _projectionFlipped:Matrix4 = new Matrix4();
@@ -89,8 +94,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
         defaultShader = new FlxGLShader();
 
-        singleQuadBatcher = new FlxQuadBatcher(1);
-        quadBatcher = new FlxQuadBatcher(QUADS_PER_BATCH);
+        batcher = new FlxBatcher(QUADS_PER_BATCH * VERTICES_PER_QUAD, QUADS_PER_BATCH * INDICES_PER_QUAD, 6);
     }
 
     public function createCameraView(camera:FlxCamera)

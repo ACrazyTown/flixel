@@ -1,5 +1,6 @@
 package flixel.system.render.gl;
 
+import openfl.Vector;
 #if FLX_RENDER_OPENGL
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
@@ -11,11 +12,19 @@ import openfl.display.BlendMode;
 import openfl.display.Shader;
 import openfl.geom.ColorTransform;
 
+enum FlxDrawType
+{
+    QUAD;
+    TRIANGLES;
+}
+
 /**
  * Helper, stores data about a queued sprite to draw.
  */
 class FlxDrawData implements IFlxPooled
 {
+    public var type:FlxDrawType;
+
     public var texture:FlxGraphic;
     public var textureSmoothing:Bool;
     public var textureRepeat:Bool;
@@ -75,6 +84,54 @@ class FlxQuadDrawData extends FlxDrawData
     {
         texture = value.parent;
         return this.frame = value;
+    }
+
+    public function new()
+    {
+        super();
+        type = QUAD;
+    }
+
+    override function put():Void
+    {
+        if (!_inPool)
+        {
+            _inPool = true;
+            pool.putUnsafe(this);
+        }
+    }
+}
+
+class FlxTrianglesDrawData extends FlxDrawData
+{
+	static var pool:FlxPool<FlxTrianglesDrawData> = new FlxPool(FlxTrianglesDrawData.new);
+	
+	public static function get(vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvs:FlxVector2d<Float>, colors:FlxVector2d<Int>, texture:FlxGraphic,
+			smoothing:Bool, repeat:Bool, shader:Shader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
+    {
+        var data = pool.get();
+
+        data.vertices = vertices;
+        data.indices = indices;
+        data.uvs = uvs;
+        data.colors = colors;
+        data.set(texture, smoothing, repeat, shader, blend, transform, matrix);
+
+        data._inPool = false;
+
+        return data;
+    }
+			
+    // TODO: typed array
+	public var vertices:FlxVector2d<Float>;
+	public var indices:Vector<Int>;
+	public var uvs:FlxVector2d<Float>;
+	public var colors:Vector<Int>;
+
+    public function new()
+    {
+        super();
+        type = TRIANGLES;
     }
 
     override function put():Void

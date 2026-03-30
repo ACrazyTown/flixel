@@ -79,19 +79,20 @@ class FlxGLView extends FlxCameraView
         // Submit all the collected sprites to the batcher
         for (data in _drawQueue)
         {
-            _renderer.quadBatcher.add(cast data);
+            _renderer.batcher.add(data);
             data.put();
         }
 
         // Force a flush to draw whatever was left in the buffer
-        _renderer.quadBatcher.flush();
+        _renderer.batcher.flush();
 
         // Now swap back to drawing on the screen because we're about to draw the camera's texture
         _renderer.setRenderTexture(null);
 
         var quad = FlxQuadDrawData.get(renderTextureFrame, antialiasing, false, null, null, null, null);
-        _renderer.quadBatcher.add(quad);
-        _renderer.quadBatcher.flush();
+        _renderer.batcher.add(quad);
+        _renderer.batcher.flush();
+        quad.put();
     }
 
     override function fill(color:FlxColor, blendAlpha:Bool = true)
@@ -139,6 +140,12 @@ class FlxGLView extends FlxCameraView
 			?position:FlxPoint, ?blend:BlendMode, repeat = false, smoothing = false, ?transform:ColorTransform, ?shader:FlxShader)
 	{
 		// super.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, shader);
+
+        // TODO: matrix support
+        var triangle = FlxTrianglesDrawData.get(vertices, indices, uvtData, colors, graphic, smoothing, repeat, shader, blend, transform, null);
+        triangle.matrix.tx = position.x;
+        triangle.matrix.ty = position.y;
+        _drawQueue.push(triangle);
 	}
 
     // =============================================================================
