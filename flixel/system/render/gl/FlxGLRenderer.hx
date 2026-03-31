@@ -51,11 +51,6 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
      * 65335 (max indices in a buffer) / 4 (unique indices per quad) = ~16383
      */
     public static inline final MAX_QUADS_PER_BUFFER:Int = 16383;
-    
-    /**
-     * The default capacity of a quad batch.
-     */
-    public static inline final QUADS_PER_BATCH:Int = 8192;
 
     /**
      * The default shader used by the renderer.
@@ -92,7 +87,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
         defaultShader = new FlxGLShader();
 
-        batcher = new FlxBatcher(QUADS_PER_BATCH * VERTICES_PER_QUAD, QUADS_PER_BATCH * INDICES_PER_QUAD, 6);
+        batcher = new FlxBatcher(MAX_QUADS_PER_BUFFER * VERTICES_PER_QUAD, MAX_QUADS_PER_BUFFER * INDICES_PER_QUAD, 6);
     }
 
     public function createCameraView(camera:FlxCamera)
