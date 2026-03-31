@@ -80,7 +80,6 @@ class FlxGLView extends FlxCameraView
         for (data in _drawQueue)
         {
             _renderer.batcher.add(data);
-            data.put();
         }
 
         // Force a flush to draw whatever was left in the buffer

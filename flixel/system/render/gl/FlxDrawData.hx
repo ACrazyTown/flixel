@@ -21,7 +21,7 @@ enum FlxDrawType
 /**
  * Helper, stores data about a queued sprite to draw.
  */
-class FlxDrawData implements IFlxPooled
+class FlxDrawData implements IFlxDestroyable
 {
     public var type:FlxDrawType;
 
@@ -54,20 +54,13 @@ class FlxDrawData implements IFlxPooled
         if (matrix != null)
             this.matrix.copyFrom(matrix);
     }
-
-    public function put():Void {}
-
-    public inline function putWeak():Void
-    {
-        put();
-    }
 }
 
-class FlxQuadDrawData extends FlxDrawData
+class FlxQuadDrawData extends FlxDrawData implements IFlxPooled
 {
     static var pool:FlxPool<FlxQuadDrawData> = new FlxPool(FlxQuadDrawData.new);
 
-    public static function get(frame:FlxFrame, smoothing:Bool, repeat:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix):FlxQuadDrawData
+    public static inline function get(frame:FlxFrame, smoothing:Bool, repeat:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix):FlxQuadDrawData
     {
         var data = pool.get();
         
@@ -92,7 +85,7 @@ class FlxQuadDrawData extends FlxDrawData
         type = QUAD;
     }
 
-    override function put():Void
+    public inline function put():Void
     {
         if (!_inPool)
         {
@@ -100,13 +93,18 @@ class FlxQuadDrawData extends FlxDrawData
             pool.putUnsafe(this);
         }
     }
+
+    public inline function putWeak():Void
+    {
+        put();
+    }
 }
 
-class FlxTrianglesDrawData extends FlxDrawData
+class FlxTrianglesDrawData extends FlxDrawData implements IFlxPooled
 {
 	static var pool:FlxPool<FlxTrianglesDrawData> = new FlxPool(FlxTrianglesDrawData.new);
 	
-	public static function get(vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvs:FlxVector2d<Float>, colors:FlxVector2d<Int>, texture:FlxGraphic,
+	public static inline function get(vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvs:FlxVector2d<Float>, colors:FlxVector2d<Int>, texture:FlxGraphic,
 			smoothing:Bool, repeat:Bool, shader:Shader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
     {
         var data = pool.get();
@@ -134,13 +132,18 @@ class FlxTrianglesDrawData extends FlxDrawData
         type = TRIANGLES;
     }
 
-    override function put():Void
+    public inline function put():Void
     {
         if (!_inPool)
         {
             _inPool = true;
             pool.putUnsafe(this);
         }
+    }
+
+    public inline function putWeak():Void
+    {
+        put();
     }
 }
 #end

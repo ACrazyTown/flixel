@@ -102,9 +102,17 @@ class FlxBatcher implements IFlxDestroyable
     public inline function add(data:FlxDrawData):Void
     {
         if (data.type == QUAD)
-            addQuad(cast data);
+        {
+            final quad:FlxQuadDrawData = cast data;
+            addQuad(quad);
+            quad.put();
+        }
         else if (data.type == TRIANGLES)
-            addTriangles(cast data);
+        {
+            final triangles:FlxTrianglesDrawData = cast data;
+            addTriangles(triangles);
+            triangles.put();
+        }
     }
 
     public function addQuad(data:FlxQuadDrawData):Void
@@ -451,7 +459,7 @@ class DrawCall implements IFlxDestroyable
 
     function new() {}
 
-    public function destroy():Void {}
+    public inline function destroy():Void {}
 
     public inline function set(count:Int, offset:Int, shader:Shader, blend:BlendMode, texture:FlxGraphic, textureRepeat:Bool, textureSmoothing:Bool)
     {
