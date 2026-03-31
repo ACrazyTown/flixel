@@ -1,11 +1,11 @@
 package flixel.system.render.gl;
 
-import lime.graphics.opengl.GLFramebuffer;
 #if FLX_RENDER_OPENGL
 import lime.utils.UInt8Array;
 import flixel.graphics.FlxTexture;
 import flixel.graphics.FlxRenderTexture;
 import lime.graphics.opengl.GLTexture;
+import lime.graphics.opengl.GLFramebuffer;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import lime.graphics.opengl.GL;
@@ -16,18 +16,21 @@ import flixel.FlxG;
  * A helper class that provides high-level convenience methods for dealing with
  * the OpenGL context with Flixel types.
  */
+// TODO ant: look into state cache
 @:access(openfl.display)
 @:access(openfl.display3D)
 class GLContext
 {
     // TODO ant: This is currently an OpenFL shader but we should really abstract this, somehow
     var _shader:Shader;
+    var _curBlendMode:BlendMode;
 
     public function new() {}
 
     public function invalidate():Void
     {
         _shader = null;
+        _curBlendMode = null;
     }
 
     // =============================================================================
@@ -127,10 +130,43 @@ class GLContext
         return true;
     }
 
-    // TODO ant
     public function setBlendMode(blend:BlendMode):Void
     {
-        // GL.blendEquation(GL.)
+        if (blend == null) 
+            blend = NORMAL;
+        
+        if (_curBlendMode == blend)
+            return;
+
+        switch (blend)
+        {
+            case ADD:
+                GL.blendEquation(GL.FUNC_ADD);
+                GL.blendFunc(GL.ONE, GL.ONE);
+
+            case MULTIPLY:
+                GL.blendEquation(GL.FUNC_ADD);
+                GL.blendFunc(GL.DST_COLOR, GL.ONE_MINUS_SRC_ALPHA);
+
+            case SCREEN:
+                GL.blendEquation(GL.FUNC_ADD);
+                GL.blendFunc(GL.ONE, GL.ONE_MINUS_SRC_COLOR);
+
+            case SUBTRACT:
+                GL.blendEquationSeparate(GL.FUNC_REVERSE_SUBTRACT, GL.FUNC_ADD);
+                GL.blendFunc(GL.ONE, GL.ONE);
+
+            default:
+                GL.blendEquation(GL.FUNC_ADD);
+                GL.blendFunc(GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
+        }
+
+        _curBlendMode = blend;
+
+        // TODO ant: I can't get this to happen anymore but if it does come back this should fix it
+        // update the OpenFL renderer's blend state to avoid blending issues
+        // with other OpenFL sprites like the mouse and debugger
+        // FlxG.stage.__renderer.__blendMode = blend;
     }
 
     inline function getGLWrap(wrap:FlxTextureWrap):Int
