@@ -191,11 +191,15 @@ class FlxTexture implements IFlxDestroyable
             _allocated = true;
 
         if (readable || FlxG.renderer.blit)
+        {
             _bitmap = bitmap;
+            status = READABLE(true);
+        }
         #if FLX_RENDER_DRAWQUADS
         else if (!readable)
         {
             handle.disposeImage();
+            status = HARDWARE;
         }
         #end
     }
@@ -259,6 +263,8 @@ class FlxTexture implements IFlxDestroyable
                 _bitmap.image.version = _version;
                 #end
             }
+
+            status = READABLE(true);
         }
 
         return _bitmap;
@@ -283,6 +289,8 @@ class FlxTexture implements IFlxDestroyable
             {
                 FlxG.renderer.destroyTextureBitmap(_bitmap);
                 _bitmap = null;
+                
+                status = HARDWARE;
             }
         }
     }
@@ -307,18 +315,12 @@ class FlxTexture implements IFlxDestroyable
         }
     }
 
-    function get_status():FlxTextureStatus
+    inline function get_status():FlxTextureStatus
     {
-        if (handle == null && _bitmap == null)
-            status = INVALID;
-        else if (_bitmap == null)
-            status = HARDWARE;
         #if !flash
-        else if (_bitmap.image != null && _bitmap.image.version > _version)
+        if (_bitmap.image != null && _bitmap.image.version > _version)
             status = READABLE(false);
         #end
-        else
-            status = READABLE(true);
 
         return status;
     }
