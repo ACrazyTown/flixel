@@ -116,13 +116,14 @@ class FlxGLView extends FlxCameraView
 		// super.drawFrame(frame, matrix, transform, blend, smoothing, shader);
         frame.parent.texture.applyIfNeeded();
 
+        if (_useRenderMatrix)
+            matrix.concat(_renderMatrix);
+
         // Queue a quad to be drawn when the camera renders
         var quad = FlxQuadDrawData.get(frame, smoothing, false, shader, blend, transform, matrix);
         _drawQueue.push(quad);
 	}
 	
-	@:noCompletion
-	static final _helperMatrix = new FlxMatrix();
 	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
 	{
 		// super.copyFrame(frame, destPoint, transform, blend, smoothing, shader);
@@ -132,6 +133,8 @@ class FlxGLView extends FlxCameraView
         var quad = FlxQuadDrawData.get(frame, smoothing, false, shader, blend, transform, null);
         quad.matrix.tx = destPoint.x;
         quad.matrix.ty = destPoint.y;
+        if (_useRenderMatrix)
+            quad.matrix.concat(_renderMatrix);
         _drawQueue.push(quad);
 	}
 	
@@ -144,6 +147,8 @@ class FlxGLView extends FlxCameraView
         var triangle = FlxTrianglesDrawData.get(vertices, indices, uvtData, colors, graphic, smoothing, repeat, shader, blend, transform, null);
         triangle.matrix.tx = position.x;
         triangle.matrix.ty = position.y;
+        if (_useRenderMatrix)
+            triangle.matrix.concat(_renderMatrix);
         _drawQueue.push(triangle);
 	}
 
@@ -200,13 +205,13 @@ class FlxGLView extends FlxCameraView
 
     inline function updateRenderMatrix():Void
     {
-        _useRenderMatrix = (camera.scaleX < camera.initialZoom) || (camera.scaleY < camera.initialZoom);
-
-		_renderMatrix.identity();
-		_renderMatrix.translate(-camera.viewMarginLeft, -camera.viewMarginTop);
-
-		if (_useRenderMatrix)
-			_renderMatrix.scale(camera.scaleX, camera.scaleY);
+        _useRenderMatrix = camera.zoom != 1;
+        if (_useRenderMatrix)
+        {
+            _renderMatrix.identity();
+            _renderMatrix.translate(-camera.viewMarginLeft, -camera.viewMarginTop);
+            _renderMatrix.scale(camera.scaleX, camera.scaleY);
+        }
     }
 
     // =============================================================================
