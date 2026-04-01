@@ -289,7 +289,7 @@ class FlxTexture implements IFlxDestroyable
             {
                 FlxG.renderer.destroyTextureBitmap(_bitmap);
                 _bitmap = null;
-                
+
                 status = HARDWARE;
             }
         }
@@ -318,7 +318,7 @@ class FlxTexture implements IFlxDestroyable
     inline function get_status():FlxTextureStatus
     {
         #if !flash
-        if (_bitmap.image != null && _bitmap.image.version > _version)
+        if (_bitmap != null && _bitmap.image != null && _bitmap.image.version > _version)
             status = READABLE(false);
         #end
 
