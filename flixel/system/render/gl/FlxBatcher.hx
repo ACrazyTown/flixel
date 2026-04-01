@@ -213,7 +213,7 @@ class FlxBatcher implements IFlxDestroyable
             // Multiply the color with the color transform multiplier,
             // because we can't pass in 3 colors
             var color:FlxColor = FlxColor.WHITE;
-            if (i < data.colors.length) // TODO: ensure colors are always present, even if not used (FlxTrianglesData)
+            if (data.colors != null && i < data.colors.length) // TODO: ensure colors are always present, even if not used (FlxTrianglesData)
                 color = data.colors[i];
 
             if (transform != null)
