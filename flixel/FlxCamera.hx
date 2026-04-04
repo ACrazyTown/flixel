@@ -32,6 +32,10 @@ import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
+#if FLX_RENDER_OPENGL
+import flixel.system.render.gl.FlxGLView;
+#end
+
 using flixel.util.FlxColorTransformUtil;
 
 /**
@@ -100,6 +104,15 @@ class FlxCamera extends FlxBasic
 	 * Holds various rendering related objects
 	 */
 	public var view(default, null):FlxCameraView;
+
+	#if FLX_RENDER_OPENGL
+	/**
+	 * This camera's `view`, typed as a `FlxGLView`
+	 * 
+	 * **NOTE**: May be null depending on the render implementation used.
+	 */
+	var viewGL(default, null):Null<FlxGLView>;
+	#end
 
 	/**
 	 * This camera's `view`, typed as a `FlxQuadView`.
@@ -527,6 +540,12 @@ class FlxCamera extends FlxBasic
 			@:bypassAccessor _blitMatrix = viewBlit._blitMatrix;
 			@:bypassAccessor _fill = viewBlit._fill;
 		}
+		#if FLX_RENDER_OPENGL
+		else if (view is FlxGLView)
+		{
+			viewGL = Std.downcast(view, FlxGLView);
+		}
+		#end
 
 		pixelPerfectRender = FlxG.renderer.blit;
 

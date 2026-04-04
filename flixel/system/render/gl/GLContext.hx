@@ -93,16 +93,11 @@ class GLContext
      * Binds and uses `texture` as the render target. If `texture` is `null`,
      * the rendering is done on the screen (back buffer).
      * 
-     * Also resizes the viewport to match the texture's dimensions.
-     * 
      * @param   texture   The `FlxRenderTexture` to render to.
      */
-    public function setRenderTexture(texture:Null<FlxRenderTexture>):Void
+    public inline function setRenderTexture(texture:Null<FlxRenderTexture>):Void
     {
         GL.bindFramebuffer(GL.FRAMEBUFFER, (texture != null) ? texture.renderTarget.framebuffer : null);
-
-        if (texture != null)
-            GL.viewport(0, 0, texture.width, texture.height);
     }
 
     /**
