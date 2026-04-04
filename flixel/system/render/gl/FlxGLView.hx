@@ -25,6 +25,7 @@ class FlxGLView extends FlxCameraView
     var _useRenderMatrix:Bool = false;
     var _renderMatrix:FlxMatrix = new FlxMatrix();
 
+    public var renderTextureQuad:FlxQuadDrawData;
     var renderTextureFrame:FlxFrame;
     var renderTextureGraphic:FlxGraphic;
     var renderTexture:FlxRenderTexture;
@@ -52,6 +53,8 @@ class FlxGLView extends FlxCameraView
         @:privateAccess 
         renderTextureGraphic = new FlxGraphic(null, renderTexture);
         renderTextureFrame = renderTextureGraphic.imageFrame.frame;
+
+        renderTextureQuad = FlxQuadDrawData.get(renderTextureFrame, antialiasing, false, null, null, null, null);
     }
 
     // =============================================================================
@@ -63,18 +66,19 @@ class FlxGLView extends FlxCameraView
         super.destroy();
     }
 
+    // To avoid redundant framebuffer swaps we won't actually clear here, and we'll do it
+    // at the beginning of render() instead. When we do it doesn't matter as long as it's before drawing.
     override function clear() 
     {
         _drawQueue.resize(0);
-
-        _renderer.resize(camera.width, camera.height);
-        _renderer.setRenderTexture(renderTexture);
-        renderTexture.clear(0);
     }
 
     override function render()
     {
+        _renderer.resize(camera.width, camera.height);
+        // Switch to rendering on the camera's texture
         _renderer.setRenderTexture(renderTexture);
+        renderTexture.clear(0); // TODO: actually implement fills
 
         // Submit all the collected sprites to the batcher
         for (data in _drawQueue)
@@ -84,14 +88,6 @@ class FlxGLView extends FlxCameraView
 
         // Force a flush to draw whatever was left in the buffer
         _renderer.batcher.flush();
-
-        // Now swap back to drawing on the screen because we're about to draw the camera's texture
-        _renderer.setRenderTexture(null);
-
-        var quad = FlxQuadDrawData.get(renderTextureFrame, antialiasing, false, null, null, null, null);
-        _renderer.batcher.add(quad);
-        _renderer.batcher.flush();
-        quad.put();
     }
 
     override function fill(color:FlxColor, blendAlpha:Bool = true)
@@ -221,6 +217,12 @@ class FlxGLView extends FlxCameraView
     // =============================================================================
 	//{ region                             GETTERS
 	// =============================================================================
+
+    override function set_antialiasing(value:Bool):Bool
+    {
+        renderTextureQuad.textureSmoothing = value;
+        return super.set_antialiasing(value);
+    }
 
     function get_display():DisplayObjectContainer
     {

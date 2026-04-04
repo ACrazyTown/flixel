@@ -18,6 +18,7 @@ import lime.graphics.opengl.GL;
 
 @:access(flixel.system.render.gl)
 @:access(flixel.graphics)
+@:access(flixel.FlxCamera)
 class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 {
     /**
@@ -92,6 +93,34 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         batcher = new FlxBatcher(MAX_QUADS_PER_BUFFER * VERTICES_PER_QUAD, MAX_QUADS_PER_BUFFER * INDICES_PER_QUAD, 6);
     }
 
+    public inline function startFrame():Void
+	{
+		FlxG.renderer.totalDrawCalls = 0;
+		FlxG.cameras.clear();
+	}
+
+	public inline function endFrame():Void
+	{
+        // First draw sprites onto their cameras
+		FlxG.cameras.render();
+
+        // Switch to drawing on the screen
+        setRenderTexture(null);
+        resize(FlxG.stage.window.width, FlxG.stage.window.height);
+
+        for (camera in FlxG.cameras.list)
+        {
+            if ((camera != null) && camera.exists && camera.visible)
+            {
+                // Then queue the actual camera texture
+                batcher.addQuad(camera.viewGL.renderTextureQuad);
+            }
+        }
+
+        // Finally flush to upload them to the GPU and draw
+        batcher.flush();
+	}
+
     public function createCameraView(camera:FlxCamera)
 	{
 		return new FlxGLView(camera);
@@ -120,8 +149,19 @@ class FlxGLTextureSystem implements IFlxTextureSystem
     public inline function setRenderTexture(texture:Null<FlxRenderTexture>):Void
     {
         context.setRenderTexture(texture);
-        _needsFlippedProjection = texture == null;
-        // trace(_needsFlippedProjection);
+        
+        if (texture != null)
+        {
+            _needsFlippedProjection = false;
+            GL.viewport(0, 0, texture.width, texture.height);
+            resize(texture.width, texture.height);
+        }
+        else
+        {
+            _needsFlippedProjection = true;
+            GL.viewport(0, 0, FlxG.stage.window.width, FlxG.stage.window.height);
+            resize(FlxG.stage.window.width, FlxG.stage.window.height);
+        }
     }
 
     function createTextureHandle():FlxTextureHandle
