@@ -133,7 +133,7 @@ class FlxSprite extends FlxObject
 	 * defaults to `false`.
 	 * @since 5.0.0
 	 */
-	public static var defaultAntialiasing:Bool;
+	public static var defaultAntialiasing:Bool = false;
 	
 	/**
 	 * Class that handles adding and playing animations on this sprite.
@@ -158,7 +158,7 @@ class FlxSprite extends FlxObject
 	/**
 	 * Controls whether the object is smoothed when rotated, affects performance.
 	 */
-	public var antialiasing(default, set):Bool;
+	public var antialiasing(default, set):Bool = defaultAntialiasing;
 
 	/**
 	 * Set this flag to true to force the sprite to update during the `draw()` call.
