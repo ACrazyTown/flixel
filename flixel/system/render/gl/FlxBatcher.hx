@@ -292,8 +292,8 @@ class FlxBatcher implements IFlxDestroyable
 
         // TODO: texture.filter ?
         var filter = dc.textureSmoothing ? GL.LINEAR : GL.NEAREST;
-        GL.texParameteri(GL.MAG_FILTER, filter);
-        GL.texParameteri(GL.MIN_FILTER, filter);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
 
         GL.activeTexture(GL.TEXTURE0);
         GL.uniform1i(shader.data.uImage0.index, 0);
