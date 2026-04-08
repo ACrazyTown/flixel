@@ -150,7 +150,7 @@ class FlxBatcher implements IFlxDestroyable
         var colorOffset = FlxColor.TRANSPARENT;
         if (transform != null)
         {
-            colorMult = FlxColor.fromRGBFloat(transform.redMultiplier, transform.greenMultiplier, transform.redMultiplier, transform.alphaMultiplier);
+            colorMult = FlxColor.fromRGBFloat(transform.redMultiplier, transform.greenMultiplier, transform.blueMultiplier, transform.alphaMultiplier);
             colorOffset = FlxColor.fromRGB(Std.int(transform.redOffset), Std.int(transform.greenOffset), Std.int(transform.blueOffset), Std.int(transform.alphaOffset));
         }
 
@@ -160,7 +160,6 @@ class FlxBatcher implements IFlxDestroyable
         addVertex(x3, y3, data.frame.uv.left, data.frame.uv.bottom, colorMult, colorOffset);
         addVertex(x4, y4, data.frame.uv.right, data.frame.uv.bottom, colorMult, colorOffset);
 
-        // trace(_indices.length, _indicesIndex, _positions.length, _numVertices, maxIndices, maxVertices);
         _indices[_indicesIndex++] = _numVertices + 0; 
         _indices[_indicesIndex++] = _numVertices + 1;
         _indices[_indicesIndex++] = _numVertices + 2;
@@ -198,7 +197,7 @@ class FlxBatcher implements IFlxDestroyable
         var colorOffset = FlxColor.TRANSPARENT;
         if (transform != null)
         {
-            colorMult = FlxColor.fromRGBFloat(transform.redMultiplier, transform.greenMultiplier, transform.redMultiplier, transform.alphaMultiplier);
+            colorMult = FlxColor.fromRGBFloat(transform.redMultiplier, transform.greenMultiplier, transform.blueMultiplier, transform.alphaMultiplier);
             colorOffset = FlxColor.fromRGB(Std.int(transform.redOffset), Std.int(transform.greenOffset), Std.int(transform.blueOffset), Std.int(transform.alphaOffset));
         }
 
@@ -285,9 +284,17 @@ class FlxBatcher implements IFlxDestroyable
         // Set matrix uniform
         GLHelper.uniformMatrix4fv(shader.data.uMatrix.index, false, _renderer.projection);
 
+        // Set up render state
         _renderer.context.setBlendMode(dc.blend);
 
+        // Set up textures
         _renderer.context.bindTexture(dc.texture.texture);
+
+        // TODO: texture.filter ?
+        var filter = dc.textureSmoothing ? GL.LINEAR : GL.NEAREST;
+        GL.texParameteri(GL.MAG_FILTER, filter);
+        GL.texParameteri(GL.MIN_FILTER, filter);
+
         GL.activeTexture(GL.TEXTURE0);
         GL.uniform1i(shader.data.uImage0.index, 0);
         GL.uniform2f(shader.data.uTextureSize.index, dc.texture.width, dc.texture.height);

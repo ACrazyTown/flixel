@@ -116,7 +116,7 @@ class FlxGLView extends FlxCameraView
             matrix.concat(_renderMatrix);
 
         // Queue a quad to be drawn when the camera renders
-        var quad = FlxQuadDrawData.get(frame, smoothing, false, shader, blend, transform, matrix);
+        var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), false, shader, blend, transform, matrix);
         _drawQueue.push(quad);
 	}
 	
@@ -126,7 +126,7 @@ class FlxGLView extends FlxCameraView
         frame.parent.texture.applyIfNeeded();
 
         // Queue a quad to be drawn when the camera renders
-        var quad = FlxQuadDrawData.get(frame, smoothing, false, shader, blend, transform, null);
+        var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), false, shader, blend, transform, null);
         quad.matrix.tx = destPoint.x;
         quad.matrix.ty = destPoint.y;
         if (_useRenderMatrix)
@@ -140,7 +140,7 @@ class FlxGLView extends FlxCameraView
 		// super.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, shader);
 
         // TODO: matrix support
-        var triangle = FlxTrianglesDrawData.get(vertices, indices, uvtData, colors, graphic, smoothing, repeat, shader, blend, transform, null);
+        var triangle = FlxTrianglesDrawData.get(vertices, indices, uvtData, colors, graphic, (antialiasing || smoothing), repeat, shader, blend, transform, null);
         triangle.matrix.tx = position.x;
         triangle.matrix.ty = position.y;
         if (_useRenderMatrix)
