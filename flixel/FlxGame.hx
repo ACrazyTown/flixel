@@ -329,6 +329,8 @@ class FlxGame extends Sprite
 			__enterFrame(ticks - _total);
 			_total = ticks;
 		});
+		#end
+
 		#if FLX_RENDER_OPENGL
 		stage.addEventListener(RenderEvent.RENDER_OPENGL, onRenderOpenGL);
 		#end
@@ -503,6 +505,7 @@ class FlxGame extends Sprite
 		#if FLX_RENDER_OPENGL
 		// Force a redraw every frame
 		invalidate();
+		#end
 		#if !flash
 		super.__enterFrame(deltaTime);
 		#end
