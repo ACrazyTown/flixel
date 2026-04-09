@@ -74,7 +74,7 @@ class BitmapFrontEnd
 	 * @param   width   How wide the rectangle should be.
 	 * @param   height  How high the rectangle should be.
 	 * @param   color   What color the rectangle should be (0xAARRGGBB).
-	 * @param   unique  Ensures that the bitmap data uses a new slot in the cache.
+	 * @param   unique  Ensures that the graphic uses a new slot in the cache.
 	 * @param   key     Force the cache to use a specific Key to index the bitmap.
 	 * @return  The created graphic.
 	 */
@@ -86,7 +86,7 @@ class BitmapFrontEnd
 	/**
 	 * Loads a bitmap from a file, clones it if necessary and caches it.
 	 * @param   graphic  Optional FlxGraphics object to create FlxGraphic from.
-	 * @param   unique   Ensures that the bitmap data uses a new slot in the cache.
+	 * @param   unique   Ensures that the graphic uses a new slot in the cache.
 	 * @param   key      Force the cache to use a specific Key to index the bitmap.
 	 * @return  The FlxGraphic we just created.
 	 */

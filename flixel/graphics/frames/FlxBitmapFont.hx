@@ -80,7 +80,7 @@ class FlxBitmapFont extends FlxFramesCollection
 	var frame:FlxFrame;
 
 	/**
-	 * Creates a new bitmap font using specified bitmap data and letter input.
+	 * Creates a new bitmap font using specified graphic and letter input.
 	 */
 	function new(frame:FlxFrame, ?border:FlxPoint)
 	{

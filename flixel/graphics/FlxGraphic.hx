@@ -134,7 +134,7 @@ class FlxGraphic implements IFlxDestroyable
 	 * It uses frame's `FlxBitmap`, not the `frame.parent.bitmap`.
 	 *
 	 * @param   Source   `FlxFrame` to get the `FlxBitmap` from.
-	 * @param   Unique   Ensures that the bitmap data uses a new slot in the cache.
+	 * @param   Unique   Ensures that the graphic uses a new slot in the cache.
 	 *                   If `true`, then `FlxBitmap` for this `FlxGraphic` will be cloned, which means extra memory.
 	 * @param   Key      Force the cache to use a specific key to index the bitmap.
 	 * @param   Cache    Whether to use graphic caching or not. Default value is `true`, which means automatic caching.
