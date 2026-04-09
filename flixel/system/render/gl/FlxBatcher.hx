@@ -275,7 +275,8 @@ class FlxBatcher implements IFlxDestroyable
      */
     function draw(dc:DrawCall):Void
     {
-        final shader = dc.shader;
+        // final shader = dc.shader;
+        final shader = FlxGLRenderer.defaultShader; // because custom shaders dont work dooooooooooooh
 
         // Prep the GL state for the upcoming draw
         if (_renderer.context.setShader(shader))
