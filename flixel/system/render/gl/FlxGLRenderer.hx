@@ -126,6 +126,11 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 		return new FlxGLView(camera);
 	}
 
+    // GL doesn't need to register cameras into the display tree
+    public function addCameraView(view:FlxGLView) {}
+    public function addCameraViewAt(view:FlxGLView, index:Int) {}
+    public function removeCameraView(view:FlxGLView) {}
+
     public function resize(width:Int, height:Int):Void
     {
         if (_projectionWidth == width && _projectionHeight == height)
