@@ -24,8 +24,9 @@ class FlxGLShader extends Shader
         varying vec2 vTexCoord;
 	", true)
 	@:glVertexBody("
-		vColorMultiplier = aColorMultiplier;
-		vColorOffset = aColorOffset;
+		// The colors are ARGB but because of little endian they are stored as BGRA
+		vColorMultiplier = aColorMultiplier.bgra;
+		vColorOffset = aColorOffset.bgra;
 
 		vTexCoord = aTexCoord;
 
