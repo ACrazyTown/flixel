@@ -19,9 +19,6 @@ import openfl.geom.Point;
 
 class FlxGLView extends FlxCameraView
 {
-    // TODO: abstract away the camera adding so that we don't need a flash sprite
-    var dummySprite:Sprite = new Sprite();
-
     var _useRenderMatrix:Bool = false;
     var _renderMatrix:FlxMatrix = new FlxMatrix();
 
@@ -44,8 +41,6 @@ class FlxGLView extends FlxCameraView
     public function new(camera:FlxCamera)
     {
         super(camera);
-
-        dummySprite.visible = false;
 
         renderTexture = new FlxRenderTexture(camera.width, camera.height, true);
         
@@ -222,11 +217,6 @@ class FlxGLView extends FlxCameraView
     {
         renderTextureQuad.textureSmoothing = value;
         return super.set_antialiasing(value);
-    }
-
-    function get_display():DisplayObjectContainer
-    {
-        return dummySprite;
     }
 
     // =============================================================================
