@@ -106,11 +106,10 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
         // Switch to drawing on the screen
         setRenderTexture(null);
-        resize(FlxG.stage.window.width, FlxG.stage.window.height);
 
         for (camera in FlxG.cameras.list)
         {
-            if ((camera != null) && camera.exists && camera.visible)
+            if ((camera != null) && camera.exists && camera.visible && camera.viewGL.needsRender)
             {
                 // Then queue the actual camera texture
                 batcher.addQuad(camera.viewGL.renderTextureQuad);
