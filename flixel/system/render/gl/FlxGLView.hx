@@ -19,6 +19,13 @@ import openfl.geom.Point;
 
 class FlxGLView extends FlxCameraView
 {
+    /**
+     * Whether this view needs to be rendered (there's sprites queued to be drawn).
+     */
+    public var needsRender(get, never):Bool;
+    inline function get_needsRender():Bool
+        return _drawQueue.length > 0;
+
     var _useRenderMatrix:Bool = false;
     var _renderMatrix:FlxMatrix = new FlxMatrix();
 
@@ -70,6 +77,9 @@ class FlxGLView extends FlxCameraView
 
     override function render()
     {
+        if (!needsRender)
+            return;
+
         _renderer.resize(camera.width, camera.height);
         // Switch to rendering on the camera's texture
         _renderer.setRenderTexture(renderTexture);
