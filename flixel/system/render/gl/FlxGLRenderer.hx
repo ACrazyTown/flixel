@@ -85,6 +85,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         method = OPENGL;
         textures = new FlxGLTextureSystem();
         renderTargets = new FlxGLRenderTargetSystem();
+        maxTextureSize = cast GL.getParameter(GL.MAX_TEXTURE_SIZE);
 
         context = new GLContext();
 
@@ -143,33 +144,11 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     }
 }
 
-<<<<<<< HEAD
 class FlxGLTextureSystem implements IFlxTextureSystem
 {
 	public function new() {}
 	
 	public function createHandle():FlxTextureHandle 
-=======
-    public inline function setRenderTexture(texture:Null<FlxRenderTexture>):Void
-    {
-        context.setRenderTexture(texture);
-        
-        if (texture != null)
-        {
-            _needsFlippedProjection = false;
-            GL.viewport(0, 0, texture.width, texture.height);
-            resize(texture.width, texture.height);
-        }
-        else
-        {
-            _needsFlippedProjection = true;
-            GL.viewport(0, 0, FlxG.stage.window.width, FlxG.stage.window.height);
-            resize(FlxG.stage.window.width, FlxG.stage.window.height);
-        }
-    }
-
-    function createTextureHandle():FlxTextureHandle
->>>>>>> 4a3a3710 (render textures in progress)
     {
         // return GL.createTexture();
         final handle = GL.createTexture();
@@ -194,11 +173,7 @@ class FlxGLTextureSystem implements IFlxTextureSystem
         bitmap.destroy();
     }
 
-<<<<<<< HEAD
 	public function uploadBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void 
-=======
-	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void
->>>>>>> 4a3a3710 (render textures in progress)
     {
         var dataFormat:Int = GL.RGBA;
         #if sys
