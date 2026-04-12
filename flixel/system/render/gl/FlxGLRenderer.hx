@@ -83,6 +83,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     {
         super();
         method = OPENGL;
+        maxTextureSize = cast GL.getParameter(GL.MAX_TEXTURE_SIZE);
 
         context = new GLContext();
 
