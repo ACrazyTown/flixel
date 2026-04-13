@@ -71,6 +71,7 @@ class FlxGLView extends FlxCameraView
     override function clear() 
     {
         _drawQueue.resize(0);
+        if (camera.bgColor != FlxColor.TRANSPARENT) fill(camera.bgColor);
     }
 
     override function render()
@@ -78,9 +79,11 @@ class FlxGLView extends FlxCameraView
         _renderer.resize(camera.width, camera.height);
         // Switch to rendering on the camera's texture
         _renderer.setRenderTexture(renderTexture);
-        renderTexture.clear(0); // TODO: actually implement fills
+        renderTexture.clear(0);
 
         // Submit all the collected sprites to the batcher
+        camera.drawFX();
+		
         for (data in _drawQueue)
         {
             _renderer.batcher.add(data);
@@ -92,6 +95,16 @@ class FlxGLView extends FlxCameraView
 
     override function fill(color:FlxColor, blendAlpha:Bool = true)
 	{
+		var frame = FlxG.bitmap.whitePixel;
+        fillColor.color = color;
+        fillColor.alphaMultiplier = color.alphaFloat;
+
+        frame.prepareMatrix(fillMatrix);
+        fillMatrix.scale(camera.width, camera.height);
+
+        var drawCall:FlxQuadDrawData = FlxQuadDrawData.get(frame, false, false, null, null, fillColor, fillMatrix);
+        _drawQueue.push(drawCall);
+		
 		// super.fill(color, blendAlpha);
 	}
 	
