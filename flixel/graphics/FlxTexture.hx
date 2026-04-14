@@ -184,7 +184,7 @@ class FlxTexture implements IFlxDestroyable
 
         FlxG.renderer.uploadTextureBitmap(this, bitmap);
         #if !flash
-        _version = bitmap.image.version;
+        _version = bitmap.readable ? bitmap.image.version : 0;
         #end
 
         if (!_allocated)
