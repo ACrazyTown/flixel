@@ -144,21 +144,11 @@ class FlxBatcher implements IFlxDestroyable
         final x4 = scaledWX + scaledHX + data.matrix.tx;
         final y4 = scaledWY + scaledHY + data.matrix.ty;
 
-        // Color transform
-        final transform = data.colorTransform;
-        var colorMult = FlxColor.WHITE;
-        var colorOffset = FlxColor.TRANSPARENT;
-        if (transform != null)
-        {
-            colorMult = FlxColor.fromRGBFloat(transform.redMultiplier, transform.greenMultiplier, transform.blueMultiplier, transform.alphaMultiplier);
-            colorOffset = FlxColor.fromRGB(Std.int(transform.redOffset), Std.int(transform.greenOffset), Std.int(transform.blueOffset), Std.int(transform.alphaOffset));
-        }
-
         // Feed it all to the buffer
-        addVertex(x1, y1, data.frame.uv.left, data.frame.uv.top, colorMult, colorOffset);
-        addVertex(x2, y2, data.frame.uv.right, data.frame.uv.top, colorMult, colorOffset);
-        addVertex(x3, y3, data.frame.uv.left, data.frame.uv.bottom, colorMult, colorOffset);
-        addVertex(x4, y4, data.frame.uv.right, data.frame.uv.bottom, colorMult, colorOffset);
+        addVertex(x1, y1, data.frame.uv.left, data.frame.uv.top, data.colorMultiplier, data.colorOffset);
+        addVertex(x2, y2, data.frame.uv.right, data.frame.uv.top, data.colorMultiplier, data.colorOffset);
+        addVertex(x3, y3, data.frame.uv.left, data.frame.uv.bottom, data.colorMultiplier, data.colorOffset);
+        addVertex(x4, y4, data.frame.uv.right, data.frame.uv.bottom, data.colorMultiplier, data.colorOffset);
 
         _indices[_indicesIndex++] = _numVertices + 0; 
         _indices[_indicesIndex++] = _numVertices + 1;
@@ -191,16 +181,6 @@ class FlxBatcher implements IFlxDestroyable
             || _numIndices + data.indices.length > maxIndices)
             flush();
 
-        // Color transform
-        final transform = data.colorTransform;
-        var colorMult = FlxColor.WHITE;
-        var colorOffset = FlxColor.TRANSPARENT;
-        if (transform != null)
-        {
-            colorMult = FlxColor.fromRGBFloat(transform.redMultiplier, transform.greenMultiplier, transform.blueMultiplier, transform.alphaMultiplier);
-            colorOffset = FlxColor.fromRGB(Std.int(transform.redOffset), Std.int(transform.greenOffset), Std.int(transform.blueOffset), Std.int(transform.alphaOffset));
-        }
-
         // Update vertices
         for (i in 0...data.vertices.length)
         {
@@ -214,13 +194,11 @@ class FlxBatcher implements IFlxDestroyable
             var color:FlxColor = FlxColor.WHITE;
             if (data.colors != null && i < data.colors.length) // TODO: ensure colors are always present, even if not used (FlxTrianglesData)
                 color = data.colors[i];
-
-            if (transform != null)
-                color *= colorMult;
+            color *= data.colorMultiplier;
 
             final transformedX = data.matrix.transformX(x, y);
             final transformedY = data.matrix.transformY(x, y);
-            addVertex(transformedX, transformedY, u, v, color, colorOffset);
+            addVertex(transformedX, transformedY, u, v, color, data.colorOffset);
         }
 
         // Update indices
