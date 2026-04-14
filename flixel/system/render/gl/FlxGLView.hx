@@ -17,6 +17,9 @@ import openfl.display.Sprite;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 
+using flixel.util.FlxColorTransformUtil;
+
+@:access(flixel.FlxCamera)
 class FlxGLView extends FlxCameraView
 {
     /**
@@ -24,7 +27,7 @@ class FlxGLView extends FlxCameraView
      */
     public var needsRender(get, never):Bool;
     inline function get_needsRender():Bool
-        return _drawQueue.length > 0;
+        return _drawQueue.length > 0 || camera._fxFadeAlpha > 0 || camera._fxFlashAlpha > 0; // TODO: better way to check if there's pending FX?
 
     var _useRenderMatrix:Bool = false;
     var _renderMatrix:FlxMatrix = new FlxMatrix();
@@ -73,7 +76,7 @@ class FlxGLView extends FlxCameraView
     override function clear() 
     {
         _drawQueue.resize(0);
-        if (camera.bgColor != FlxColor.TRANSPARENT) fill(camera.bgColor);
+        fill(camera.bgColor);
     }
 
     override function render()
@@ -81,18 +84,15 @@ class FlxGLView extends FlxCameraView
         if (!needsRender)
             return;
 
-        _renderer.resize(camera.width, camera.height);
         // Switch to rendering on the camera's texture
         _renderer.setRenderTexture(renderTexture);
         renderTexture.clear(0);
 
-        // Submit all the collected sprites to the batcher
         camera.drawFX();
-		
+
+        // Submit all the collected sprites to the batcher
         for (data in _drawQueue)
-        {
             _renderer.batcher.add(data);
-        }
 
         // Force a flush to draw whatever was left in the buffer
         _renderer.batcher.flush();
@@ -100,17 +100,19 @@ class FlxGLView extends FlxCameraView
 
     override function fill(color:FlxColor, blendAlpha:Bool = true)
 	{
-		var frame = FlxG.bitmap.whitePixel;
-        fillColor.color = color;
-        fillColor.alphaMultiplier = color.alphaFloat;
+        // super.fill(color, blendAlpha);
+        // TODO: support !blendAlpha via glClear?
 
-        frame.prepareMatrix(fillMatrix);
-        fillMatrix.scale(camera.width, camera.height);
+        if (color.alphaFloat == 0)
+            return;
 
-        var drawCall:FlxQuadDrawData = FlxQuadDrawData.get(frame, false, false, null, null, fillColor, fillMatrix);
-        _drawQueue.push(drawCall);
-		
-		// super.fill(color, blendAlpha);
+		final frame = FlxG.bitmap.whitePixel;
+        final quad = FlxQuadDrawData.get(frame, false, false, null, null, FlxColor.fromRGB(0, 0, 0, color.alpha), color.rgb, null);
+
+        frame.prepareMatrix(quad.matrix);
+        quad.matrix.scale(camera.width, camera.height);
+
+        _drawQueue.push(quad);
 	}
 	
 	override function drawPixels(pixels, matrix, ?transform, ?blend, smoothing = false, ?shader)
