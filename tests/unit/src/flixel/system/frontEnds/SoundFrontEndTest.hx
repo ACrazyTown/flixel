@@ -1,10 +1,13 @@
 package flixel.system.frontEnds;
 
 import flixel.FlxG;
+<<<<<<< HEAD
 import flixel.sound.FlxSound;
 import flixel.sound.FlxSoundGroup;
 import massive.munit.Assert;
 import openfl.media.Sound;
+=======
+>>>>>>> funkin/dev
 
 class SoundFrontEndTest
 {
@@ -26,6 +29,7 @@ class SoundFrontEndTest
 	{
 		FlxG.sound.create("assets/invalid").play();
 	}
+<<<<<<< HEAD
 
 	@Test // #1511
 	function testSoundCurve()
@@ -98,6 +102,8 @@ class SoundFrontEndTest
 		assertSoundProps(1.0, false, false);
 		#end
 	}
+=======
+>>>>>>> funkin/dev
 	#end
 	
 	@Test

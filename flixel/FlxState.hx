@@ -44,14 +44,14 @@ class FlxState extends FlxContainer
 	 * The natural background color the cameras default to. In `AARRGGBB` format.
 	 */
 	public var bgColor(get, set):FlxColor;
-	
+
 	/**
 	 * The specific argument that was passed into `switchState` or `FlxGame.new`
 	 */
 	@:allow(flixel.FlxGame)
 	@:allow(flixel.FlxG)
 	var _constructor:()->FlxState;
-	
+
 	/**
 	 * Current substate. Substates also can be nested.
 	 */
@@ -89,12 +89,12 @@ class FlxState extends FlxContainer
 
 	@:noCompletion
 	var _subStateClosed:FlxTypedSignal<FlxSubState->Void>;
-	
+
 	public function new ()
 	{
 		super(0);
 	}
-	
+
 	/**
 	 * This function is called after the game engine successfully switches states.
 	 * Override this function, NOT the constructor, to initialize or set up your game state.
@@ -175,7 +175,7 @@ class FlxState extends FlxContainer
 		};
 		FlxDestroyUtil.destroy(_subStateOpened);
 		FlxDestroyUtil.destroy(_subStateClosed);
-		
+
 		if (subState != null)
 		{
 			subState.destroy();
@@ -187,9 +187,9 @@ class FlxState extends FlxContainer
 	/**
 	 * Called from `FlxG.switchState()`, when `onOutroComplete` is called, the actual state
 	 * switching will happen.
-	 * 
+	 *
 	 * Note: Calling `super.startOutro(onOutroComplete)` will call `onOutroComplete`.
-	 * 
+	 *
 	 * @param   onOutroComplete  Called when the outro is complete.
 	 * @since 5.3.0
 	 */
@@ -202,13 +202,17 @@ class FlxState extends FlxContainer
 	 * This method is called after the game loses focus.
 	 * Can be useful for third party libraries, such as tweening engines.
 	 */
-	public function onFocusLost():Void {}
+	public function onFocusLost():Void {
+		if (subState != null) subState.onFocusLost();
+	}
 
 	/**
 	 * This method is called after the game receives focus.
 	 * Can be useful for third party libraries, such as tweening engines.
 	 */
-	public function onFocus():Void {}
+	public function onFocus():Void {
+		if (subState != null) subState.onFocus();
+	}
 
 	/**
 	 * This function is called whenever the window size has been changed.
@@ -246,7 +250,7 @@ class FlxState extends FlxContainer
 	{
 		return FlxG.cameras.bgColor = Value;
 	}
-	
+
 	@:noCompletion
 	function get_subStateOpened():FlxTypedSignal<FlxSubState->Void>
 	{

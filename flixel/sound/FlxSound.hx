@@ -755,7 +755,7 @@ class FlxSound extends FlxBasic
 		if (FlxG.sound.muted)
 			return 0.0;
 		
-		return FlxG.sound.applySoundCurve(FlxG.sound.volume * volume);
+		return FlxG.sound.volume * volume;
 		#else
 		return volume;
 		#end
