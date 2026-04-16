@@ -321,12 +321,10 @@ class FlxGame extends Sprite
 		if (FlxG.updateFramerate < FlxG.drawFramerate)
 			FlxG.log.warn("FlxG.updateFramerate: The update framerate shouldn't be smaller" + " than the draw framerate, since it can slow down your game.");
 
-		#if flash
-		// Finally, set up an event for the actual game loop stuff.
-		stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
-		#end
 		#if FLX_RENDER_OPENGL
 		stage.addEventListener(RenderEvent.RENDER_OPENGL, onRenderOpenGL);
+		#end
+		#if flash
 		stage.addEventListener(Event.ENTER_FRAME, function(e)
 		{
 			ticks = getTicks();

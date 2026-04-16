@@ -1322,6 +1322,7 @@ class FlxBitmapText extends FlxSprite
 	}
 	
 	function drawText(posX:Int, posY:Int, isFront:Bool = true, ?bitmap:FlxBitmap, useTiles:Bool = false):Void
+	{
 		if (FlxG.renderer.method == BLITTING)
 		if (useTiles)
 		{
