@@ -918,16 +918,9 @@ class FlxText extends FlxSprite
 	{
 		if (textField == null || !_regen)
 			return;
-<<<<<<< HEAD
 		
 		_regen = false;
 		
-=======
-
-		final oldGraphic:FlxGraphic = graphic;
-		final oldBorderPixels:BitmapData = _borderPixels;
-
->>>>>>> funkin/dev
 		final oldWidth:Int = graphic != null ? graphic.width : 0;
 		final oldHeight:Int = graphic != null ? graphic.height : VERTICAL_GUTTER;
 
