@@ -12,8 +12,6 @@ import flixel.system.render.gl.FlxDrawData;
 import flixel.system.render.quad.FlxDrawTrianglesItem.DrawData;
 import flixel.util.FlxColor;
 import openfl.display.BlendMode;
-import openfl.display.DisplayObjectContainer;
-import openfl.display.Sprite;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 
@@ -29,13 +27,29 @@ class FlxGLView extends FlxCameraView
     inline function get_needsRender():Bool
         return _drawQueue.length > 0 || camera._fxFadeAlpha > 0 || camera._fxFlashAlpha > 0; // TODO: better way to check if there's pending FX?
 
-    var _useRenderMatrix:Bool = false;
+	/**
+	 * Checks whether `_renderMatrix` should be applied to sprites.
+	 * True only if `camera.zoom != camera.initialZoom`.
+	 */
+	var _useRenderMatrix(get, never):Bool;
+	
+	inline function get__useRenderMatrix():Bool
+		return camera.zoom != camera.initialZoom;
+		
+	/**
+	 * Helper matrix applied to all sprites when `camera.zoom != camera.initialZoom`.
+	 * Used to scale sprites according to the camera zoom.
+	 */
     var _renderMatrix:FlxMatrix = new FlxMatrix();
 
     public var renderTextureQuad:FlxQuadDrawData;
     var renderTextureFrame:FlxFrame;
     var renderTextureGraphic:FlxGraphic;
     var renderTexture:FlxRenderTexture;
+	var _scaleX:Float;
+	var _scaleY:Float;
+	var _offsetX:Float;
+	var _offsetY:Float;
 
     /**
      * An array containing the draw data for all the sprites drawn to this camera.
@@ -204,30 +218,49 @@ class FlxGLView extends FlxCameraView
 	//{ region                             HELPERS
 	// =============================================================================
 
-    public function offsetView(x:Float, y:Float):Void {}
+	/**
+	 * Returns the `FlxQuadDrawData` for the camera's texture, while also updating its matrix.
+	 */
+	public inline function getDrawData():FlxQuadDrawData
+	{
+		final matrix = renderTextureQuad.matrix;
+		
+		matrix.identity();
+		matrix.scale(FlxG.scaleMode.scale.x * camera.initialZoom, FlxG.scaleMode.scale.y * camera.initialZoom);
+		matrix.translate(FlxG.game.x + camera.x * FlxG.scaleMode.scale.x + _offsetX, FlxG.game.y + camera.y * FlxG.scaleMode.scale.y + _offsetY);
+		
+		return renderTextureQuad;
+	}
+	
+	public function offsetView(x:Float, y:Float):Void
+	{
+		_offsetX += x;
+		_offsetY += y;
+	}
 
-    function updateInternals():Void {}
+	function updateInternals():Void {}
 
     function updateOffset():Void {}
 
-    function updatePosition():Void {}
+	function updatePosition():Void
+	{
+        _offsetX = 0;
+        _offsetY = 0;
+	}
     
     function updateScale():Void 
     {
-        updateRenderMatrix();
+		if (_useRenderMatrix)
+			updateRenderMatrix();
     }
 
     function updateScrollRect():Void {}
 
     inline function updateRenderMatrix():Void
-    {
-        _useRenderMatrix = camera.zoom != 1;
-        if (_useRenderMatrix)
-        {
-            _renderMatrix.identity();
-            _renderMatrix.translate(-camera.viewMarginLeft, -camera.viewMarginTop);
-            _renderMatrix.scale(camera.scaleX, camera.scaleY);
-        }
+	{
+		_renderMatrix.identity();
+		_renderMatrix.translate(-camera.viewMarginLeft, -camera.viewMarginTop);
+		_renderMatrix.scale(camera.scaleX, camera.scaleY);
     }
 
     // =============================================================================

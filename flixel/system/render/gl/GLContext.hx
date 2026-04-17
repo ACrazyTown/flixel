@@ -31,6 +31,8 @@ class GLContext
     {
         _shader = null;
         _curBlendMode = null;
+
+        GL.disable(GL.SCISSOR_TEST);
     }
 
     // =============================================================================
