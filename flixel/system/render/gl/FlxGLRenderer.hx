@@ -187,6 +187,8 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
 	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void
     {
+        if (!bitmap.readable) return;
+
         if (!texture._allocated)
         {
             var dataFormat = GL.RGBA;
