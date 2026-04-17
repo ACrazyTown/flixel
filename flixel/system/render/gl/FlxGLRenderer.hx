@@ -176,30 +176,23 @@ class FlxGLTextureSystem implements IFlxTextureSystem
 
 	public function uploadBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void 
     {
-        if (!texture._allocated)
+        var dataFormat = GL.RGBA;
+        
+        #if sys
+        // On sys targets, OpenFL stores bitmaps in BGRA format
+        // During uploads we can simply tell OpenGL to interpret the data as BGRA
+        if (bitmap.image.format == BGRA32)
         {
-            var dataFormat = GL.RGBA;
-            
-            #if sys
-            // On sys targets, OpenFL stores bitmaps in BGRA format
-            // During initial uploads we can simply tell OpenGL to interpret the data as BGRA
-            if (bitmap.image.format == BGRA32)
-            {
-                var ext = GL.getExtension("EXT_bgra");
-                if (ext != null)
-                    dataFormat = ext.BGRA_EXT;
-            }
-            #end
+            var ext = GL.getExtension("EXT_bgra");
+            if (ext != null)
+                dataFormat = ext.BGRA_EXT;
+        }
+        #end
 
+        if (!texture._allocated)
             context.allocTextureData(texture, GL.RGBA, bitmap.data, dataFormat);
-        }
         else
-        {
-            // During subsequent updates the data format has to be the same as the texture format
-            // so we have to change it manually
-            bitmap.image.format = RGBA32;
-            context.uploadTextureData(texture, bitmap.data, GL.RGBA);
-        }
+            context.uploadTextureData(texture, bitmap.data, dataFormat);
     }
 
 	public function readPixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void 
