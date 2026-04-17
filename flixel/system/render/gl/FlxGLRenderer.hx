@@ -112,7 +112,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
             if ((camera != null) && camera.exists && camera.visible && camera.viewGL.needsRender)
             {
                 // Then queue the actual camera texture
-                batcher.addQuad(camera.viewGL.renderTextureQuad);
+                batcher.addQuad(camera.viewGL.getDrawData());
             }
         }
 
