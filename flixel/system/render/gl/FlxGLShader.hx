@@ -60,18 +60,6 @@ class FlxGLShader extends Shader
 	@:glFragmentBody("
 		gl_FragColor = flixel_texture2D(uImage0, vTexCoord);
 	", true)
-	#if emscripten
-	@:glFragmentSource("
-		#pragma header
-
-		void main(void)
-		{
-			#pragma body
-
-			gl_FragColor = gl_FragColor.bgra;
-		}
-	", true)
-	#else
 	@:glFragmentSource("
 		#pragma header
 
@@ -80,7 +68,6 @@ class FlxGLShader extends Shader
 			#pragma body
 		}
 	", true)
-	#end
 	public function new()
 	{
 		super();

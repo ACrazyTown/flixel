@@ -1,5 +1,6 @@
 package flixel.system.render.gl;
 
+import openfl.display.BitmapData;
 #if FLX_RENDER_OPENGL
 import lime.graphics.opengl.GLTexture;
 import flixel.system.render.FlxRenderer.FlxTypedRenderer;
@@ -186,21 +187,30 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
 	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void
     {
-        var dataFormat:Int = GL.RGBA;
-        #if sys
-        if (bitmap.image.format == BGRA32)
-        {
-            // On sys targets OpenFL stores bitmaps as BGRA...
-            var bgraExt = GL.getExtension("EXT_bgra");
-            if (bgraExt != null)
-                dataFormat = bgraExt.BGRA_EXT;
-        }
-        #end
-
         if (!texture._allocated)
-            context.allocTextureData(texture, bitmap.data, dataFormat, GL.RGBA);
+        {
+            var dataFormat = GL.RGBA;
+            
+            #if sys
+            // On sys targets, OpenFL stores bitmaps in BGRA format
+            // During initial uploads we can simply tell OpenGL to interpret the data as BGRA
+            if (bitmap.image.format == BGRA32)
+            {
+                var ext = GL.getExtension("EXT_bgra");
+                if (ext != null)
+                    dataFormat = ext.BGRA_EXT;
+            }
+            #end
+
+            context.allocTextureData(texture, GL.RGBA, bitmap.data, dataFormat);
+        }
         else
+        {
+            // During subsequent updates the data format has to be the same as the texture format
+            // so we have to change it manually
+            bitmap.image.format = RGBA32;
             context.uploadTextureData(texture, bitmap.data, GL.RGBA);
+        }
     }
 
 	function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void
