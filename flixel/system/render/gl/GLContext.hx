@@ -59,7 +59,7 @@ class GLContext
     //     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, glFilter);
     // }
 
-    public function allocTextureData(texture:FlxTexture, data:UInt8Array, dataFormat:Int, textureFormat:Int):Void
+    public function allocTextureData(texture:FlxTexture, textureFormat:Int, data:UInt8Array, dataFormat:Int):Void
     {
         bindTexture(texture);
         GLHelper.texImage2D(GL.TEXTURE_2D, 0, textureFormat, texture.width, texture.height, 0, dataFormat, GL.UNSIGNED_BYTE, data);
