@@ -609,7 +609,7 @@ class FlxGraphic implements IFlxDestroyable
 		return FlxAtlasFrames.findFrame(this, null);
 	}
 
-	inline function get_bitmap():FlxBitmap
+	inline function get_bitmap():Null<FlxBitmap>
 	{
 		return texture != null ? texture.getBitmap() : null;
 	}
