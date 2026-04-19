@@ -134,13 +134,14 @@ class BitmapFrontEnd
 	 * @param   bmd  FlxBitmap to find in the cache.
 	 * @return  The FlxBitmap's key or null if there isn't such FlxBitmap in cache.
 	 */
+	@:access(flixel.graphics)
 	public function findKeyForBitmap(bmd:FlxBitmap):String
 	{
 		#if FLX_RENDER_DRAWQUADS
 		for (key in _cache.keys())
 		{
 			var obj = _cache.get(key);
-			if (obj != null && obj.texture.handle == bmd)
+			if (obj != null && obj.texture._handle == bmd)
 				return key;
 		}
 		#end

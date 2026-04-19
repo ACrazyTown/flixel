@@ -89,7 +89,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void 
 	{
 		#if FLX_RENDER_DRAWQUADS
-		texture.handle = bitmap;
+		texture._handle = bitmap;
 		#end
 	}
 
@@ -99,7 +99,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 		final gl = FlxG.stage.window.context.webgl;
 
 		@:privateAccess
-		final glTexture = texture.handle.getTexture(FlxG.stage.context3D).__getTexture();
+		final glTexture = texture._handle.getTexture(FlxG.stage.context3D).__getTexture();
 		gl.bindTexture(gl.TEXTURE_2D, glTexture);
 
         // Create dummy framebuffer we'll read from

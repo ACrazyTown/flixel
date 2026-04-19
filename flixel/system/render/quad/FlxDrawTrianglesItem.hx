@@ -18,6 +18,7 @@ typedef DrawData<T> = openfl.Vector<T>;
 /**
  * @author Zaphod
  */
+@:access(flixel.graphics)
 class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 {
 	static inline final INDICES_PER_QUAD = 6;
@@ -59,7 +60,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		
 		#if (!flash && FLX_RENDER_DRAWQUADS)
 		var shader = shader != null ? shader : graphics.shader;
-		shader.bitmap.input = graphics.texture.handle;
+		shader.bitmap.input = graphics.texture._handle;
 		shader.bitmap.filter = (camera.view.antialiasing || antialiasing) ? LINEAR : NEAREST;
 		shader.bitmap.wrap = REPEAT; // in order to prevent breaking tiling behaviour in classes that use drawTriangles
 		shader.alpha.value = alphas;

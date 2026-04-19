@@ -57,12 +57,6 @@ class FlxTexture implements IFlxDestroyable
     }
 
     /**
-     * The underlying representation of the texture, you probably shouldn't mess with this!
-     * The actual type varies depending on the used renderer backend. 
-     */
-    public var handle(default, null):FlxTextureHandle;
-
-    /**
      * The current status of the texture.
      */
     public var status(get, null):FlxTextureStatus;
@@ -102,9 +96,15 @@ class FlxTexture implements IFlxDestroyable
     // public var filter(default, set):FlxTextureFilter = defaultFilter;
 
     /**
+     * The underlying representation of the texture, you probably shouldn't mess with this!
+     * The actual type varies depending on the used renderer backend. 
+     */
+    var _handle:Null<FlxTextureHandle>;
+
+    /**
      * Reference to the internal bitmap, which is used to allow read/write operations when the texture is readable.
      */
-    var _bitmap:FlxBitmap;
+    var _bitmap:Null<FlxBitmap>;
 
     /**
      * Helper, used to track changes between the internal bitmap and the texture.
@@ -140,7 +140,7 @@ class FlxTexture implements IFlxDestroyable
         		FlxG.log.error('Texture dimensions (${width}x${height}) exceed the maximum allowed size (${max}x${max})');
         }
 
-        handle = FlxG.renderer.createTextureHandle();
+        _handle = FlxG.renderer.createTextureHandle();
 
         // Invoke the setters to properly set up the texture state
         set_wrapU(wrapU);
@@ -153,10 +153,10 @@ class FlxTexture implements IFlxDestroyable
      */
     public function destroy():Void 
     {
-        if (handle != null)
+        if (_handle != null)
         {
-            FlxG.renderer.destroyTextureHandle(handle);
-            handle = null;
+            FlxG.renderer.destroyTextureHandle(_handle);
+            _handle = null;
         }
 
         if (_bitmap != null)
@@ -198,7 +198,7 @@ class FlxTexture implements IFlxDestroyable
         #if FLX_RENDER_DRAWQUADS
         else if (!readable)
         {
-            handle.disposeImage();
+            _handle.disposeImage();
             status = HARDWARE;
         }
         #end
@@ -251,9 +251,9 @@ class FlxTexture implements IFlxDestroyable
             {
                 var image = new Image(new ImageBuffer(pixels, width, height, 32, RGBA32));
                 @:privateAccess image.version = _version;
-                @:privateAccess handle.__fromImage(image);
+                @:privateAccess _handle.__fromImage(image);
 
-                _bitmap = handle;
+                _bitmap = _handle;
             }
             else
             #end
