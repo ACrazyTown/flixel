@@ -22,7 +22,7 @@ typedef FlxTextureHandle = FlxBitmap;
  * There are two options for reading pixels from a texture:
  * 1. Use the `texture.readPixels[...]()` method to read the pixels of the texture (or a specified region) into a specific user managed buffer.
  * 2. Use the `texture.getBitmap()` method to read the entire texture into an internal `FlxBitmap`. The bitmap is managed internally by the texture.
- *    Any changes made to the provided bitmap will be applied to the texture once `texture.apply()` is called. You can also optionally destroy the
+ *    Any changes made to the provided bitmap will be applied to the texture once `texture.sync()` is called. You can also optionally destroy the
  *    internal bitmap when applying changes, to free memory.
  */
 class FlxTexture implements IFlxDestroyable
@@ -230,7 +230,7 @@ class FlxTexture implements IFlxDestroyable
      * Returns a `FlxBitmap` instance associated with this texture.
      * 
      * `FlxBitmap` provides methods to read and manipulate the pixel data of the image.
-     * After you're done editing the bitmap, you must call `texture.apply()` in order to apply the changes
+	 * After you're done editing the bitmap, you must call `texture.sync()` in order to apply the changes
      * and update the hardware texture.
      * 
      * If the texture's status is `HARDWARE`, the pixel data will be downloaded from the GPU.
@@ -271,15 +271,15 @@ class FlxTexture implements IFlxDestroyable
     }
 
     /**
-     * Applies the changes made to this texture's bitmap and updates the texture.
+	 * Updates the texture based on the changes made to the bitmap, synchronising the two.
      * 
      * **NOTE:** This function is not thread-safe, and should only be called on the main thread!
      * 
      * @param   destroyBitmap   Whether the internal bitmap should be destroyed. Set this to `true`
-     *                          if you don't plan on read/writing pixels afterwards, for a noticable decrease in memory usage.
+	 *                          if you don't plan on read/writing pixels afterwards, for a noticeable decrease in memory usage.
      *                          You can always get a reference to the bitmap back via `texture.getBitmap()`.
      */
-    public function apply(destroyBitmap:Bool = false) 
+	public function sync(destroyBitmap:Bool = false) 
     {
         if (_bitmap != null)
         {
@@ -300,15 +300,15 @@ class FlxTexture implements IFlxDestroyable
      * This is called by draw methods to avoid a breaking change between the two, and should be removed in the next major version.
      */
     @:allow(flixel.system.render)
-    @:noCompletion function applyIfNeeded():Void
+	@:noCompletion function syncIfNeeded():Void
     {
         switch (status)
         {
             case READABLE(synced):
                 if (!synced)
                 {
-                    FlxG.log.warn("Automatic texture-bitmap syncing is deprecated and will be removed in the next major version. Use texture.apply() to apply changes made to the texture's bitmap.");
-                    apply(false);
+					FlxG.log.warn("Automatic texture-bitmap syncing is deprecated and will be removed in the next major version. Use texture.sync() to apply changes made to the texture's bitmap.");
+					sync(false);
                 }
 
             default:
