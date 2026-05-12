@@ -1,12 +1,15 @@
 package flixel.system.render.gl;
 
 #if FLX_RENDER_OPENGL
+import flixel.system.render.FlxTopology;
+import flixel.system.render.gl.FlxDrawCall;
 import flixel.system.render.gl.FlxDrawData;
 import flixel.graphics.FlxGraphic;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.util.FlxPool;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
+import lime.graphics.opengl.GLFramebuffer;
 import lime.utils.ArrayBuffer;
 import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
@@ -32,6 +35,8 @@ class FlxBatcher implements IFlxDestroyable
      */
     public final ATTRIBUTES_PER_VERTEX:Int = 6; // TODO ant: TEMP, should be 7
 
+    // public var attributes:Array<GLAttribute>;
+
     public var maxVertices:Int;
     public var maxIndices:Int;
 
@@ -44,6 +49,7 @@ class FlxBatcher implements IFlxDestroyable
     var _numIndices:Int = 0;
 
     // Draw state
+	var _currentTopology:FlxTopology;
     var _currentShader:Shader;
     var _currentBlendMode:BlendMode;
     var _currentTexture:FlxGraphic; // TODO ant: replace these 3 with FlxTexture
@@ -53,7 +59,7 @@ class FlxBatcher implements IFlxDestroyable
     // Draw call data
     var _count:Int = 0;
     var _offset:Int = 0;
-    var _drawCalls:Array<DrawCall> = [];
+    var _drawCalls:Array<BatchDrawCall> = [];
 
     // Vertex buffer data
     var _vertexIndex:Int = 0;
@@ -79,6 +85,46 @@ class FlxBatcher implements IFlxDestroyable
         this.attributesPerVertex = attributesPerVertex;
 
         initBuffers();
+
+        // final stride = attributesPerVertex * Float32Array.BYTES_PER_ELEMENT;
+        // attributes = [
+        //     {
+        //         buffer: _glVertexBuffer,
+        //         name: "aPosition",
+        //         size: 2,
+        //         type: GL.FLOAT,
+        //         normalized: false,
+        //         stride: stride,
+        //         offset: 0
+        //     },
+        //     {
+        //         buffer: _glVertexBuffer,
+        //         name: "aTexCoord",
+        //         size: 2,
+        //         type: GL.FLOAT,
+        //         normalized: false,
+        //         stride: stride,
+        //         offset: 8, // 2 * 4
+        //     },
+        //     {
+        //         buffer: _glVertexBuffer,
+        //         name: "aColorMultiplier",
+        //         size: 4,
+        //         type: GL.UNSIGNED_BYTE,
+        //         normalized: true,
+        //         stride: stride,
+        //         offset: 16 // prev + 2 * 4
+        //     },
+        //     {
+        //         buffer: _glVertexBuffer,
+        //         name: "aColorOffset",
+        //         size: 4,
+        //         type: GL.UNSIGNED_BYTE,
+        //         normalized: true,
+        //         stride: stride,
+        //         offset: 20 // prev + 4
+        //     }
+        // ];
     }
 
     public function destroy():Void
@@ -158,6 +204,7 @@ class FlxBatcher implements IFlxDestroyable
         _indices[_indicesIndex++] = _numVertices + 3;
 
         // Set up the render state
+		_currentTopology = TRIANGLE_LIST;
         _currentTexture = data.texture;
         _currentTextureRepeat = data.textureRepeat;
         _currentTextureSmoothing = data.textureSmoothing;
@@ -208,6 +255,7 @@ class FlxBatcher implements IFlxDestroyable
         }
 
         // Set up the render state
+		_currentTopology = TRIANGLE_LIST;
         _currentTexture = data.texture;
         _currentTextureRepeat = data.textureRepeat;
         _currentTextureSmoothing = data.textureSmoothing;
@@ -227,14 +275,15 @@ class FlxBatcher implements IFlxDestroyable
         // queue up whatever was left
         if (_count > 0)
         {
-            final dc = DrawCall.get(_count, _offset, _currentShader, _currentBlendMode, _currentTexture, _currentTextureRepeat, _currentTextureSmoothing);
+			final dc = BatchDrawCall.get(this, _count, _offset, _currentTopology, _currentShader, _currentBlendMode, _currentTexture, _currentTextureRepeat,
+				_currentTextureSmoothing);
             _drawCalls.push(dc);
         }
 
         uploadBuffers();
 
         for (dc in _drawCalls)
-            draw(dc);
+            _renderer.draw(dc);
 
         _drawCalls.resize(0);
         _count = 0;
@@ -247,47 +296,9 @@ class FlxBatcher implements IFlxDestroyable
     }
 
     /**
-     * Executes a batched draw call.
-     * 
-     * @param   dc   The draw call to execute.
-     */
-    function draw(dc:DrawCall):Void
-    {
-        final shader = dc.shader;
-
-        // Prep the GL state for the upcoming draw
-        if (_renderer.context.setShader(shader))
-            initShader(shader);
-
-        // Set matrix uniform
-        GLHelper.uniformMatrix4fv(shader.data.uMatrix.index, false, _renderer.projection);
-
-        // Set up render state
-        _renderer.context.setBlendMode(dc.blend);
-
-        // Set up textures
-        _renderer.context.bindTexture(dc.texture.texture);
-
-        // TODO: texture.filter ?
-        var filter = dc.textureSmoothing ? GL.LINEAR : GL.NEAREST;
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
-
-        GL.activeTexture(GL.TEXTURE0);
-        GL.uniform1i(shader.data.uImage0.index, 0);
-        GL.uniform2f(shader.data.uTextureSize.index, dc.texture.width, dc.texture.height);
-
-        // Finally, actually draw them
-        GL.drawElements(GL.TRIANGLES, dc.count, GL.UNSIGNED_SHORT, dc.offset);
-        FlxG.renderer.totalDrawCalls++;
-
-        dc.put();
-    }
-
-    /**
      * Called during a draw call, when the active shader changes.
      */
-    function initShader(shader:Shader):Void
+    public function initShader(shader:Shader):Void
     {
         final stride = attributesPerVertex * Float32Array.BYTES_PER_ELEMENT;
         var offset = 0;
@@ -331,9 +342,12 @@ class FlxBatcher implements IFlxDestroyable
         var sameTextureSmoothing = _currentTextureSmoothing == next.textureSmoothing;
         var sameTexture = (_currentTexture == next.texture) && sameTextureRepeat && sameTextureSmoothing;
 
-        if (!(sameShader && sameBlendMode && sameTexture))
+		var sameTopology = _currentTopology == next.topology;
+		
+		if (!(sameShader && sameBlendMode && sameTexture && sameTopology) && true)
         {
-            final dc = DrawCall.get(_count, _offset, _currentShader, _currentBlendMode, _currentTexture, _currentTextureRepeat, _currentTextureSmoothing);
+			final dc = BatchDrawCall.get(this, _count, _offset, _currentTopology, _currentShader, _currentBlendMode, _currentTexture, _currentTextureRepeat,
+				_currentTextureSmoothing);
             _drawCalls.push(dc);
 
             _offset += _count * UInt16Array.BYTES_PER_ELEMENT;
@@ -353,7 +367,7 @@ class FlxBatcher implements IFlxDestroyable
 
         // Allocate the vertex buffer on the GPU
         _glVertexBuffer = GL.createBuffer();
-        GL.bindBuffer(GL.ARRAY_BUFFER, _glVertexBuffer);
+        _renderer.context.bindGLVertexBuffer(_glVertexBuffer);
         GLHelper.bufferData(GL.ARRAY_BUFFER, _positions, GL.STREAM_DRAW);
 
         // Construct the index buffer;
@@ -361,7 +375,7 @@ class FlxBatcher implements IFlxDestroyable
 
         // Allocate the index buffer on the GPU
         _glIndexBuffer = GL.createBuffer();
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, _glIndexBuffer);
+        _renderer.context.bindGLIndexBuffer(_glIndexBuffer);
         GLHelper.bufferData(GL.ELEMENT_ARRAY_BUFFER, _indices, GL.STREAM_DRAW);
     }
 
@@ -369,7 +383,7 @@ class FlxBatcher implements IFlxDestroyable
     inline function uploadBuffers():Void
     {
         // TODO: upload portion of buffer?
-        GL.bindBuffer(GL.ARRAY_BUFFER, _glVertexBuffer);
+        _renderer.context.bindGLVertexBuffer(_glVertexBuffer);
 
         if (_numVertices == maxVertices)
         {
@@ -382,7 +396,7 @@ class FlxBatcher implements IFlxDestroyable
             GLHelper.bufferSubData(GL.ARRAY_BUFFER, 0, portion);
         }
         
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, _glIndexBuffer);
+        _renderer.context.bindGLIndexBuffer(_glIndexBuffer);
 
         if (_numIndices == maxIndices)
         {
@@ -413,60 +427,17 @@ class FlxBatcher implements IFlxDestroyable
     }
 }
 
-/**
- * Internal data representation of a batched draw call.
- * Managed and reused internally by the batcher, you probably shouldn't mess with these.
- */
-class DrawCall implements IFlxDestroyable
+@:access(flixel.system.render.gl.FlxBatcher)
+@:forward
+abstract BatchDrawCall(FlxDrawCall) from FlxDrawCall to FlxDrawCall
 {
-    static var pool:FlxPool<DrawCall> = new FlxPool(DrawCall.new);
-
-    public static inline function get(count:Int, offset:Int, shader:Shader, blend:BlendMode, texture:FlxGraphic, textureRepeat:Bool, textureSmoothing:Bool):DrawCall
-    {
-        var dc = pool.get();
-        dc._inPool = false;
-        dc.set(count, offset, shader, blend, texture, textureRepeat, textureSmoothing);
-        return dc;
-    }
-
-    public var shader:Shader;
-
-    public var blend:BlendMode;
-
-    public var texture:FlxGraphic;
-    public var textureRepeat:Bool;
-    public var textureSmoothing:Bool;
-
-    public var count:Int;
-    public var offset:Int;
-
-    var _inPool:Bool = false;
-
-    function new() {}
-
-    public inline function destroy():Void {}
-
-    public inline function set(count:Int, offset:Int, shader:Shader, blend:BlendMode, texture:FlxGraphic, textureRepeat:Bool, textureSmoothing:Bool)
-    {
-        this.count = count;
-        this.offset = offset;
-
-        this.shader = shader;
-
-        this.blend = blend;
-
-        this.texture = texture;
-        this.textureRepeat = textureRepeat;
-        this.textureSmoothing = textureSmoothing;
-    }
-
-    public inline function put():Void
-    {
-        if (!_inPool)
-        {
-            _inPool = true;
-            pool.putUnsafe(this);
-        }
-    }
+	public static inline function get(batcher:FlxBatcher, count:Int, offset:Int, topology:FlxTopology, shader:Shader, blend:BlendMode,
+			texture:FlxGraphic,
+			textureRepeat:Bool, textureSmoothing:Bool):BatchDrawCall
+	{
+		return FlxDrawCall.get()
+			.init(batcher._glIndexBuffer, count, offset)
+			.setState(topology, shader, blend, texture, textureRepeat, textureSmoothing);
+	}
 }
 #end

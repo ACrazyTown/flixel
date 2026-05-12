@@ -1,7 +1,11 @@
 package flixel.system.render.gl;
 
-import openfl.display.BitmapData;
 #if FLX_RENDER_OPENGL
+import flixel.system.render.FlxTopology;
+import lime.utils.Float32Array;
+import openfl.display.Shader;
+import flixel.system.render.gl.FlxDrawCall;
+import openfl.display.BitmapData;
 import lime.graphics.opengl.GLTexture;
 import flixel.system.render.FlxRenderer.FlxTypedRenderer;
 import lime.math.Matrix4;
@@ -10,12 +14,10 @@ import flixel.graphics.FlxTexture;
 import flixel.graphics.FlxRenderTexture;
 import flixel.util.FlxColor;
 import flixel.math.FlxRect;
-#if FLX_OPENGL_AVAILABLE
 import lime.utils.UInt8Array;
 import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
 import lime.graphics.opengl.GL;
-#end
 
 @:access(flixel.system.render.gl)
 @:access(flixel.graphics)
@@ -55,6 +57,15 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     public static inline final MAX_QUADS_PER_BUFFER:Int = 16383;
 
     /**
+     * Whether vertex array objects (VAOs) are supported
+     * 
+     * This is dependent on the current OpenGL version. If the current version does not natively support VAOs,
+     * an extension will be tried to be used instead. 
+     * If VAOs are not supported in any form, they will be emulated.
+     */
+    public static var supportsVAO:Null<Bool>;
+
+    /**
      * The default shader used by the renderer.
      */
     public static var defaultShader:FlxGLShader;
@@ -85,6 +96,27 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         super();
         method = OPENGL;
         maxTextureSize = cast GL.getParameter(GL.MAX_TEXTURE_SIZE);
+    }
+
+    override function initGlobals():Void
+    {
+        if (supportsVAO == null)
+        {
+            // Natively supported on WebGL 2.0 and OpenGL (ES) 3.0+
+            var supportsNatively = (GL.type == WEBGL && GL.version >= 2) && ((GL.type == OPENGLES || GL.type == OPENGL) && GL.version >= 3);
+
+            // On older versions we may still be able to use it if the required extension is available
+            var extensions = GL.getSupportedExtensions();
+            // TODO: APPLE_vertex_array_object ?
+            var supportsExtension = extensions.contains("ARB_vertex_array_object") || extensions.contains("OES_vertex_array_object");
+
+            #if (desktop && lime <= version("8.3.1"))
+            // VAO functions are broken on current Lime when targeting desktop ...
+            supportsVAO = false;
+            #else
+            supportsVAO = supportsNatively || supportsExtension;
+            #end
+        }
 
         context = new GLContext();
 
@@ -92,6 +124,88 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
         batcher = new FlxBatcher(MAX_QUADS_PER_BUFFER * VERTICES_PER_QUAD, MAX_QUADS_PER_BUFFER * INDICES_PER_QUAD, 6);
     }
+
+    // =============================================================================
+	//{region                          PUBLIC API
+	// =============================================================================
+
+        /**
+     * Immediately executes the passed `FlxDrawCall`.
+     * @param   dc   The `FlxDrawCall` to execute.
+     */
+    public function draw(dc:FlxDrawCall):Void
+    {
+        final shader = dc.shader;
+
+        // Prep the GL state for the upcoming draw
+        // if (_renderer.context.setShader(shader))
+        //     initShader(shader);
+        // TODO: nicer way to handle attributes?
+        if (context.setShader(shader))
+            batcher.initShader(shader);
+
+        // Set matrix uniform
+        // TODO: apply in resize
+        GLHelper.uniformMatrix4fv(shader.data.uMatrix.index, false, projection);
+
+        // Set up render state
+        context.setBlendMode(dc.blend);
+
+        // Set up textures
+        context.bindTexture(dc.texture.texture);
+
+        // TODO: texture.filter ?
+        var filter = dc.textureSmoothing ? GL.LINEAR : GL.NEAREST;
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+
+        GL.activeTexture(GL.TEXTURE0);
+        GL.uniform1i(shader.data.uImage0.index, 0);
+        GL.uniform2f(shader.data.uTextureSize.index, dc.texture.width, dc.texture.height);
+
+        // Finally, actually draw them
+        context.bindGLIndexBuffer(dc.indexBuffer);
+		GL.drawElements(dc.topology, dc.count, GL.UNSIGNED_SHORT, dc.offset);
+        FlxG.renderer.totalDrawCalls++;
+    }
+
+    public function resize(width:Int, height:Int):Void
+    {
+        if (_projectionWidth == width && _projectionHeight == height)
+            return;
+    
+        _projection.createOrtho(0, width, 0, height, -1000, 1000);
+        _projectionFlipped.createOrtho(0, width, height, 0, -1000, 1000);
+
+        _projectionWidth = width;
+        _projectionHeight = height;
+    }
+
+    public function setRenderTexture(texture:Null<FlxRenderTexture>):Void
+    {
+        context.setRenderTexture(texture);
+        
+        if (texture != null)
+        {
+            _needsFlippedProjection = false;
+            GL.viewport(0, 0, texture.width, texture.height);
+            resize(texture.width, texture.height);
+        }
+        else
+        {
+            _needsFlippedProjection = true;
+            GL.viewport(0, 0, FlxG.stage.window.width, FlxG.stage.window.height);
+            resize(FlxG.stage.window.width, FlxG.stage.window.height);
+        }
+    }
+
+    // =============================================================================
+	//}endregion                       PUBLIC API
+	// =============================================================================
+
+    // =============================================================================
+	//{region                          INHERITED
+	// =============================================================================
 
     public inline function startFrame():Void
 	{
@@ -129,36 +243,6 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     public function addCameraView(view:FlxGLView) {}
     public function addCameraViewAt(view:FlxGLView, index:Int) {}
     public function removeCameraView(view:FlxGLView) {}
-
-    public function resize(width:Int, height:Int):Void
-    {
-        if (_projectionWidth == width && _projectionHeight == height)
-            return;
-    
-        _projection.createOrtho(0, width, 0, height, -1000, 1000);
-        _projectionFlipped.createOrtho(0, width, height, 0, -1000, 1000);
-
-        _projectionWidth = width;
-        _projectionHeight = height;
-    }
-
-    public function setRenderTexture(texture:Null<FlxRenderTexture>):Void
-    {
-        context.setRenderTexture(texture);
-        
-        if (texture != null)
-        {
-            _needsFlippedProjection = false;
-            GL.viewport(0, 0, texture.width, texture.height);
-            resize(texture.width, texture.height);
-        }
-        else
-        {
-            _needsFlippedProjection = true;
-            GL.viewport(0, 0, FlxG.stage.window.width, FlxG.stage.window.height);
-            resize(FlxG.stage.window.width, FlxG.stage.window.height);
-        }
-    }
 
     function createTextureHandle():FlxTextureHandle
     {
@@ -321,5 +405,8 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
             GL.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_STENCIL_ATTACHMENT, GL.RENDERBUFFER, target.renderbuffer);
         }
     }
+    // =============================================================================
+	//}endregion                        INHERITED
+	// =============================================================================
 }
 #end
