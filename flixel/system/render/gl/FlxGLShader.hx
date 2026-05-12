@@ -31,6 +31,7 @@ class FlxGLShader extends Shader
 		vTexCoord = aTexCoord;
 
 		gl_Position = uMatrix * aPosition;
+		gl_PointSize = 1.0;
 	", true)
 	@:glVertexSource("
 		#pragma header
