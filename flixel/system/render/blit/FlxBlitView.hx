@@ -1,6 +1,5 @@
 package flixel.system.render.blit;
 
-import flixel.graphics.FlxTexture;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
@@ -24,7 +23,6 @@ import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
-@:access(flixel.graphics.FlxTexture)
 class FlxBlitView extends FlxCameraView
 {
 	/**
@@ -197,7 +195,7 @@ class FlxBlitView extends FlxCameraView
 	
 	@:noCompletion
 	static final _helperMatrix = new FlxMatrix();
-	override function drawPixels(texture:FlxTexture, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
+	override function drawPixels(pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
 	{
 		// super.drawPixels(pixels, matrix, transform, blend, smoothing, shader);
 		
@@ -206,18 +204,18 @@ class FlxBlitView extends FlxCameraView
 		if (_useBlitMatrix)
 		{
 			_helperMatrix.concat(_blitMatrix);
-			buffer.draw(texture._bitmap, _helperMatrix, null, null, null, (smoothing || antialiasing));
+			buffer.draw(pixels, _helperMatrix, null, null, null, (smoothing || antialiasing));
 		}
 		else
 		{
 			_helperMatrix.translate(-camera.viewMarginLeft, -camera.viewMarginTop);
-			buffer.draw(texture._bitmap, _helperMatrix, null, blend, null, (smoothing || antialiasing));
+			buffer.draw(pixels, _helperMatrix, null, blend, null, (smoothing || antialiasing));
 		}
 	}
 	
 	@:noCompletion
 	static final _helperPoint:Point = new Point();
-	override function copyPixels(texture:FlxTexture, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false,
+	override function copyPixels(pixels:FlxBitmap, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false,
 			?shader)
 	{
 		// super.copyPixels(pixels, sourceRect, destPoint, transform, blend, smoothing);
@@ -227,13 +225,13 @@ class FlxBlitView extends FlxCameraView
 			_helperMatrix.identity();
 			_helperMatrix.translate(destPoint.x, destPoint.y);
 			_helperMatrix.concat(_blitMatrix);
-			buffer.draw(texture._bitmap, _helperMatrix, null, null, null, (smoothing || antialiasing));
+			buffer.draw(pixels, _helperMatrix, null, null, null, (smoothing || antialiasing));
 		}
 		else
 		{
 			_helperPoint.x = destPoint.x - Std.int(camera.viewMarginLeft);
 			_helperPoint.y = destPoint.y - Std.int(camera.viewMarginTop);
-			buffer.copyPixels(texture._bitmap, sourceRect, _helperPoint, null, null, true);
+			buffer.copyPixels(pixels, sourceRect, _helperPoint, null, null, true);
 		}
 	}
 	
