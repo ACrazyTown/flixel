@@ -9,6 +9,7 @@ import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import openfl.Assets;
 import flixel.graphics.FlxBitmap;
+import flixel.graphics.FlxTexture;
 
 /**
  * Internal storage system to prevent graphics from being used repeatedly in memory.
@@ -92,7 +93,11 @@ class BitmapFrontEnd
 	 */
 	public function add(graphic:FlxGraphicAsset, unique = false, ?key:String):FlxGraphic
 	{
-		if ((graphic is FlxGraphic))
+		if ((graphic is FlxTexture))
+		{
+			return FlxGraphic.fromTexture(cast graphic, unique, key);
+		}
+		else if ((graphic is FlxGraphic))
 		{
 			return FlxGraphic.fromGraphic(cast graphic, unique, key);
 		}

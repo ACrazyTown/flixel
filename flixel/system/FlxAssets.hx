@@ -5,6 +5,7 @@ import haxe.macro.Expr;
 #if !macro
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.FlxTexture;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.atlas.AseAtlas;
 import flixel.graphics.atlas.TexturePackerAtlas;
@@ -13,6 +14,7 @@ import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.graphics.frames.bmfont.BMFont;
 import flixel.system.frontEnds.AssetFrontEnd;
+import flixel.util.typeLimit.OneOfSix;
 import flixel.util.typeLimit.OneOfFive;
 import flixel.util.typeLimit.OneOfFour;
 import flixel.util.typeLimit.OneOfThree;
@@ -41,7 +43,7 @@ typedef FlxAsepriteJsonAsset = FlxJsonAsset<AseAtlas>;
 typedef FlxTilemapGraphicAsset = OneOfFive<FlxFramesCollection, FlxGraphic, FlxBitmap, BitmapData, String>;
 typedef FlxBitmapFontGraphicAsset = OneOfFive<FlxFrame, FlxGraphic, FlxBitmap, BitmapData, String>;
 
-abstract FlxGraphicAsset(OneOfFive<FlxGraphic, FlxBitmap, BitmapData, String, Class<Dynamic>>) from FlxGraphic to FlxGraphic from FlxBitmap to FlxBitmap from BitmapData to BitmapData from String
+abstract FlxGraphicAsset(OneOfSix<FlxTexture, FlxGraphic, FlxBitmap, BitmapData, String, Class<Dynamic>>) from FlxTexture to FlxTexture from FlxGraphic to FlxGraphic from FlxBitmap to FlxBitmap from BitmapData to BitmapData from String
 	to String from Class<Dynamic> to Class<Dynamic>
 {
 	public inline function resolveBitmapData(?log, ?pos):Null<BitmapData>
@@ -330,18 +332,22 @@ class FlxAssets
 	public static function assertBitmapData(graphic:FlxGraphicAsset):BitmapData
 	{
 		if (graphic == null)
-			throw 'Cannot resolve null graphic asset, expected String, FlxGraphic, Class<Bitmap> or BitmapData';
+			throw 'Cannot resolve null graphic asset, expected String, FlxTexture, FlxGraphic, Class<Bitmap> or BitmapData';
 		
 		final data = resolveBitmapData(graphic, null);
 		if (data != null)
 			return data;
 		
-		throw 'Invalid graphic asset, expected String, FlxGraphic, Class<Bitmap> or BitmapData';
+		throw 'Invalid graphic asset, expected String, FlxTexture, FlxGraphic, Class<Bitmap> or BitmapData';
 	}
 	
 	public static function resolveBitmapData(graphic:FlxGraphicAsset, ?log, ?pos):Null<BitmapData>
 	{
-		if ((graphic is FlxGraphic))
+		if ((graphic is FlxTexture))
+		{
+			return cast(graphic, FlxTexture).getBitmap();
+		}
+		else if ((graphic is FlxGraphic))
 		{
 			return cast(graphic, FlxGraphic).texture.getBitmap();
 		}
@@ -359,7 +365,7 @@ class FlxAssets
 		}
 		
 		if (log != null)
-			FlxG.log.advanced('Invalid graphic asset, expected String, FlxGraphic, Class<Bitmap> or BitmapData', log, pos);
+			FlxG.log.advanced('Invalid graphic asset, expected String, FlxTexture, FlxGraphic, Class<Bitmap> or BitmapData', log, pos);
 		
 		return null;
 	}

@@ -296,6 +296,36 @@ class FlxTexture implements IFlxDestroyable
     }
 
     /**
+     * Clones this texture and returns a brand new instance.
+     * 
+     * **NOTE:** This function is not thread-safe, and should only be called on the main thread!
+     * 
+     * @return FlxTexture
+     */
+    public function clone():FlxTexture
+    {
+        var pixels:FlxBitmap = null;
+
+        switch (status)
+        {
+            case READABLE(synced):
+                pixels = getBitmap();
+
+                // DRAW_QUADS / BLIT uses the underlying bitmap as the handle,
+                // so for a fresh copy we want to clone it.
+                if (FlxG.renderer.blit #if FLX_RENDER_DRAWQUADS || true #end)
+                    pixels = pixels.clone();
+
+            default:
+                pixels = FlxBitmap.fromBytes(readPixels().toBytes());
+        }
+
+        var texture = new FlxTexture(width, height);
+        texture.uploadBitmap(pixels);
+        return texture;
+    }
+
+    /**
 	 * `FlxBitmap` synced the bitmap and texture automatically while `FlxTexture` requires you to manually apply your changes.
      * This is called by draw methods to avoid a breaking change between the two, and should be removed in the next major version.
      */

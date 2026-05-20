@@ -129,6 +129,36 @@ class FlxGraphic implements IFlxDestroyable
 		return graphic;
 	}
 
+	public static function fromTexture(source:FlxTexture, unique:Bool = false, key:String, cache:Bool = false):FlxGraphic
+	{
+		if (!cache)
+			return createGraphicFromTexture(source, key, unique, cache);
+
+		// var cacheKey:String = FlxG.bitmap.findKeyForBitmap(source);
+
+		// var assetKey:String = null;
+		// var assetClass:Class<FlxBitmap> = null;
+		// var graphic:FlxGraphic = null;
+		// if (cacheKey != null)
+		// {
+		// 	graphic = FlxG.bitmap.get(key);
+		// 	assetKey = graphic.assetsKey;
+		// 	assetClass = graphic.assetsClass;
+		// }
+
+		// TODO: can we resolve systemKey somehow? Keying by the bitmap is not ideal
+		// because some renderer implementations might not have a constant bitmap
+		var cacheKey = FlxG.bitmap.generateKey(null, key, unique);
+		var graphic = FlxG.bitmap.get(key);
+		if (graphic != null)
+			return graphic;
+
+		graphic = createGraphicFromTexture(source, cacheKey, unique);
+		// graphic.assetsKey = assetKey;
+		// graphic.assetsClass = assetClass;
+		return graphic;
+	}
+
 	/**
 	 * Creates and (optionally) caches a `FlxGraphic` object from the specified `FlxFrame`.
 	 * It uses frame's `FlxBitmap`, not the `frame.parent.bitmap`.
@@ -190,7 +220,7 @@ class FlxGraphic implements IFlxDestroyable
 			return Source;
 
 		var key:String = FlxG.bitmap.generateKey(Source.key, Key, Unique);
-		var graphic:FlxGraphic = createGraphic(Source.texture.getBitmap(), key, Unique);
+		var graphic:FlxGraphic = createGraphicFromTexture(Source.texture, key, Unique);
 		graphic.unique = Unique;
 		graphic.assetsClass = Source.assetsClass;
 		graphic.assetsKey = Source.assetsKey;
@@ -242,10 +272,14 @@ class FlxGraphic implements IFlxDestroyable
 	 * @param   cache    Whether to use graphic caching or not. Default value is `true`, which means automatic caching.
 	 * @return  Created `FlxGraphic` object.
 	 */
-	static function createGraphic(bitmap:FlxBitmap, key:String, unique:Bool = false, cache:Bool = true):FlxGraphic
+	static inline function createGraphic(bitmap:FlxBitmap, key:String, unique:Bool = false, cache:Bool = true):FlxGraphic
 	{
-		bitmap = FlxGraphic.getBitmap(bitmap, unique);
-		var texture = FlxTexture.fromBitmap(bitmap);
+		return createGraphicFromTexture(FlxTexture.fromBitmap(bitmap), key, unique, cache);
+	}
+
+	static function createGraphicFromTexture(texture:FlxTexture, key:String, unique:Bool, cache:Bool = true):FlxGraphic
+	{
+		var texture = unique ? texture.clone() : texture;
 		var graphic:FlxGraphic = null;
 
 		if (cache)
