@@ -1532,6 +1532,7 @@ class FlxCamera extends FlxBasic
 		calcMarginY();
 		updateScrollRect();
 		updateInternalSpritePositions();
+		updateFlashSpritePosition();
 
 		view.updateScale();
 
