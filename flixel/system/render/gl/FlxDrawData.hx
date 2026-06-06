@@ -2,6 +2,7 @@ package flixel.system.render.gl;
 
 #if FLX_RENDER_OPENGL
 import flixel.util.FlxColor;
+import flixel.system.render.FlxTopology;
 import openfl.Vector;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
@@ -25,6 +26,7 @@ enum FlxDrawType
 class FlxDrawData implements IFlxDestroyable
 {
     public var type:FlxDrawType;
+	public var topology:FlxTopology = TRIANGLE_LIST;
 
     public var texture:FlxGraphic;
     public var textureSmoothing:Bool;

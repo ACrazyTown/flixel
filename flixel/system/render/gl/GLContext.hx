@@ -1,6 +1,7 @@
 package flixel.system.render.gl;
 
 #if FLX_RENDER_OPENGL
+import lime.graphics.opengl.GLBuffer;
 import lime.utils.UInt8Array;
 import flixel.graphics.FlxTexture;
 import flixel.graphics.FlxRenderTexture;
@@ -25,12 +26,22 @@ class GLContext
     var _shader:Shader;
     var _curBlendMode:BlendMode;
 
+    var _curGLFramebuffer:GLFramebuffer;
+    var _curGLVertexBuffer:GLBuffer;
+    var _curGLIndexBuffer:GLBuffer;
+
     public function new() {}
 
     public function invalidate():Void
     {
         _shader = null;
         _curBlendMode = null;
+
+        _curGLFramebuffer = null;
+        _curGLVertexBuffer = null;
+        _curGLIndexBuffer = null;
+
+        GL.disable(GL.SCISSOR_TEST);
     }
 
     // =============================================================================
@@ -97,7 +108,7 @@ class GLContext
      */
     public inline function setRenderTexture(texture:Null<FlxRenderTexture>):Void
     {
-        GL.bindFramebuffer(GL.FRAMEBUFFER, (texture != null) ? texture.renderTarget.framebuffer : null);
+        bindGLFramebuffer((texture != null) ? texture.renderTarget.framebuffer : null);
     }
 
     /**
@@ -163,6 +174,41 @@ class GLContext
         // with other OpenFL sprites like the mouse and debugger
         // FlxG.stage.__renderer.__blendMode = blend;
     }
+
+    // =============================================================================
+	//{region                            GL CACHE
+	// =============================================================================
+
+    public inline function bindGLFramebuffer(framebuffer:GLFramebuffer):Void
+    {
+        if (_curGLFramebuffer == framebuffer)
+            return;
+
+        GL.bindFramebuffer(GL.FRAMEBUFFER, framebuffer);
+        _curGLFramebuffer = framebuffer;
+    }
+
+    public inline function bindGLVertexBuffer(buffer:GLBuffer):Void
+    {
+        if (_curGLVertexBuffer == buffer)
+            return;
+
+        GL.bindBuffer(GL.ARRAY_BUFFER, buffer);
+        _curGLVertexBuffer = buffer;
+    }
+
+    public inline function bindGLIndexBuffer(buffer:GLBuffer):Void
+    {
+        if (_curGLIndexBuffer == buffer)
+            return;
+
+        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, buffer);
+        _curGLIndexBuffer = buffer;
+    }
+
+    // =============================================================================
+	//}endregion                         GL CACHE
+	// =============================================================================
 
     inline function getGLWrap(wrap:FlxTextureWrap):Int
     {
