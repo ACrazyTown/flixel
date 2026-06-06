@@ -428,7 +428,7 @@ class FlxBitmapText extends FlxSprite
 					}
 
 					matrix.translate(screenPos.x + originX, screenPos.y + originY);
-					camera.view.drawFrame(frame, matrix, color, blend, antialiasing, shader);
+					camera.view.drawFrame(frame, matrix, color, blend, antialiasing, filters);
 				}
 
 				borderDrawData.forEach(addQuad.bind(_, _, _, borderColorTransform));
