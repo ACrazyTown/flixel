@@ -145,9 +145,11 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         if (context.setShader(shader))
             batcher.initShader(shader);
 
+        shader.updateUniforms();
+
         // Set matrix uniform
         // TODO: apply in resize
-        GLHelper.uniformMatrix4fv(shader.data.uMatrix.index, false, projection);
+        GLHelper.uniformMatrix4fv(shader.getUniformLocation("uMatrix"), false, projection);
 
         // Set up render state
         context.setBlendMode(dc.blend);
@@ -161,8 +163,11 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
 
         GL.activeTexture(GL.TEXTURE0);
-        GL.uniform1i(shader.data.uImage0.index, 0);
-        GL.uniform2f(shader.data.uTextureSize.index, dc.texture.width, dc.texture.height);
+        GL.uniform1i(shader.getUniformLocation("uImage0"), 0);
+
+        var uTextureSizeLocation = shader.getUniformLocation("uTextureSize");
+        if (uTextureSizeLocation != null)
+            GL.uniform2f(uTextureSizeLocation, dc.texture.width, dc.texture.height);
 
         // Finally, actually draw them
         context.bindGLIndexBuffer(dc.indexBuffer);

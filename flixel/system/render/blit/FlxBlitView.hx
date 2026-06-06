@@ -8,7 +8,7 @@ import flixel.system.render.quad.FlxDrawTrianglesItem;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets;
+import flixel.graphics.shaders.FlxShader;
 import flixel.system.render.FlxCameraView;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -195,7 +195,7 @@ class FlxBlitView extends FlxCameraView
 	
 	@:noCompletion
 	static final _helperMatrix = new FlxMatrix();
-	override function drawPixels(pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
+	override function drawPixels(pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
 	{
 		// super.drawPixels(pixels, matrix, transform, blend, smoothing, shader);
 		
@@ -216,7 +216,7 @@ class FlxBlitView extends FlxCameraView
 	@:noCompletion
 	static final _helperPoint:Point = new Point();
 	override function copyPixels(pixels:FlxBitmap, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false,
-			?shader)
+			?filters:Array<FlxShader>)
 	{
 		// super.copyPixels(pixels, sourceRect, destPoint, transform, blend, smoothing);
 		
@@ -235,12 +235,12 @@ class FlxBlitView extends FlxCameraView
 		}
 	}
 	
-	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
+	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
 	{
 		throw "Not Implemented on blit";
 	}
 	
-	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
+	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
 	{
 		// TODO: fix this case for zoom less than initial zoom...
 		frame.paint(buffer, destPoint, true);
@@ -252,7 +252,7 @@ class FlxBlitView extends FlxCameraView
 	@:noCompletion
 	static final drawVertices = new FlxVector2d<Float>();
 	override function drawTriangles(graphic:FlxGraphic, vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvtData:FlxVector2d<Float>, ?colors:FlxVector2d<Int>,
-			?position, ?blend, repeat = false, smoothing = false, ?transform, ?shader)
+			?position, ?blend, repeat = false, smoothing = false, ?transform, ?filters)
 	{
 		// super.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, shader);
 		

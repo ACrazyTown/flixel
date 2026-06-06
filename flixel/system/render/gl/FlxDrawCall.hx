@@ -4,7 +4,7 @@ import flixel.util.FlxDestroyUtil;
 import lime.graphics.opengl.GLBuffer;
 import lime.graphics.opengl.GLFramebuffer;
 import flixel.system.render.FlxTopology;
-import openfl.display.Shader;
+import flixel.graphics.shaders.FlxShader;
 import openfl.display.BlendMode;
 import flixel.graphics.FlxGraphic;
 import flixel.util.FlxPool;
@@ -33,7 +33,7 @@ class FlxDrawCall implements IFlxDestroyable
 	// Render state
     public var framebuffer:GLFramebuffer;
 	public var topology:FlxTopology;
-	public var shader:Shader;
+	public var shader:FlxShader;
 	public var blend:BlendMode;
     public var texture:FlxGraphic;
     public var textureRepeat:Bool;
@@ -54,7 +54,7 @@ class FlxDrawCall implements IFlxDestroyable
 		return this;
 	}
 	
-	public inline function setState(topology:FlxTopology, shader:Shader, blend:BlendMode, texture:FlxGraphic, textureRepeat:Bool,
+	public inline function setState(topology:FlxTopology, shader:FlxShader, blend:BlendMode, texture:FlxGraphic, textureRepeat:Bool,
 			textureSmoothing:Bool):FlxDrawCall
 	{
 		this.topology = topology;

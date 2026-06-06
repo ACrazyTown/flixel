@@ -1,5 +1,9 @@
 package flixel.system.render;
 
+import lime.math.Matrix3;
+// import flixel.graphics.shaders.FlxShaderUniforms.FlxShaderUniform;
+// import flixel.graphics.shaders.FlxShaderUniforms.FlxShaderUniformLocation;
+// import flixel.graphics.shaders.FlxShader;
 import flixel.graphics.FlxRenderTexture;
 import flixel.math.FlxRect;
 import flixel.graphics.FlxBitmap;
@@ -164,6 +168,27 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 
 	// =============================================================================
 	//}endregion                           TEXTURES
+	// =============================================================================
+
+	// =============================================================================
+	//{region                              SHADERS
+	// =============================================================================
+	
+	// abstract function createShaderHandle(data:FlxShaderData):FlxShaderHandle;
+	// abstract function destroyShaderHandle(handle:FlxShaderHandle):Void;
+
+	// abstract function setShaderUniformInt(handle:FlxShaderHandle, location:FlxShaderUniformLocation, value:Int):Void;
+	// abstract function setShaderUniformIVec2(handle:FlxShaderHandle, location:FlxShaderUniformLocation, v1:Int, v2:Int):Void;
+	// abstract function setShaderUniformIVec3(handle:FlxShaderHandle, location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int):Void;
+	// abstract function setShaderUniformIVec4(handle:FlxShaderHandle, location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int, v4:Int):Void;
+
+	// abstract function setShaderUniformFloat(handle:FlxShaderHandle, location:FlxShaderUniformLocation, value:Float):Void;
+	// abstract function setShaderUniformFVec2(handle:FlxShaderHandle, location:FlxShaderUniformLocation, v1:Float, v2:Float):Void;
+	// abstract function setShaderUniformFVec3(handle:FlxShaderHandle, location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float):Void;
+	// abstract function setShaderUniformFVec4(handle:FlxShaderHandle, location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float, v4:Float):Void;
+
+	// =============================================================================
+	//}endregion                           SHADERS
 	// =============================================================================
 }
 
