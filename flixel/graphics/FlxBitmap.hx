@@ -12,6 +12,11 @@ import openfl.display.BitmapData;
 @:forward
 abstract FlxBitmap(BitmapData) from BitmapData to BitmapData
 {
+    public static inline function fromFile(path:String):FlxBitmap
+    {
+        return BitmapData.fromFile(path);
+    }
+
     public static inline function fromBytes(bytes:Bytes):FlxBitmap
     {
         return BitmapData.fromBytes(bytes);
