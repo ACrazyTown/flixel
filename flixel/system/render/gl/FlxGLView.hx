@@ -144,7 +144,7 @@ class FlxGLView extends FlxCameraView
 	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader)
 	{
 		// super.drawFrame(frame, matrix, transform, blend, smoothing, shader);
-        frame.parent.texture.applyIfNeeded();
+		frame.parent.texture.syncIfNeeded();
 
         if (_useRenderMatrix)
             matrix.concat(_renderMatrix);
@@ -157,7 +157,7 @@ class FlxGLView extends FlxCameraView
 	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
 	{
 		// super.copyFrame(frame, destPoint, transform, blend, smoothing, shader);
-        frame.parent.texture.applyIfNeeded();
+		frame.parent.texture.syncIfNeeded();
 
         // Queue a quad to be drawn when the camera renders
         var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), false, shader, blend, transform, null);

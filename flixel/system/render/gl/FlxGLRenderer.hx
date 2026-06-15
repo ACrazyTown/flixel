@@ -345,7 +345,15 @@ class FlxGLRenderTargetSystem implements IFlxRenderTargetSystem
 
 	public function createHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle 
     {
-        return new FlxGLRenderTarget(texture, depth, stencil);
+        var handle = new FlxGLRenderTarget();
+        handle.texture = texture;
+
+        handle.framebuffer = GL.createFramebuffer();
+        GL.bindFramebuffer(GL.FRAMEBUFFER, handle.framebuffer);
+        GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, texture._handle, 0);
+
+        // resizeRenderTarget(texture, texture.width, texture.height);
+        return handle;
     }
 
 	public function destroyHandle(handle:FlxRenderTargetHandle):Void 
