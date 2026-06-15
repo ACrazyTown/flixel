@@ -7,12 +7,14 @@ import openfl.Vector;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.util.FlxPool;
 import openfl.display.BlendMode;
 import openfl.display.Shader;
 import openfl.geom.ColorTransform;
+
+// TODO: support for SHADER ARRAY
 
 enum FlxDrawType
 {
@@ -32,7 +34,7 @@ class FlxDrawData implements IFlxDestroyable
     public var textureSmoothing:Bool;
     public var textureRepeat:Bool;
 
-    public var shader:Shader;
+    public var shader:FlxShader;
     public var blend:BlendMode;
 
     public var colorOffset:FlxColor;
@@ -121,7 +123,7 @@ class FlxTrianglesDrawData extends FlxDrawData implements IFlxPooled
 	static var pool:FlxPool<FlxTrianglesDrawData> = new FlxPool(FlxTrianglesDrawData.new);
 	
 	public static inline function get(vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvs:FlxVector2d<Float>, colors:FlxVector2d<Int>, texture:FlxGraphic,
-			smoothing:Bool, repeat:Bool, shader:Shader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
+			smoothing:Bool, repeat:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
     {
         var data = pool.get();
 

@@ -10,8 +10,8 @@ import lime.graphics.opengl.GLFramebuffer;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import lime.graphics.opengl.GL;
-import openfl.display.Shader;
 import flixel.FlxG;
+import flixel.graphics.shaders.FlxShader;
 
 /**
  * A helper class that provides high-level convenience methods for dealing with
@@ -22,8 +22,7 @@ import flixel.FlxG;
 @:access(openfl.display3D)
 class GLContext
 {
-    // TODO ant: This is currently an OpenFL shader but we should really abstract this, somehow
-    var _shader:Shader;
+    var _shader:FlxShader;
     var _curBlendMode:BlendMode;
 
     var _curGLFramebuffer:GLFramebuffer;
@@ -119,18 +118,22 @@ class GLContext
      * @param   shader   The shader to use
      * @return  Whether the active shader was changed
      */
-    public function setShader(shader:Shader):Bool
+    public function setShader(shader:FlxShader):Bool
     {
         if (_shader == shader)
             return false;
 
-        if (shader.__context == null)
-        {
-            shader.__context = FlxG.stage.context3D;
-            shader.__init();
-        }
+        // if (shader)
 
-        GL.useProgram(shader.glProgram);
+        // if (shader.__context == null)
+        // {
+        //     shader.__context = FlxG.stage.context3D;
+        //     shader.__init();
+        // }
+
+        // GL.useProgram(shader.glProgram);
+        @:privateAccess
+        GL.useProgram(shader._handle);
         _shader = shader;
 
         return true;

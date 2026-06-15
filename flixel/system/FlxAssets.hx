@@ -138,6 +138,7 @@ abstract FlxJsonAsset<T>(OneOfTwo<T, String>) from T from String
 	}
 }
 
+@:deprecated("flixel.system.FlxAssets.FlxShader is deprecated. Use flixel.graphics.FlxShader instead.")
 typedef FlxShader = #if nme Dynamic #else flixel.system.render.quad.FlxGraphicsShader #end;
 #end
 

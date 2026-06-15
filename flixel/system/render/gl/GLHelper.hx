@@ -43,5 +43,9 @@ class GLHelper
     {
         cast (GL.context, WebGL2RenderContext).uniformMatrix4fv(location, transpose, data, srcOffset, srcLength);
     }
+
+    public static inline function uniform1fv(location:GLUniformLocation) {
+        
+    }
 }
 #end

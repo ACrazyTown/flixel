@@ -1,5 +1,9 @@
 package flixel.system.render;
 
+import lime.math.Matrix3;
+// import flixel.graphics.shaders.FlxShaderUniforms.FlxShaderUniform;
+// import flixel.graphics.shaders.FlxShaderUniforms.FlxShaderUniformLocation;
+// import flixel.graphics.shaders.FlxShader;
 import flixel.graphics.textures.FlxRenderTexture;
 import flixel.math.FlxRect;
 import flixel.graphics.FlxBitmap;
