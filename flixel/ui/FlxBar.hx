@@ -889,7 +889,7 @@ class FlxBar extends FlxSprite
 					_matrix.ty = Math.floor(_matrix.ty);
 				}
 				
-				camera.view.drawFrame(_frontFrame, _matrix, colorTransform, blend, antialiasing, shader);
+				camera.view.drawFrame(_frontFrame, _matrix, colorTransform, blend, antialiasing, filters);
 			}
 		}
 	}

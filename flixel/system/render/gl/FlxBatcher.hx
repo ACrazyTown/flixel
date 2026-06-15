@@ -15,7 +15,7 @@ import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 import lime.utils.Int32Array;
 import openfl.display.BlendMode;
-import openfl.display.Shader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxColor;
 
 /**
@@ -50,7 +50,7 @@ class FlxBatcher implements IFlxDestroyable
 
     // Draw state
 	var _currentTopology:FlxTopology;
-    var _currentShader:Shader;
+    var _currentShader:FlxShader;
     var _currentBlendMode:BlendMode;
     var _currentTexture:FlxGraphic; // TODO ant: replace these 3 with FlxTexture
     var _currentTextureRepeat:Bool;
@@ -298,33 +298,35 @@ class FlxBatcher implements IFlxDestroyable
     /**
      * Called during a draw call, when the active shader changes.
      */
-    public function initShader(shader:Shader):Void
+    public function initShader(shader:FlxShader):Void
     {
         final stride = attributesPerVertex * Float32Array.BYTES_PER_ELEMENT;
         var offset = 0;
 
+        // TODO: think about VAOs and the location
+
         // Setup and enable position attribute
-        GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, stride, offset);
-        GL.enableVertexAttribArray(shader.data.aPosition.index);
+        GL.vertexAttribPointer(shader.getAttributeLocation("aPosition"), 2, GL.FLOAT, false, stride, offset);
+        GL.enableVertexAttribArray(shader.getAttributeLocation("aPosition"));
 
         offset += 2 * 4;
 
         // Setup and enable tex coord attribute
-        GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, stride, offset);
-        GL.enableVertexAttribArray(shader.data.aTexCoord.index);
+        GL.vertexAttribPointer(shader.getAttributeLocation("aTexCoord"), 2, GL.FLOAT, false, stride, offset);
+        GL.enableVertexAttribArray(shader.getAttributeLocation("aTexCoord"));
 
         offset += 2 * 4;
 
         // Color attributes will be interpreted as unsigned bytes and normalized
         // Setup and enable color multiplier attribute
-        GL.vertexAttribPointer(shader.data.aColorMultiplier.index, 4, GL.UNSIGNED_BYTE, true, stride, offset);
-        GL.enableVertexAttribArray(shader.data.aColorMultiplier.index);
+        GL.vertexAttribPointer(shader.getAttributeLocation("aColorMultiplier"), 4, GL.UNSIGNED_BYTE, true, stride, offset);
+        GL.enableVertexAttribArray(shader.getAttributeLocation("aColorMultiplier"));
 
         offset += 4;
 
         // Setup and enable color offset attribute
-        GL.vertexAttribPointer(shader.data.aColorOffset.index, 4, GL.UNSIGNED_BYTE, true, stride, offset);
-        GL.enableVertexAttribArray(shader.data.aColorOffset.index);
+        GL.vertexAttribPointer(shader.getAttributeLocation("aColorOffset"), 4, GL.UNSIGNED_BYTE, true, stride, offset);
+        GL.enableVertexAttribArray(shader.getAttributeLocation("aColorOffset"));
     }
 
     function drawIfNeeded(next:FlxDrawData):Void
@@ -421,7 +423,7 @@ class FlxBatcher implements IFlxDestroyable
         // _positions[_vertexIndex++] = textureSlot; // TODO ant : TEMP
     }
 
-    inline function resolveShader(shader:Shader):Shader
+    inline function resolveShader(shader:FlxShader):FlxShader
     {
         return shader == null ? FlxGLRenderer.defaultShader : shader;
     }
@@ -431,7 +433,7 @@ class FlxBatcher implements IFlxDestroyable
 @:forward
 abstract BatchDrawCall(FlxDrawCall) from FlxDrawCall to FlxDrawCall
 {
-	public static inline function get(batcher:FlxBatcher, count:Int, offset:Int, topology:FlxTopology, shader:Shader, blend:BlendMode,
+	public static inline function get(batcher:FlxBatcher, count:Int, offset:Int, topology:FlxTopology, shader:FlxShader, blend:BlendMode,
 			texture:FlxGraphic,
 			textureRepeat:Bool, textureSmoothing:Bool):BatchDrawCall
 	{
