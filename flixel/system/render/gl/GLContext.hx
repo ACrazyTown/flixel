@@ -50,7 +50,7 @@ class GLContext
 
     public inline function bindTexture(texture:FlxTexture):Void
     {
-        GL.bindTexture(GL.TEXTURE_2D, texture.handle);
+        GL.bindTexture(GL.TEXTURE_2D, texture._handle);
     }
 
     public inline function setTextureWrapU(wrap:FlxTextureWrap):Void
@@ -85,7 +85,7 @@ class GLContext
     @:deprecated
     public function setTexture(texture:FlxTexture, repeat:Bool, smoothing:Bool):Void
     {
-        GL.bindTexture(GL.TEXTURE_2D, texture.handle);
+        GL.bindTexture(GL.TEXTURE_2D, texture._handle);
 
         var wrap = repeat ? GL.REPEAT : GL.CLAMP_TO_EDGE;
         var filter = smoothing ? GL.LINEAR : GL.NEAREST;

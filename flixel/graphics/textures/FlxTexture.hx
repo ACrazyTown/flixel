@@ -118,6 +118,7 @@ class FlxTexture implements IFlxDestroyable
      * The underlying representation of the texture, you probably shouldn't mess with this!
      * The actual type varies depending on the used renderer backend. 
      */
+    @:allow(flixel.system.render)
     var _handle:Null<FlxTextureHandle>;
 
     /**
