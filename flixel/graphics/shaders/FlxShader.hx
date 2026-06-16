@@ -147,45 +147,9 @@ class FlxShader implements IFlxDestroyable
         return GL.getAttribLocation(_handle, name);
     }
 
-    // public function setUniformInt(name:String, v1:Int):Void
-    // {
-    //     if (data.flash != null) 
-    //     {
-    //         setFlashShaderUniform(name, [v1]);
-    //         return;
-    //     }
-
-    //     var uniform = _uniforms.get(name);
-    //     if (uniform == null) 
-    //     {
-    //         FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
-    //         return; 
-    //     }
-
-    //     uniform.value = INT1(v1);
-    // }
-
-    // public function setUniformInt2(name:String, v1:Int, v2:Int):Void
-    // {
-    //     if (data.flash != null)
-    //     {
-    //         setFlashShaderUniform(name, [v1, v2]);
-    //         return;
-    //     }
-
-    //     var uniform = _uniforms.get(name);
-    //     if (uniform == null) 
-    //     {
-    //         FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
-    //         return; 
-    //     }
-        
-    //     uniform.value = INT2(v1, v2);
-    // }
-
     // INT1-4
 
-    overload extern public inline function setUniform(name:String, v1:Int) 
+    public function setInt1(name:String, v1:Int) 
     {
         if (data.flash != null)
         {
@@ -203,7 +167,7 @@ class FlxShader implements IFlxDestroyable
         uniform.value = INT1(v1);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Int, v2:Int) 
+    public function setInt2(name:String, v1:Int, v2:Int) 
     {
         if (data.flash != null)
         {
@@ -221,7 +185,7 @@ class FlxShader implements IFlxDestroyable
         uniform.value = INT2(v1, v2);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Int, v2:Int, v3:Int) 
+    public function setInt3(name:String, v1:Int, v2:Int, v3:Int) 
     {
         if (data.flash != null)
         {
@@ -239,7 +203,7 @@ class FlxShader implements IFlxDestroyable
         uniform.value = INT3(v1, v2, v3);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Int, v2:Int, v3:Int, v4:Int) 
+    public function setInt4(name:String, v1:Int, v2:Int, v3:Int, v4:Int) 
     {
         if (data.flash != null)
         {
@@ -258,7 +222,7 @@ class FlxShader implements IFlxDestroyable
     }
 
     // INT ARRAY
-    overload extern public inline function setUniform(name:String, v:Array<Int>)
+    public function setIntArray(name:String, v:Array<Int>)
     {
         if (data.flash != null)
         {
@@ -266,12 +230,30 @@ class FlxShader implements IFlxDestroyable
             return;
         }
 
-        setUniform(name, new Int32Array(v));
+        setTypedIntArray(name, new Int32Array(v));
+    }
+
+    public function setTypedIntArray(name:String, v:Int32Array)
+    {
+        if (data.flash != null)
+        {
+            FlxG.log.error("OpenFL shaders do not support uniform arrays.");
+            return;
+        }
+
+        var uniform = _uniforms.get(name);
+        if (uniform == null) 
+        {
+            FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
+            return; 
+        }
+
+        uniform.value = INTV(v);
     }
 
     // FLOAT1-4
 
-    overload extern public inline function setUniform(name:String, v1:Float) 
+    public function setFloat1(name:String, v1:Float) 
     {
         if (data.flash != null)
         {
@@ -289,7 +271,7 @@ class FlxShader implements IFlxDestroyable
         uniform.value = FLOAT1(v1);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Float, v2:Float) 
+    public function setFloat2(name:String, v1:Float, v2:Float) 
     {
         if (data.flash != null)
         {
@@ -307,7 +289,7 @@ class FlxShader implements IFlxDestroyable
         uniform.value = FLOAT2(v1, v2);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Float, v2:Float, v3:Float) 
+    public function setFloat3(name:String, v1:Float, v2:Float, v3:Float) 
     {
         if (data.flash != null)
         {
@@ -325,7 +307,7 @@ class FlxShader implements IFlxDestroyable
         uniform.value = FLOAT3(v1, v2, v3);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Float, v2:Float, v3:Float, v4:Float) 
+    public function setFloat4(name:String, v1:Float, v2:Float, v3:Float, v4:Float) 
     {
         if (data.flash != null)
         {
@@ -343,7 +325,7 @@ class FlxShader implements IFlxDestroyable
         uniform.value = FLOAT4(v1, v2, v3, v4);
     }
 
-    overload extern public inline function setUniform(name:String, v:Array<Float>)
+    public function setFloatArray(name:String, v:Array<Float>)
     {
         if (data.flash != null)
         {
@@ -351,12 +333,10 @@ class FlxShader implements IFlxDestroyable
             return;
         }
 
-        setUniform(name, new Float32Array(v));
+        setTypedFloatArray(name, new Float32Array(v));
     }
 
-    // This would've been seperated into two methods for Float32Array and Int32Array
-    // but both of those are an abstract over ArrayBufferView and therefore were causing ambiguous overload errors
-    overload extern public inline function setUniform(name:String, v:ArrayBufferView)
+    public function setTypedFloatArray(name:String, v:Float32Array)
     {
         if (data.flash != null)
         {
@@ -371,92 +351,29 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        if (v.type == Float32)
-            uniform.value = FLOATV(v);
-        else if (v.type == Int32)
-            uniform.value = INTV(v);
-        else
-            FlxG.log.error('Unsupported array type for uniform "$name". Should be Float32 or Int32.');
+        uniform.value = FLOATV(v);
     }
 
     // BOOL
 
-    overload extern public inline function setUniform(name:String, v1:Bool) 
+    public function setBool1(name:String, v1:Bool) 
     {
-        if (data.flash != null)
-        {
-            setFlashShaderUniform(name, [v1]);
-            return;
-        }
-
-        var uniform = _uniforms.get(name);
-        if (uniform == null) 
-        {
-            FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
-            return; 
-        }
-
-        uniform.value = INT1(v1 ? 1 : 0);
+        setInt1(name, v1 ? 1 : 0);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Bool, v2:Bool) 
+    public function setBool2(name:String, v1:Bool, v2:Bool) 
     {
-        if (data.flash != null)
-        {
-            setFlashShaderUniform(name, [v1, v2]);
-            return;
-        }
-
-        var uniform = _uniforms.get(name);
-        if (uniform == null) 
-        {
-            FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
-            return; 
-        }
-
-        uniform.value = INT2(v1 ? 1 : 0, v2 ? 1 : 0);
+        setInt2(name, v1 ? 1 : 0, v2 ? 1 : 0);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Bool, v2:Bool, v3:Bool) 
+    public function setBool3(name:String, v1:Bool, v2:Bool, v3:Bool) 
     {
-        if (data.flash != null)
-        {
-            setFlashShaderUniform(name, [v1, v2, v3]);
-            return;
-        }
-
-        var uniform = _uniforms.get(name);
-        if (uniform == null) 
-        {
-            FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
-            return; 
-        }
-
-        uniform.value = INT3(v1 ? 1 : 0, v2 ? 1 : 0, v3 ? 1 : 0);
+        setInt3(name, v1 ? 1 : 0, v2 ? 1 : 0, v3 ? 1 : 0);
     }
 
-    overload extern public inline function setUniform(name:String, v1:Bool, v2:Bool, v3:Bool, v4:Bool) 
+    public function setBool4(name:String, v1:Bool, v2:Bool, v3:Bool, v4:Bool) 
     {
-        if (data.flash != null)
-        {
-            setFlashShaderUniform(name, [v1, v2, v3, v4]);
-            return;
-        }
-
-        var uniform = _uniforms.get(name);
-        if (uniform == null) 
-        {
-            FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
-            return; 
-        }
-
-        uniform.value = INT4(v1 ? 1 : 0, v2 ? 1 : 0, v3 ? 1 : 0, v4 ? 1 : 0);
-    }
-
-    overload extern public inline function setUniform(name:String, v:Array<Bool>)
-    {
-        var i:Array<Int> = [for (b in v) b ? 1 : 0];
-        setUniform(name, i);
+        setInt4(name, v1 ? 1 : 0, v2 ? 1 : 0, v3 ? 1 : 0, v4 ? 1 : 0);
     }
 
     @:allow(flixel.system.render)
