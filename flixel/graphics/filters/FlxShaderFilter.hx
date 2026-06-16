@@ -14,6 +14,7 @@ class FlxShaderFilter extends FlxFilter
 
     public function new(shader:FlxShader)
     {
+        super();
         this.shader = shader;
     }
 }
