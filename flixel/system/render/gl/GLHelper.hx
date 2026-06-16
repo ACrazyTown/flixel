@@ -44,8 +44,54 @@ class GLHelper
         cast (GL.context, WebGL2RenderContext).uniformMatrix4fv(location, transpose, data, srcOffset, srcLength);
     }
 
-    public static inline function uniform1fv(location:GLUniformLocation) {
-        
+    public static inline function uniformMatrix3fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniformMatrix3fv(location, transpose, data, srcOffset, srcLength);
+    }
+
+    public static inline function uniformMatrix2fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniformMatrix2fv(location, transpose, data, srcOffset, srcLength);
+    }
+
+    public static inline function uniform1iv(location:GLUniformLocation, v:Dynamic):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniform1iv(location, v);
+    }
+
+    public static inline function uniform2iv(location:GLUniformLocation, v:Dynamic):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniform2iv(location, v);
+    }
+
+    public static inline function uniform3iv(location:GLUniformLocation, v:Dynamic):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniform3iv(location, v);
+    }
+
+    public static inline function uniform4iv(location:GLUniformLocation, v:Dynamic):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniform4iv(location, v);
+    }
+
+    public static inline function uniform1fv(location:GLUniformLocation, v:Dynamic):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniform1fv(location, v);
+    }
+
+    public static inline function uniform2fv(location:GLUniformLocation, v:Dynamic):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniform2fv(location, v);
+    }
+
+    public static inline function uniform3fv(location:GLUniformLocation, v:Dynamic):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniform3fv(location, v);
+    }
+
+    public static inline function uniform4fv(location:GLUniformLocation, v:Dynamic):Void
+    {
+        cast (GL.context, WebGL2RenderContext).uniform4fv(location, v);
     }
 }
 #end
