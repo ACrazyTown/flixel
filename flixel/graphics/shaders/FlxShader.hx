@@ -104,6 +104,7 @@ class FlxShader implements IFlxDestroyable
      */
     public function getUniformLocation(name:String):Null<FlxShaderUniformLocation>
     {
+        #if !flash
         if (data.flash != null)
         {
             inline function getOpenFLUniform(name:String):Dynamic
@@ -118,6 +119,7 @@ class FlxShader implements IFlxDestroyable
 
             return uniform != null ? cast uniform.index : null;
         }
+        #end
 
         var uniform = _uniforms.get(name);
         return uniform != null ? uniform.location : null;
@@ -125,6 +127,7 @@ class FlxShader implements IFlxDestroyable
 
     public function getAttributeLocation(name:String):Null<Int>
     {
+        #if !flash
         if (data.flash != null)
         {
             inline function getOpenFLAttribute(name:String):Dynamic
@@ -139,6 +142,7 @@ class FlxShader implements IFlxDestroyable
             
             return attribute != null ? cast attribute.index : null;
         }
+        #end
 
         return GL.getAttribLocation(_handle, name);
     }
@@ -458,6 +462,7 @@ class FlxShader implements IFlxDestroyable
     @:allow(flixel.system.render)
     function updateUniforms():Void
     {
+        #if !flash
         if (data.flash != null)
         {
             // this is a copy of openfl.display.Shader.__updateGL();
@@ -498,6 +503,7 @@ class FlxShader implements IFlxDestroyable
 
             return;
         }
+        #end
 
         for (key in _uniforms.keys())
         {
@@ -524,6 +530,7 @@ class FlxShader implements IFlxDestroyable
 
     function setFlashShaderUniform<T>(name:String, value:T):Void
     {
+        #if !flash
         if (data.flash != null)
         {
             final param:ShaderParameter<T> = Reflect.field(data.flash.shader.data, name);
@@ -535,6 +542,7 @@ class FlxShader implements IFlxDestroyable
 
             param.value = cast value;
         }
+        #end
     }
 
     function _processSource(shader:GLSLShader):String
@@ -577,6 +585,7 @@ class FlxShader implements IFlxDestroyable
     {
         // TODO: use default shader data when certain params are null
 
+        #if !flash
         if (data.flash != null)
         {
             var fshader = data.flash.shader;
@@ -594,6 +603,7 @@ class FlxShader implements IFlxDestroyable
 
             return fshader.glProgram;
         }
+        #end
 
         function createShader(type:Int, data:GLSLShader):GLShader 
         {
