@@ -65,6 +65,15 @@ class FlxGLShader extends FlxShader
 			glsl: {
 				vertex: {
 					source: "
+						// TODO: inject this via code?
+						#ifdef GL_ES
+						#ifdef GL_FRAGMENT_PRECISION_HIGH
+						precision highp float;
+						#else
+						precision mediump float;
+						#endif
+						#endif
+
 						attribute vec4 aPosition;
 						attribute vec4 aColorMultiplier;
 						attribute vec4 aColorOffset;
@@ -92,6 +101,15 @@ class FlxGLShader extends FlxShader
 				},
 				fragment: {
 					source: "
+						// TODO: inject this via code?
+						#ifdef GL_ES
+						#ifdef GL_FRAGMENT_PRECISION_HIGH
+						precision highp float;
+						#else
+						precision mediump float;
+						#endif
+						#endif
+
 						varying vec4 vColorMultiplier;
 						varying vec4 vColorOffset;
 						varying vec2 vTexCoord;
