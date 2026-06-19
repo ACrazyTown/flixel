@@ -80,7 +80,6 @@ class FlxGLShader extends FlxShader
 						attribute vec2 aTexCoord;
 
 						uniform mat4 uMatrix;
-						uniform vec2 uTextureSize;
 
 						varying vec4 vColorMultiplier;
 						varying vec4 vColorOffset;
@@ -115,6 +114,7 @@ class FlxGLShader extends FlxShader
 						varying vec2 vTexCoord;
 
 						uniform sampler2D uImage0;
+						uniform vec2 uTextureSize;
 
 						vec4 flixel_texture2D(sampler2D sampler, vec2 coord)
 						{

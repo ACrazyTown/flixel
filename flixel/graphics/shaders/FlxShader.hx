@@ -1,26 +1,33 @@
 package flixel.graphics.shaders;
 
 // import flixel.graphics.shaders.FlxShaderUniforms;
-import flixel.system.render.gl.GLHelper;
-import haxe.ds.StringMap;
-import flixel.system.render.quad.FlxGraphicsShader;
-import openfl.display.Shader;
-import lime.graphics.opengl.GLShader;
-import flixel.util.FlxDestroyUtil.IFlxDestroyable;
-import lime.graphics.opengl.GL;
-import lime.utils.Float32Array;
-import lime.utils.Int32Array;
+import openfl.display.BitmapData;
+import flixel.graphics.FlxTexture;
 import flixel.system.FlxAssets.FlxShader as FlxLegacyShader;
-import openfl.display.ShaderParameter;
+import flixel.system.render.gl.GLHelper;
+import flixel.system.render.quad.FlxGraphicsShader;
+import flixel.util.FlxDestroyUtil.IFlxDestroyable;
+import haxe.ds.StringMap;
+import lime.graphics.opengl.GL;
+import lime.graphics.opengl.GLShader;
 import lime.math.Matrix4;
 import lime.utils.ArrayBufferView;
+import lime.utils.Float32Array;
+import lime.utils.Int32Array;
+import openfl.display.Shader;
+import openfl.display.ShaderParameter;
 
 // typedef FlxShaderAttributeLocation = Int;
 typedef FlxShaderUniformLocation = lime.graphics.opengl.GLUniformLocation;
 typedef FlxShaderHandle = lime.graphics.opengl.GLProgram;
 
+// TODO: support for WebGL2 specifics like uints and more matrices
+// TODO: get rid of all the traces bro & clean up
+
 /**
  * A `FlxShader` represents a single-pass shader program used to render a sprite.
+ * 
+ * 
  */
 @:haxe.warning("-WDeprecated")
 class FlxShader implements IFlxDestroyable
@@ -150,6 +157,12 @@ class FlxShader implements IFlxDestroyable
 
     // INT1-4
 
+    /**
+     * Sets the value of the specified uniform to `v1`.
+     * 
+     * @param   name   The uniform's name in the shader.
+     * @param   v1     The integer value to set the uniform to.
+     */
     public function setInt1(name:String, v1:Int) 
     {
         if (data.flash != null)
@@ -168,6 +181,13 @@ class FlxShader implements IFlxDestroyable
         uniform.value = INT1(v1);
     }
 
+    /**
+     * Sets the values of the specified 2-component uniform to (`v1`, `v2`).
+     * 
+     * @param   name   The uniform's name in the shader.
+     * @param   v1     The integer value to set the first component of the uniform to.
+     * @param   v2     The integer value to set the second component of the uniform to.
+     */
     public function setInt2(name:String, v1:Int, v2:Int) 
     {
         if (data.flash != null)
@@ -186,6 +206,14 @@ class FlxShader implements IFlxDestroyable
         uniform.value = INT2(v1, v2);
     }
 
+    /**
+     * Sets the values of the specified 3-component uniform to (`v1`, `v2`, `v3`).
+     * 
+     * @param   name   The uniform's name in the shader.
+     * @param   v1     The integer value to set the first component of the uniform to.
+     * @param   v2     The integer value to set the second component of the uniform to.
+     * @param   v3     The integer value to set the third component of the uniform to.
+     */
     public function setInt3(name:String, v1:Int, v2:Int, v3:Int) 
     {
         if (data.flash != null)
@@ -204,6 +232,15 @@ class FlxShader implements IFlxDestroyable
         uniform.value = INT3(v1, v2, v3);
     }
 
+    /**
+     * Sets the values of the specified 4-component uniform to (`v1`, `v2`, `v3`, `v4`).
+     * 
+     * @param   name   The uniform's name in the shader.
+     * @param   v1     The integer value to set the first component of the uniform to.
+     * @param   v2     The integer value to set the second component of the uniform to.
+     * @param   v3     The integer value to set the third component of the uniform to.
+     * @param   v4     The integer value to set the fourth component of the uniform to.
+     */
     public function setInt4(name:String, v1:Int, v2:Int, v3:Int, v4:Int) 
     {
         if (data.flash != null)
@@ -222,31 +259,25 @@ class FlxShader implements IFlxDestroyable
         uniform.value = INT4(v1, v2, v3, v4);
     }
 
-    // INT ARRAY
-
     /**
-     * Sets the value of the `name` uniform to the specified int array `v`.
+     * Sets the value of the specified uniform to `v`.
+     * While this method is mainly intended for use with uniform arrays, you may also use it to update
+     * a single or vector uniform as well.
      * 
-     * `components` is a number from 1 to 4 that represents how many components there are per vector in array. 
-     * For example, an array with `components = 1` will be interpreted as an array of integers, while
-     * an array with `components = 2` will be interpreted as an array of `vec2`s.
+     * `dimension` specifies how the array data should be interpreted; i.e. how many components there are
+     * per vector in array. For example, if `dimension` is `SCALAR`, the array is treated as a simple int array.
+     * If `dimension` is `VEC2`, the array is treated as an array of 2 component integer vectors (`vec2`s)
      * 
-     * @param   name   a
-     * @param   v      a
+     * @param   name   The uniform's name in the shader.
+     * @param   v      The int array 
      * @param   size   a 
      */
-    public function setIntArray(name:String, v:Array<Int>, components:Int = 1)
+    public function setIntArray(name:String, v:Array<Int>, dimension:FlxShaderArrayDimension = SCALAR)
     {
-        if (data.flash != null)
-        {
-            FlxG.log.error("OpenFL shaders do not support uniform arrays.");
-            return;
-        }
-
-        setTypedIntArray(name, new Int32Array(v), components);
+        setTypedIntArray(name, new Int32Array(v), dimension);
     }
 
-    public function setTypedIntArray(name:String, v:Int32Array, components:Int = 1)
+    public function setTypedIntArray(name:String, v:Int32Array, dimension:FlxShaderArrayDimension = SCALAR)
     {
         if (data.flash != null)
         {
@@ -261,7 +292,7 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        uniform.value = INTV(v, components);
+        uniform.value = INTV(v, dimension);
     }
 
     // FLOAT1-4
@@ -338,18 +369,12 @@ class FlxShader implements IFlxDestroyable
         uniform.value = FLOAT4(v1, v2, v3, v4);
     }
 
-    public function setFloatArray(name:String, v:Array<Float>, components:Int = 1)
+    public function setFloatArray(name:String, v:Array<Float>, dimension:FlxShaderArrayDimension = SCALAR)
     {
-        if (data.flash != null)
-        {
-            FlxG.log.error("OpenFL shaders do not support uniform arrays.");
-            return;
-        }
-
-        setTypedFloatArray(name, new Float32Array(v), components);
+        setTypedFloatArray(name, new Float32Array(v), dimension);
     }
 
-    public function setTypedFloatArray(name:String, v:Float32Array, components:Int = 1)
+    public function setTypedFloatArray(name:String, v:Float32Array, dimension:FlxShaderArrayDimension = SCALAR)
     {
         if (data.flash != null)
         {
@@ -364,7 +389,7 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        uniform.value = FLOATV(v, components);
+        uniform.value = FLOATV(v, dimension);
     }
 
     // BOOL
@@ -389,21 +414,29 @@ class FlxShader implements IFlxDestroyable
         setInt4(name, v1 ? 1 : 0, v2 ? 1 : 0, v3 ? 1 : 0, v4 ? 1 : 0);
     }
 
-    public function setMatrix(name:String, v:Array<Float>)
+    public function setBoolArray(name:String, v:Array<Bool>, dimension:FlxShaderArrayDimension)
     {
-        setTypedMatrix(name, new Float32Array(v));
+        setIntArray(name, [for (n in v) n ? 1 : 0], dimension);
     }
 
-    public function setTypedMatrix(name:String, v:Float32Array)
+    public function setMatrix(name:String, v:Array<Float>, type:FlxShaderMatrixType, ?transpose:Bool = false)
     {
-        /*
-        TODO: can you pass in a matrix?
         if (data.flash != null)
         {
-            FlxG.log.error("OpenFL shaders do not support uniform arrays.");
+            setFlashShaderUniform(name, v);
             return;
         }
-        */
+
+        setMatrixTypedArray(name, new Float32Array(v), type, transpose);
+    }
+
+    public function setMatrixTypedArray(name:String, v:Float32Array, type:FlxShaderMatrixType, ?transpose:Bool = false)
+    {
+        if (data.flash != null)
+        {
+            setFlashShaderUniform(name, [for (i in 0...v.length) v[i]]);
+            return;
+        }
 
         var uniform = _uniforms.get(name);
         if (uniform == null) 
@@ -412,14 +445,45 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        if (v.length == 16)
-            uniform.value = MAT4X4(v);
-        else if (v.length == 9)
-            uniform.value = MAT3X3(v);
-        else if (v.length == 4)
-            uniform.value = MAT2X2(v);
-        else
-            FlxG.log.error("Invalid shader uniform matrix size"); // todo
+        uniform.value = MATRIX(v, type, transpose);
+    }
+
+    public function setBitmap(name:String, bitmap:BitmapData, smoothing:Bool)
+    {
+        if (data.flash != null)
+        {
+            var input:openfl.display.ShaderInput<BitmapData> = Reflect.field(data.flash.shader.data, name);
+            input.filter = smoothing ? LINEAR : NEAREST;
+            input.input = bitmap;
+            return;
+        }
+
+        var uniform = _uniforms.get(name);
+        if (uniform == null) 
+        {
+            FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
+            return; 
+        }
+
+        uniform.value = BITMAP(bitmap, smoothing);
+    }
+
+    public function setTexture(name:String, texture:FlxTexture, smoothing:Bool)
+    {
+        if (data.flash != null)
+        {
+            FlxG.log.error("shader.setTexture() is not supported with OpenFL shaders");
+            return;
+        }
+
+        var uniform = _uniforms.get(name);
+        if (uniform == null) 
+        {
+            FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
+            return; 
+        }
+
+        uniform.value = TEXTURE(texture, smoothing);
     }
 
     @:allow(flixel.system.render)
@@ -468,6 +532,8 @@ class FlxShader implements IFlxDestroyable
         }
         #end
 
+        var curTextureSlot:Int = 0;
+
         for (key in _uniforms.keys())
         {
             var uniform = _uniforms.get(key);
@@ -480,31 +546,63 @@ class FlxShader implements IFlxDestroyable
                 case INT2(v1, v2): GL.uniform2i(uniform.location, v1, v2);
                 case INT3(v1, v2, v3): GL.uniform3i(uniform.location, v1, v2, v3);
                 case INT4(v1, v2, v3, v4): GL.uniform4i(uniform.location, v1, v2, v3, v4);
-                case INTV(v, components):
-                    switch (components)
+                case INTV(v, dimension):
+                    switch (dimension)
                     {
-                        case 1: GLHelper.uniform1iv(uniform.location, v);
-                        case 2: GLHelper.uniform2iv(uniform.location, v);
-                        case 3: GLHelper.uniform3iv(uniform.location, v);
-                        case 4: GLHelper.uniform4iv(uniform.location, v);
+                        case SCALAR: GLHelper.uniform1iv(uniform.location, v);
+                        case VEC2: GLHelper.uniform2iv(uniform.location, v);
+                        case VEC3: GLHelper.uniform3iv(uniform.location, v);
+                        case VEC4: GLHelper.uniform4iv(uniform.location, v);
                     }
 
                 case FLOAT1(v): GL.uniform1f(uniform.location, v);
                 case FLOAT2(v1, v2): GL.uniform2f(uniform.location, v1, v2);
                 case FLOAT3(v1, v2, v3): GL.uniform3f(uniform.location, v1, v2, v3);
                 case FLOAT4(v1, v2, v3, v4): GL.uniform4f(uniform.location, v1, v2, v3, v4);
-                case FLOATV(v, components):
-                    switch (components)
+                case FLOATV(v, dimension):
+                    switch (dimension)
                     {
-                        case 1: GLHelper.uniform1fv(uniform.location, v);
-                        case 2: GLHelper.uniform2fv(uniform.location, v);
-                        case 3: GLHelper.uniform3fv(uniform.location, v);
-                        case 4: GLHelper.uniform4fv(uniform.location, v);
+                        case SCALAR: GLHelper.uniform1fv(uniform.location, v);
+                        case VEC2: GLHelper.uniform2fv(uniform.location, v);
+                        case VEC3: GLHelper.uniform3fv(uniform.location, v);
+                        case VEC4: GLHelper.uniform4fv(uniform.location, v);
                     }
 
-                case MAT4X4(v): GLHelper.uniformMatrix4fv(uniform.location, false, v);
-                case MAT3X3(v): GLHelper.uniformMatrix3fv(uniform.location, false, v);
-                case MAT2X2(v): GLHelper.uniformMatrix2fv(uniform.location, false, v);
+                case MATRIX(v, type, transpose):
+                    switch (type)
+                    {
+                        case MAT4X4: GLHelper.uniformMatrix4fv(uniform.location, transpose, v);
+                        case MAT3X3: GLHelper.uniformMatrix3fv(uniform.location, transpose, v);
+                        case MAT2X2: GLHelper.uniformMatrix2fv(uniform.location, transpose, v);
+                        default: throw "implement webgl2 matrices"; // TODO
+                    }
+
+                case TEXTURE(texture, smoothing):
+                    GL.activeTexture(GL.TEXTURE0 + curTextureSlot);
+                    // TODO: after moving this to renderer GET RID OF THIS
+                    cast (FlxG.renderer, flixel.system.render.gl.FlxGLRenderer).context.bindTexture(texture);
+
+                    final filter = smoothing ? GL.LINEAR : GL.NEAREST;
+                    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+                    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+
+                    GL.uniform1i(uniform.location, curTextureSlot);
+
+                    curTextureSlot++;
+
+                case BITMAP(bitmap, smoothing):
+                    GL.activeTexture(GL.texture0 + curTextureSlot)
+                    @:privateAccess
+                    GL.bindTexture(GL.TEXTURE_2D, bitmap.getTexture(FlxG.stage.context3D).__getTexture());
+
+                    final filter = smoothing ? GL.LINEAR : GL.NEAREST;
+                    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+                    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+
+                    GL.uniform1i(uniform.location, curTextureSlot);
+
+                    curTextureSlot++;
+                    
 
                 default: 
             }
@@ -575,6 +673,7 @@ class FlxShader implements IFlxDestroyable
 
             trace(fshader);
 
+            // https://github.com/openfl/openfl/blob/de55e8c592826d6f56b424badeaf2eebd1a7b0c2/src/openfl/display/OpenGLRenderer.hx#L537-L554
             @:privateAccess
             {
                 if (fshader.__context == null)
@@ -746,6 +845,7 @@ class FlxShader implements IFlxDestroyable
 
             var uniform:FlxShaderUniform = 
             {
+                name: info.name,
                 location: location,
                 value: switch (info.type) 
                 {
@@ -761,8 +861,8 @@ class FlxShader implements IFlxDestroyable
                     case GL.INT_VEC3, GL.BOOL_VEC3: INT3(0, 0, 0);
                     case GL.INT_VEC4, GL.BOOL_VEC4: INT4(0, 0, 0, 0);
 
-                    case GL.FLOAT_MAT4: MAT4X4(new Float32Array(4 * 4));
-                    case GL.FLOAT_MAT3: MAT3X3(new Float32Array(3 * 3));
+                    case GL.FLOAT_MAT4: MATRIX(null, MAT4X4, false);
+                    case GL.FLOAT_MAT3: MATRIX(null, MAT3X3, false);
 
                     default: throw 'Unsupported ${info.name} ${info.type})';
                 }
@@ -827,6 +927,11 @@ typedef FlxGLSLShaderData =
      * Data for the fragment shader.
      */
     var fragment:GLSLShader;
+
+    /**
+     * Allow Flixel to 
+     */
+    var process:Bool;
 }
 
 // typedef FlxGLShaderData = 
@@ -903,8 +1008,9 @@ enum abstract GLShaderExtensionBehavior(String) from String to String
 }
 
 @:structInit
-private class FlxShaderUniform
+class FlxShaderUniform
 {
+    public var name:String;
     public var location:FlxShaderUniformLocation;
     public var value(default, set):FlxShaderUniformValue;
     public var dirty:Bool = false;
@@ -925,7 +1031,7 @@ private class FlxShaderUniform
         //         return this.value;
         //     }
         // }
-
+        this.dirty = true;
         return this.value = value;
     }
 }
@@ -936,19 +1042,57 @@ enum FlxShaderUniformValue
     INT2(v1:Int, v2:Int);
     INT3(v1:Int, v2:Int, v3:Int);
     INT4(v1:Int, v2:Int, v3:Int, v4:Int);
-    INTV(v:Int32Array, components:Int);
+    INTV(v:Int32Array, dimension:FlxShaderArrayDimension);
 
     FLOAT1(v:Float);
     FLOAT2(v1:Float, v2:Float);
     FLOAT3(v1:Float, v2:Float, v3:Float);
     FLOAT4(v1:Float, v2:Float, v3:Float, v4:Float);
-    FLOATV(v:Float32Array, components:Int);
+    FLOATV(v:Float32Array, dimension:FlxShaderArrayDimension);
 
-    MAT2X2(v:Float32Array);
-    MAT3X3(v:Float32Array);
-    MAT4X4(v:Float32Array);
-    // MAT3X3(v:Float32Array);
-    // MAT4X4(v:Float32Array);
+    MATRIX(v:Float32Array, type:FlxShaderMatrixType, transpose:Bool);
+
+    TEXTURE(v:FlxTexture, smoothing:Bool);
+
+    // Temporary backwards compatibility stuff
+    BITMAP(v:BitmapData, smoothing:Bool);
+}
+
+enum FlxShaderMatrixType
+{
+    MAT4X4;
+    MAT3X3;
+    MAT2X2;
+
+    MAT2X3; 
+    MAT2X4;
+    MAT3X2;
+    MAT3X4;
+    MAT4X2;
+    MAT4X3;
+}
+
+enum FlxShaderArrayDimension
+{
+    /**
+     * The array is interpreted as an array of individual values.
+     */
+    SCALAR;
+
+    /**
+     * The array is interpreted as an array of 2-component vectors.
+     */
+    VEC2;
+
+    /**
+     * The array is interpreted as an array of 3-component vectors.
+     */
+    VEC3;
+
+    /**
+     * The array is interpreted as an array of 4-component vectors.
+     */
+    VEC4;
 }
 
 // @:structInit

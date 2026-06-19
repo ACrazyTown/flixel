@@ -131,7 +131,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 	//{region                          PUBLIC API
 	// =============================================================================
 
-        /**
+    /**
      * Immediately executes the passed `FlxDrawCall`.
      * @param   dc   The `FlxDrawCall` to execute.
      */
@@ -146,29 +146,19 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         if (context.setShader(shader))
             batcher.initShader(shader);
 
-        shader.updateUniforms();
-
-        // Set matrix uniform
-        // TODO: apply in resize
-        GLHelper.uniformMatrix4fv(shader.getUniformLocation("uMatrix"), false, projection);
-
         // Set up render state
         context.setBlendMode(dc.blend);
 
-        // Set up textures
-        context.bindTexture(dc.texture.texture);
+        shader.setMatrixTypedArray("uMatrix", projection, MAT4X4);
 
-        // TODO: texture.filter ?
-        var filter = dc.textureSmoothing ? GL.LINEAR : GL.NEAREST;
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+        // TODO: setTexture breaks OpenFL shaders, which do not use FlxTexture
 
-        GL.activeTexture(GL.TEXTURE0);
-        GL.uniform1i(shader.getUniformLocation("uImage0"), 0);
+        shader.setTexture("uImage0", dc.texture.texture, dc.textureSmoothing);
+        // TODO: nicer way to update this? the GLSL compiler may get rid of it if its unused
+        // shader.setInt2("uTextureSize", dc.texture.width, dc.texture.height);
 
-        var uTextureSizeLocation = shader.getUniformLocation("uTextureSize");
-        if (uTextureSizeLocation != null)
-            GL.uniform2f(uTextureSizeLocation, dc.texture.width, dc.texture.height);
+        // Upload the uniforms to the GPU
+        shader.updateUniforms();
 
         // Finally, actually draw them
         context.bindGLIndexBuffer(dc.indexBuffer);
