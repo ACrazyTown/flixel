@@ -591,7 +591,7 @@ class FlxShader implements IFlxDestroyable
                     curTextureSlot++;
 
                 case BITMAP(bitmap, smoothing):
-                    GL.activeTexture(GL.texture0 + curTextureSlot)
+                    GL.activeTexture(GL.TEXTURE0 + curTextureSlot);
                     @:privateAccess
                     GL.bindTexture(GL.TEXTURE_2D, bitmap.getTexture(FlxG.stage.context3D).__getTexture());
 
@@ -671,8 +671,6 @@ class FlxShader implements IFlxDestroyable
         {
             var fshader = data.flash.shader;
 
-            trace(fshader);
-
             // https://github.com/openfl/openfl/blob/de55e8c592826d6f56b424badeaf2eebd1a7b0c2/src/openfl/display/OpenGLRenderer.hx#L537-L554
             @:privateAccess
             {
@@ -738,110 +736,15 @@ class FlxShader implements IFlxDestroyable
         return program;
     }
 
-    // function _createShaderUniforms(shader:FlxShader):FlxShaderUniforms
-    // {
-    //     var uniforms = new FlxShaderUniforms(shader);
-
-    //     var numUniforms = GL.getProgramParameter(shader._handle, GL.ACTIVE_UNIFORMS);
-    //     for (i in 0...numUniforms)
-    //     {
-    //         var info = GL.getActiveUniform(shader._handle, i);
-    //         var location = GL.getUniformLocation(shader._handle, info.name);
-    //         // var value = GL.getUniform()
-            
-    //         trace(location, info.type, info.size, info.name);
-
-    //         var type:FlxShaderUniformTypeWIP = switch (info.type) {
-    //             case GL.FLOAT: FLOAT1(0);
-    //             case GL.FLOAT_VEC2: FLOAT2(0, 0);
-    //             case GL.FLOAT_VEC3: FLOAT3(0, 0, 0);
-    //             case GL.FLOAT_VEC4: FLOAT4(0, 0, 0, 0);
-
-    //             // GLSL booleans can be represented with an int
-    //             case GL.INT, GL.BOOL: INT1(0);
-    //             case GL.INT_VEC2, GL.BOOL_VEC2: INT2(0, 0);
-    //             case GL.INT_VEC3, GL.BOOL_VEC3: INT3(0, 0, 0);
-    //             case GL.INT_VEC4, GL.BOOL_VEC4: INT4(0, 0, 0, 0);
-
-    //             case _: null;
-    //         }
-
-    //         var uniform:FlxShaderUniform = 
-    //         {
-    //             value: [],
-    //             type: 0,
-    //             size: info.size,
-    //             location: location,
-    //             dirty: false
-    //         };
-    //         uniforms._uniforms[info.name] = uniform;
-    //     }
-
-    //     return uniforms;
-    // }
-
     function _createShaderUniformMap(handle:FlxShaderHandle):StringMap<FlxShaderUniform>
     {
         var uniforms = new StringMap<FlxShaderUniform>();
-
-        var stamp = haxe.Timer.stamp();
 
         var numUniforms = GL.getProgramParameter(handle, GL.ACTIVE_UNIFORMS);
         for (i in 0...numUniforms)
         {
             var info = GL.getActiveUniform(handle, i);
             var location = GL.getUniformLocation(handle, info.name);
-
-
-            // var u:Uniform<Dynamic>;
-
-            // switch (info.type)
-            // {
-            //     case GL.FLOAT: var un:Uniform<Float> = {location: location, value: 0}
-            //     case GL.FLOAT_VEC2: var un:Uniform<Vec2<Float>> = {location: location, value: {x: 0, y: 0}};
-            // }
-
-            // var umap:StringMap<Uniform<Dynamic>> = new StringMap<Uniform<Dynamic>>();
-
-            // switch (info.type)
-            // {
-            //     case GL.FLOAT:
-            //         var u:UniformFloat = {location: location, value: 0};
-            //         umap.set(info.name, u);
-
-            //     case GL.FLOAT_VEC2:
-            //         var u:UniformVec2 = {location: location, value: {x: 0, y: 0}}
-            //         umap.set(info.name, u);
-
-            //     case GL.FLOAT_VEC3:
-            //         var u:UniformVec3 = {location: location, value: {x: 0, y: 0, z: 0}};
-            //         umap.set(info.name, u);
-
-            //     case GL.FLOAT_VEC4:
-            //         var u:UniformVec4 = {location: location, value: {x: 0, y: 0, z: 0, w: 0}};
-            //         umap.set(info.name, u);
-
-            //     case GL.INT:
-            //         var u:UniformInt = {location: location, value: 0};
-            //         umap.set(info.name, u);
-
-            //     case GL.INT_VEC2:
-            //         var u:UniformIVec2 = {location: location, value: {x: 0, y: 0}}
-            //         umap.set(info.name, u);
-
-            //     case GL.INT_VEC3:
-            //         var u:UniformIVec3 = {location: location, value: {x: 0, y: 0, z: 0}};
-            //         umap.set(info.name, u);
-
-            //     case GL.INT_VEC4:
-            //         var u:UniformIVec4 = {location: location, value: {x: 0, y: 0, z: 0, w: 0}};
-            //         umap.set(info.name, u);
-                    
-            // }
-
-            // trace(umap);
-            
-            trace('Detected ${info.name} (${info.type})');
 
             var uniform:FlxShaderUniform = 
             {
@@ -864,14 +767,13 @@ class FlxShader implements IFlxDestroyable
                     case GL.FLOAT_MAT4: MATRIX(null, MAT4X4, false);
                     case GL.FLOAT_MAT3: MATRIX(null, MAT3X3, false);
 
+                    // TODO: temporary throw until I figure out what's missing
                     default: throw 'Unsupported ${info.name} ${info.type})';
                 }
             };
 
             uniforms.set(info.name, uniform);
         }
-
-        trace('Uniform assembly took ${(haxe.Timer.stamp()-stamp)*1000}ms');
 
         return uniforms;
     }
@@ -927,52 +829,7 @@ typedef FlxGLSLShaderData =
      * Data for the fragment shader.
      */
     var fragment:GLSLShader;
-
-    /**
-     * Allow Flixel to 
-     */
-    var process:Bool;
 }
-
-// typedef FlxGLShaderData = 
-// {
-//     /**
-//      * The wanted GLSL version
-//      */
-//     // var version:String;
-
-//     // -- Vertex shader --
-//     /**
-//      * The GLSL source code for the vertex shader.
-//      */
-//      @:optional var vertexSource:String;
-
-//     /**
-//      * An array of ordered vertex attributes in the vertex shader.
-//      * The order of the elements in the array will be used to determine
-//      * their location in the shader.
-//      */
-//      @:optional var vertexAttributes:Array<String>;
-
-//     /**
-//      * The preferred floating-point precision for the vertex shader.
-//      * Note that not all devices support all precision profiles, so this value may be ignored.
-//      */
-//     @:optional var vertexPrecision:GLShaderPrecision;
-
-//     // -- Fragment shader --
-//     /**
-//      * The GLSL source code for the fragment shader.
-//      */
-//     var fragmentSource:String;
-
-//     /**
-//      * The preferred floating-point precision for the fragment shader.
-//      * Note that not all devices support all precision profiles, so this value may be ignored.
-//      */
-//      @:optional var fragmentPrecision:GLShaderPrecision;
-
-// }
 
 typedef GLSLShader = 
 {
@@ -1094,66 +951,3 @@ enum FlxShaderArrayDimension
      */
     VEC4;
 }
-
-// @:structInit
-// class Uniform<T>
-// {
-//     public var location:FlxShaderUniformLocation;
-//     public var value:T;
-//     public var dirty:Bool = false;
-// }
-
-// typedef UniformFloat = Uniform<Float>;
-// typedef UniformInt = Uniform<Int>;
-// typedef UniformVec2 = Uniform<Vec2<Float>>;
-// typedef UniformVec3 = Uniform<Vec3<Float>>;
-// typedef UniformVec4 = Uniform<Vec4<Float>>;
-// typedef UniformIVec2 = Uniform<Vec2<Int>>;
-// typedef UniformIVec3 = Uniform<Vec3<Int>>;
-// typedef UniformIVec4 = Uniform<Vec4<Int>>;
-
-// @:structInit
-// private class Vec2<T>
-// {
-//     public var x:T;
-//     public var y:T;
-// }
-
-// @:structInit
-// private class Vec3<T>
-// {
-//     public var x:T;
-//     public var y:T;
-//     public var z:T;
-// }
-
-// @:structInit
-// private class Vec4<T>
-// {
-//     public var x:T;
-//     public var y:T;
-//     public var z:T;
-//     public var w:T;
-// }
-
-// typedef FlxShaderUniform = 
-// {
-//     location:FlxShaderUniformLocation,
-//     value:Dynamic,
-//     dirty:Bool
-// }
-
-// enum FlxShaderUniformType
-// {
-//     FLOAT;
-
-//     VEC2;
-//     VEC3;
-//     VEC4;
-
-//     MAT2;
-//     MAT3;
-//     MAT4;
-
-//     SAMPLER2D;
-// }
