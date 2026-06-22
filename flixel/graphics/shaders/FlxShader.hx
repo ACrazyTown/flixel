@@ -38,17 +38,17 @@ class FlxShader implements IFlxDestroyable
 
     @:noCompletion
     static var flashAttributeNames:Map<String, String> = [
-        "aPosition" => "openfl_Position",
-        "aTexCoord" => "openfl_TextureCoord",
-        "aColorMultiplier" => "openfl_ColorMultiplier",
-        "aColorOffset" => "openfl_ColorOffset"
+		"flixel_aPosition" => "openfl_Position",
+		"flixel_aTextureCoord" => "openfl_TextureCoord",
+		"flixel_aColorMultiplier" => "openfl_ColorMultiplier",
+		"flixel_aColorOffset" => "openfl_ColorOffset"
     ];
 
     @:noCompletion
     static var flashUniformNames:Map<String, String> = [
-        "uMatrix" => "openfl_Matrix",
-        "uTextureSize" => "openfl_TextureSize",
-        "uImage0" => "bitmap",
+		"flixel_uMatrix" => "openfl_Matrix",
+		"flixel_uTextureSize" => "openfl_TextureSize",
+		"flixel_uTexture" => "bitmap",
     ];
 
     @:noCompletion
@@ -834,7 +834,6 @@ class FlxShader implements IFlxDestroyable
         var prefix:StringBuf = new StringBuf();
 
         var versionRegex = ~/^#version/m;
-        var precisionRegex = ~/^precision/m;
 
         if (shader.version != null)
         {
@@ -856,6 +855,8 @@ class FlxShader implements IFlxDestroyable
             // }
         }
 
+        var precisionRegex = ~/^precision/m;
+
         // Precision qualifiers are only supported on OpenGL ES and WebGL
         if (GL.type != OPENGL && shader.precision != null)
         {
@@ -869,7 +870,7 @@ class FlxShader implements IFlxDestroyable
                 {
                     prefix.add("#ifdef GL_FRAGMENT_PRECISION_HIGH\n");
                     prefix.add("precision highp float;\n");
-                    prefix.add("#elseif\n");
+                    prefix.add("#else\n");
                     prefix.add("precision mediump float;\n");
                     prefix.add("#endif\n");
                 }
@@ -915,13 +916,15 @@ class FlxShader implements IFlxDestroyable
         function createShader(type:Int, data:GLSLShader):GLShader 
         {
             var shader = GL.createShader(type);
-            GL.shaderSource(shader, _processSource(data));
+            var src = _processSource(data);
+            GL.shaderSource(shader, src);
             GL.compileShader(shader);
 
             if (GL.getShaderParameter(shader, GL.COMPILE_STATUS) == 0)
             {
                 var error = GL.getShaderInfoLog(shader);
                 trace('Error compiling ${type == GL.FRAGMENT_SHADER ? 'fragment' : 'vertex'} shader:\n$error');
+                trace(src);
             }
 
             return shader;
