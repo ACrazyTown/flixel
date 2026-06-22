@@ -11,6 +11,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import flixel.system.render.FlxRenderer;
+import flixel.system.render.FlxRendererTypes;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
