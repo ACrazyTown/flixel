@@ -454,9 +454,9 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 			/* if Using tile graphics like GraphicAuto or others defined above, they will not
 			 * load immediately. Track their loading and apply frame padding after.
 			**/
-			if (!graph.isLoaded && Std.isOfType(graph.texture.getBitmap(), IEmbeddedBitmapData))
+			if (!graph.isLoaded && Std.isOfType(graph.texture.downloadBitmap(), IEmbeddedBitmapData))
 			{
-				var futureBitmap:IEmbeddedBitmapData = cast graph.texture.getBitmap();
+				var futureBitmap:IEmbeddedBitmapData = cast graph.texture.downloadBitmap();
 				futureBitmap.onLoad = function()
 				{
 					frames = padTileFrames(tileWidth, tileHeight, graph, actualFramePadding);

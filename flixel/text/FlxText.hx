@@ -280,7 +280,7 @@ class FlxText extends FlxSprite
 	{
 		regenGraphic();
 
-		var node:FlxNode = atlas.addNode(graphic.texture.getBitmap(), graphic.key);
+		var node:FlxNode = atlas.addNode(graphic.texture.downloadBitmap(), graphic.key);
 		var result:Bool = (node != null);
 
 		if (node != null)
@@ -952,7 +952,7 @@ class FlxText extends FlxSprite
 			#end
 			
 			if (_hasBorderAlpha)
-				_borderPixels = graphic.texture.getBitmap().clone();
+				_borderPixels = graphic.texture.downloadBitmap().clone();
 
 			if (_autoHeight)
 				textField.height = newHeight;
@@ -964,7 +964,7 @@ class FlxText extends FlxSprite
 		}
 		else // Else just clear the old buffer before redrawing the text
 		{
-			graphic.texture.getBitmap().fillRect(_flashRect, FlxColor.TRANSPARENT);
+			graphic.texture.downloadBitmap().fillRect(_flashRect, FlxColor.TRANSPARENT);
 			if (_hasBorderAlpha)
 			{
 				if (_borderPixels == null)
@@ -985,7 +985,7 @@ class FlxText extends FlxSprite
 			applyBorderTransparency();
 			applyFormats(_formatAdjusted, false);
 
-			drawTextFieldTo(graphic.texture.getBitmap());
+			drawTextFieldTo(graphic.texture.downloadBitmap());
 		}
 		
 		resetFrame();
@@ -1209,7 +1209,7 @@ class FlxText extends FlxSprite
 
 		_borderColorTransform.alphaMultiplier = borderColor.alphaFloat;
 		_borderPixels.colorTransform(_borderPixels.rect, _borderColorTransform);
-		graphic.texture.getBitmap().draw(_borderPixels);
+		graphic.texture.downloadBitmap().draw(_borderPixels);
 	}
 
 	/**
@@ -1217,7 +1217,7 @@ class FlxText extends FlxSprite
 	 */
 	inline function copyTextWithOffset(x:Float, y:Float)
 	{
-		var graphic:FlxBitmap = _hasBorderAlpha ? _borderPixels : graphic.texture.getBitmap();
+		var graphic:FlxBitmap = _hasBorderAlpha ? _borderPixels : graphic.texture.downloadBitmap();
 		_matrix.translate(x, y);
 		drawTextFieldTo(graphic);
 	}

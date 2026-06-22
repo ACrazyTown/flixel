@@ -1182,7 +1182,7 @@ class FlxBitmapText extends FlxSprite
 			}
 			else
 			{
-				pixels.fillRect(graphic.texture.getBitmap().rect, colorForFill);
+				pixels.fillRect(graphic.texture.downloadBitmap().rect, colorForFill);
 			}
 
 			bitmap = pixels;

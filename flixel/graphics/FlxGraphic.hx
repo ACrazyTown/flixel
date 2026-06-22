@@ -304,7 +304,7 @@ class FlxGraphic implements IFlxDestroyable
 	/**
 	 * The cached `FlxBitmap` object.
 	 */
-	@:deprecated("graphic.bitmap is deprecated, use graphic.texture.getBitmap() instead.")
+	@:deprecated("graphic.bitmap is deprecated, use graphic.texture.downloadBitmap() instead.")
 	public var bitmap(get, set):FlxBitmap;
 
 	/**
@@ -584,7 +584,7 @@ class FlxGraphic implements IFlxDestroyable
 
 	inline function get_isLoaded()
 	{
-		final bitmap = texture.getBitmap();
+		final bitmap = texture.downloadBitmap();
 		return bitmap != null && !bitmap.rect.isEmpty();
 	}
 	
@@ -645,7 +645,7 @@ class FlxGraphic implements IFlxDestroyable
 
 	inline function get_bitmap():Null<FlxBitmap>
 	{
-		return texture != null ? texture.getBitmap() : null;
+		return texture != null ? texture.downloadBitmap() : null;
 	}
 
 	function set_bitmap(value:FlxBitmap):FlxBitmap

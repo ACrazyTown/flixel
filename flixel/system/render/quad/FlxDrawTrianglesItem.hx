@@ -83,7 +83,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 
 		view.canvas.graphics.beginShaderFill(shader);
 		#else
-		view.canvas.graphics.beginBitmapFill(graphics.texture.getBitmap(), null, true, (camera.antialiasing || antialiasing));
+		view.canvas.graphics.beginBitmapFill(graphics.texture.downloadBitmap(), null, true, (camera.antialiasing || antialiasing));
 		#end
 
 		view.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);

@@ -16,7 +16,7 @@ import flixel.system.render.FlxRendererTypes;
  * ### Reading texture pixels
  * There are two options for reading pixels from a texture:
  * 1. Use the `texture.readPixels[...]()` method to read the pixels of the texture (or a specified region) into a specific user managed buffer.
- * 2. Use the `texture.getBitmap()` method to read the entire texture into an internal `FlxBitmap`. The bitmap is managed internally by the texture.
+ * 2. Use the `texture.downloadBitmap()` method to read the entire texture into an internal `FlxBitmap`. The bitmap is managed internally by the texture.
  *    Any changes made to the provided bitmap will be applied to the texture once `texture.sync()` is called. You can also optionally destroy the
  *    internal bitmap when applying changes, to free memory.
  */
@@ -235,7 +235,7 @@ class FlxTexture implements IFlxDestroyable
      * 
      * @return   A `FlxBitmap` containing the pixel data of this texture.
      */
-    public function getBitmap():FlxBitmap 
+    public function downloadBitmap():FlxBitmap 
     {
         if (_bitmap == null)
         {
@@ -272,7 +272,7 @@ class FlxTexture implements IFlxDestroyable
      * 
      * @param   destroyBitmap   Whether the internal bitmap should be destroyed. Set this to `true`
 	 *                          if you don't plan on read/writing pixels afterwards, for a noticeable decrease in memory usage.
-     *                          You can always get a reference to the bitmap back via `texture.getBitmap()`.
+     *                          You can always get a reference to the bitmap back via `texture.downloadBitmap()`.
      */
 	public function sync(destroyBitmap:Bool = false) 
     {
@@ -304,7 +304,7 @@ class FlxTexture implements IFlxDestroyable
         switch (status)
         {
             case READABLE(synced):
-                pixels = getBitmap();
+                pixels = downloadBitmap();
 
                 // DRAW_QUADS / BLIT uses the underlying bitmap as the handle,
                 // so for a fresh copy we want to clone it.
@@ -395,14 +395,14 @@ enum FlxTextureStatus
     /**
      * The texture exists in RAM and can be read and edited.
      * 
-     * @param   synced     Whether the texture and its bitmap are synced (have the same pixel data).
+     * @param   synced   Whether the texture and its bitmap are synced (have the same pixel data).
      */
     READABLE(synced:Bool);
 
     /**
      * The texture only exists in VRAM.
      * 
-     * It can't be read from, or edited, without calling `texture.getBitmap()` first
+     * It can't be read from, or edited, without calling `texture.downloadBitmap()` first
      * to download the pixel data back from the GPU.
      */
     HARDWARE;

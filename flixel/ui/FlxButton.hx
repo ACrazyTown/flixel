@@ -400,7 +400,7 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	 */
 	public function stampOnAtlas(atlas:FlxAtlas):Bool
 	{
-		var buttonNode:FlxNode = atlas.addNode(graphic.texture.getBitmap(), graphic.key);
+		var buttonNode:FlxNode = atlas.addNode(graphic.texture.downloadBitmap(), graphic.key);
 		var result:Bool = (buttonNode != null);
 
 		if (buttonNode != null)
@@ -413,7 +413,7 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 
 		if (result && label != null)
 		{
-			var labelNode:FlxNode = atlas.addNode(label.graphic.texture.getBitmap(), label.graphic.key);
+			var labelNode:FlxNode = atlas.addNode(label.graphic.texture.downloadBitmap(), label.graphic.key);
 			result = result && (labelNode != null);
 
 			if (labelNode != null)

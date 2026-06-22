@@ -345,11 +345,11 @@ class FlxAssets
 	{
 		if ((graphic is FlxTexture))
 		{
-			return cast(graphic, FlxTexture).getBitmap();
+			return cast(graphic, FlxTexture).downloadBitmap();
 		}
 		else if ((graphic is FlxGraphic))
 		{
-			return cast(graphic, FlxGraphic).texture.getBitmap();
+			return cast(graphic, FlxGraphic).texture.downloadBitmap();
 		}
 		else if ((graphic is BitmapData))
 		{

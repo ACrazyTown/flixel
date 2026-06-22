@@ -293,7 +293,7 @@ class FlxBlitView extends FlxCameraView
 		}
 		
 		_trianglesSprite.graphics.clear();
-		_trianglesSprite.graphics.beginBitmapFill(graphic.texture.getBitmap(), null, repeat, smoothing);
+		_trianglesSprite.graphics.beginBitmapFill(graphic.texture.downloadBitmap(), null, repeat, smoothing);
 		_trianglesSprite.graphics.drawTriangles(drawVertices, indices, uvtData);
 		_trianglesSprite.graphics.endFill();
 		
