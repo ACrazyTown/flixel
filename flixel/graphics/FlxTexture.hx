@@ -6,12 +6,7 @@ import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
 import lime.utils.UInt8Array;
-
-/**
- * Underlying representation of the texture.
- * The actual type is dependant on the renderer, and is determined at compile time.
- */
-typedef FlxTextureHandle = FlxBitmap;
+import flixel.system.render.FlxRendererTypes;
 
 /**
  * Represents a GPU texture used for rendering.
