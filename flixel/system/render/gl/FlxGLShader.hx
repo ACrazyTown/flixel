@@ -3,133 +3,77 @@ package flixel.system.render.gl;
 #if FLX_RENDER_OPENGL
 import flixel.graphics.shaders.FlxShader;
 
-// TODO ant: add temporary compatibility for pre-GL shaders, and then remove it in 7.0.0
 /**
  * A basic shader used by the OpenGL renderer
  */
 class FlxGLShader extends FlxShader
 {
-	// @:glVertexHeader("
-	// 	attribute vec4 aPosition;
-	// 	attribute vec4 aColorMultiplier;
-	// 	attribute vec4 aColorOffset;
-	//     attribute vec2 aTexCoord;
-	// 	uniform mat4 uMatrix;
-	//     uniform vec2 uTextureSize;
-	// 	varying vec4 vColorMultiplier;
-	// 	varying vec4 vColorOffset;
-	//     varying vec2 vTexCoord;
-	// ", true)
-	// @:glVertexBody("
-	// 	// The colors are ARGB but because of little endian they are stored as BGRA
-	// 	vColorMultiplier = aColorMultiplier.bgra;
-	// 	vColorOffset = aColorOffset.bgra;
-	// 	vTexCoord = aTexCoord;
-	// 	gl_Position = uMatrix * aPosition;
-	// 	gl_PointSize = 1.0;
-	// ", true)
-	// @:glVertexSource("
-	// 	#pragma header
-	// 	void main(void)
-	//     {
-	// 		#pragma body
-	// 	}
-	// ", true)
-	// @:glFragmentHeader("
-	// 	varying vec4 vColorMultiplier;
-	// 	varying vec4 vColorOffset;
-	//     varying vec2 vTexCoord;
-	//     uniform sampler2D uImage0;
-	//     vec4 flixel_texture2D(sampler2D sampler, vec2 coord)
-	//     {
-	//         vec4 color = texture2D(sampler, coord);
-	// 		color = vec4(color.rgb / color.a, color.a);
-	// 		color = (color * vColorMultiplier) + vColorOffset;
-	//         return vec4(color.rgb * color.a, color.a);
-	//     }
-	// ", true)
-	// @:glFragmentBody("
-	// 	gl_FragColor = flixel_texture2D(uImage0, vTexCoord);
-	// ", true)
-	// @:glFragmentSource("
-	// 	#pragma header
-	// 	void main(void)
-	// 	{
-	// 		#pragma body
-	// 	}
-	// ", true)
 	public function new()
 	{
-		// super();
 		super({
 			glsl: {
 				vertex: {
 					source: "
-						// TODO: inject this via code?
-						#ifdef GL_ES
-						#ifdef GL_FRAGMENT_PRECISION_HIGH
-						precision highp float;
-						#else
-						precision mediump float;
-						#endif
-						#endif
+						attribute vec4 flixel_aPosition;
+						attribute vec4 flixel_aColorMultiplier;
+						attribute vec4 flixel_aColorOffset;
+						attribute vec2 flixel_aTextureCoord;
 
-						attribute vec4 aPosition;
-						attribute vec4 aColorMultiplier;
-						attribute vec4 aColorOffset;
-						attribute vec2 aTexCoord;
+						uniform mat4 flixel_uMatrix;
 
-						uniform mat4 uMatrix;
-
-						varying vec4 vColorMultiplier;
-						varying vec4 vColorOffset;
-						varying vec2 vTexCoord;
+						varying vec4 flixel_vColorMultiplier;
+						varying vec4 flixel_vColorOffset;
+						varying vec2 flixel_vTextureCoord;
 
 						void main()
 						{
 							// The colors are ARGB but because of little endian they are stored as BGRA
-							vColorMultiplier = aColorMultiplier.bgra;
-							vColorOffset = aColorOffset.bgra;
+							flixel_vColorMultiplier = flixel_aColorMultiplier.bgra;
+							flixel_vColorOffset = flixel_aColorOffset.bgra;
 
-							vTexCoord = aTexCoord;
+							flixel_vTextureCoord = flixel_aTextureCoord;
 
-							gl_Position = uMatrix * aPosition;
+							gl_Position = flixel_uMatrix * flixel_aPosition;
 							gl_PointSize = 1.0;
 						}",
-					attributes: ["aPosition", "aColorMultiplier", "aColorOffset", "aTexCoord"]
+					attributes: [
+						"flixel_aPosition",
+						"flixel_aColorMultiplier",
+						"flixel_aColorOffset",
+						"flixel_aTextureCoord"
+					],
+					precision: HIGH
 				},
 				fragment: {
 					source: "
-						// TODO: inject this via code?
-						#ifdef GL_ES
-						#ifdef GL_FRAGMENT_PRECISION_HIGH
-						precision highp float;
-						#else
-						precision mediump float;
-						#endif
-						#endif
+						varying vec4 flixel_vColorMultiplier;
+						varying vec4 flixel_vColorOffset;
+						varying vec2 flixel_vTextureCoord;
 
-						varying vec4 vColorMultiplier;
-						varying vec4 vColorOffset;
-						varying vec2 vTexCoord;
+						uniform sampler2D flixel_uTexture;
+						uniform vec2 flixel_uTextureSize;
 
-						uniform sampler2D uImage0;
-						uniform vec2 uTextureSize;
-
-						vec4 flixel_texture2D(sampler2D sampler, vec2 coord)
+						vec4 flixel_texture(sampler2D sampler, vec2 coord)
 						{
 							vec4 color = texture2D(sampler, coord);
 
 							color = vec4(color.rgb / color.a, color.a);
-							color = (color * vColorMultiplier) + vColorOffset;
+							color = (color * flixel_vColorMultiplier) + flixel_vColorOffset;
 
 							return vec4(color.rgb * color.a, color.a);
 						}
 
+						// For backwards compatibility, remove in v7
+						vec4 flixel_texture2D(sampler2D sampler, vec2 coord)
+						{
+							return flixel_texture(sampler, coord);
+						}
+
 						void main()
 						{
-							gl_FragColor = flixel_texture2D(uImage0, vTexCoord);
-						}"
+							gl_FragColor = flixel_texture(flixel_uTexture, flixel_vTextureCoord);
+						}",
+					precision: HIGH
 				}
 			}
 		});

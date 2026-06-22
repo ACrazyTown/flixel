@@ -90,7 +90,7 @@ class FlxBatcher implements IFlxDestroyable
         // attributes = [
         //     {
         //         buffer: _glVertexBuffer,
-        //         name: "aPosition",
+		//         name: "flixel_aPosition",
         //         size: 2,
         //         type: GL.FLOAT,
         //         normalized: false,
@@ -99,7 +99,7 @@ class FlxBatcher implements IFlxDestroyable
         //     },
         //     {
         //         buffer: _glVertexBuffer,
-        //         name: "aTexCoord",
+		//         name: "flixel_aTextureCoord",
         //         size: 2,
         //         type: GL.FLOAT,
         //         normalized: false,
@@ -108,7 +108,7 @@ class FlxBatcher implements IFlxDestroyable
         //     },
         //     {
         //         buffer: _glVertexBuffer,
-        //         name: "aColorMultiplier",
+		//         name: "flixel_aColorMultiplier",
         //         size: 4,
         //         type: GL.UNSIGNED_BYTE,
         //         normalized: true,
@@ -117,7 +117,7 @@ class FlxBatcher implements IFlxDestroyable
         //     },
         //     {
         //         buffer: _glVertexBuffer,
-        //         name: "aColorOffset",
+		//         name: "flixel_aColorOffset",
         //         size: 4,
         //         type: GL.UNSIGNED_BYTE,
         //         normalized: true,
@@ -306,27 +306,27 @@ class FlxBatcher implements IFlxDestroyable
         // TODO: think about VAOs and the location
 
         // Setup and enable position attribute
-        GL.vertexAttribPointer(shader.getAttributeLocation("aPosition"), 2, GL.FLOAT, false, stride, offset);
-        GL.enableVertexAttribArray(shader.getAttributeLocation("aPosition"));
+		GL.vertexAttribPointer(shader.getAttributeLocation("flixel_aPosition"), 2, GL.FLOAT, false, stride, offset);
+		GL.enableVertexAttribArray(shader.getAttributeLocation("flixel_aPosition"));
 
         offset += 2 * 4;
 
         // Setup and enable tex coord attribute
-        GL.vertexAttribPointer(shader.getAttributeLocation("aTexCoord"), 2, GL.FLOAT, false, stride, offset);
-        GL.enableVertexAttribArray(shader.getAttributeLocation("aTexCoord"));
+		GL.vertexAttribPointer(shader.getAttributeLocation("flixel_aTextureCoord"), 2, GL.FLOAT, false, stride, offset);
+		GL.enableVertexAttribArray(shader.getAttributeLocation("flixel_aTextureCoord"));
 
         offset += 2 * 4;
 
         // Color attributes will be interpreted as unsigned bytes and normalized
         // Setup and enable color multiplier attribute
-        GL.vertexAttribPointer(shader.getAttributeLocation("aColorMultiplier"), 4, GL.UNSIGNED_BYTE, true, stride, offset);
-        GL.enableVertexAttribArray(shader.getAttributeLocation("aColorMultiplier"));
+		GL.vertexAttribPointer(shader.getAttributeLocation("flixel_aColorMultiplier"), 4, GL.UNSIGNED_BYTE, true, stride, offset);
+		GL.enableVertexAttribArray(shader.getAttributeLocation("flixel_aColorMultiplier"));
 
         offset += 4;
 
         // Setup and enable color offset attribute
-        GL.vertexAttribPointer(shader.getAttributeLocation("aColorOffset"), 4, GL.UNSIGNED_BYTE, true, stride, offset);
-        GL.enableVertexAttribArray(shader.getAttributeLocation("aColorOffset"));
+		GL.vertexAttribPointer(shader.getAttributeLocation("flixel_aColorOffset"), 4, GL.UNSIGNED_BYTE, true, stride, offset);
+		GL.enableVertexAttribArray(shader.getAttributeLocation("flixel_aColorOffset"));
     }
 
     function drawIfNeeded(next:FlxDrawData):Void
