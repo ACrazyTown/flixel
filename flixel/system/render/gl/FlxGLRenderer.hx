@@ -150,12 +150,10 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         context.setBlendMode(dc.blend);
 
         shader.setMatrixTypedArray("uMatrix", projection, MAT4X4);
-
         // TODO: setTexture breaks OpenFL shaders, which do not use FlxTexture
-
         shader.setTexture("uImage0", dc.texture.texture, dc.textureSmoothing);
-        // TODO: nicer way to update this? the GLSL compiler may get rid of it if its unused
-        // shader.setInt2("uTextureSize", dc.texture.width, dc.texture.height);
+        if (shader.hasUniform("uTextureSize"))
+            shader.setInt2("uTextureSize", dc.texture.width, dc.texture.height);
 
         // Upload the uniforms to the GPU
         shader.updateUniforms();
