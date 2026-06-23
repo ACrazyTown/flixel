@@ -9,7 +9,7 @@ import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import openfl.Assets;
 import flixel.graphics.FlxBitmap;
-import flixel.graphics.FlxTexture;
+import flixel.graphics.textures.FlxTexture;
 
 /**
  * Internal storage system to prevent graphics from being used repeatedly in memory.

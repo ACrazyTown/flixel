@@ -2,7 +2,7 @@ package flixel.system.render.blit;
 
 import lime.utils.UInt8Array;
 import flixel.graphics.FlxBitmap;
-import flixel.graphics.FlxTexture;
+import flixel.graphics.textures.FlxTexture;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawTrianglesItem;

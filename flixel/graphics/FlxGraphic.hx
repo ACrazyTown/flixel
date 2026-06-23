@@ -11,6 +11,7 @@ import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.graphics.FlxBitmap;
+import flixel.graphics.textures.FlxTexture;
 
 /**
  * `FlxBitmap` wrapper which is used for rendering.

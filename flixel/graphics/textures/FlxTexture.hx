@@ -1,4 +1,4 @@
-package flixel.graphics;
+package flixel.graphics.textures;
 
 import flixel.graphics.FlxBitmap;
 import flixel.math.FlxRect;

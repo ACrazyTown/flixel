@@ -3,7 +3,7 @@ package flixel.system.render;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.FlxTexture;
+import flixel.graphics.textures.FlxTexture;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;

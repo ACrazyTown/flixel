@@ -1,6 +1,6 @@
 package flixel;
 
-import flixel.graphics.FlxTexture;
+import flixel.graphics.textures.FlxTexture;
 import flixel.FlxBasic.IFlxBasic;
 import flixel.animation.FlxAnimationController;
 import flixel.graphics.FlxGraphic;

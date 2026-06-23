@@ -5,7 +5,7 @@ import haxe.macro.Expr;
 #if !macro
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.FlxTexture;
+import flixel.graphics.textures.FlxTexture;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.atlas.AseAtlas;
 import flixel.graphics.atlas.TexturePackerAtlas;

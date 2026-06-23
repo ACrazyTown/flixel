@@ -1,7 +1,7 @@
 package flixel.system.render.quad;
 
 import openfl.display3D.Context3DWrapMode;
-import flixel.graphics.FlxTexture;
+import flixel.graphics.textures.FlxTexture;
 import flixel.FlxCamera;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
