@@ -585,8 +585,13 @@ class FlxGraphic implements IFlxDestroyable
 
 	inline function get_isLoaded()
 	{
-		final bitmap = texture.downloadBitmap();
+		#if FLX_RENDER_DRAWQUADS
+		@:privateAccess
+		final bitmap = texture._handle;
 		return bitmap != null && !bitmap.rect.isEmpty();
+		#else
+		return true;
+		#end
 	}
 	
 	inline function get_isDestroyed()
