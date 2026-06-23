@@ -25,8 +25,27 @@ class FlxTexture implements IFlxDestroyable
     /**
      * The default value of the `readable` parameter in the upload methods.
      * Defaults to `true` for backwards compatibility.
+     * 
+     * When targeting Flash, or using the blitting renderer, this value must always be 
+     * true and will warn if you attempt to change it.
      */
-    public static var defaultReadable:Bool = true;
+    public static var defaultReadable(default, set):Bool = true;
+
+    static function set_defaultReadable(value:Bool):Bool
+    {
+        #if flash
+        FlxG.log.warn("FlxTexture.defaultReadable can only be true when targeting Flash.");
+        return true;
+        #else 
+        if (FlxG.renderer.blit)
+        {
+            FlxG.log.warn("FlxTexture.defaultReadable can only be true when using the blitting renderer.");
+            return true;
+        }
+
+        return defaultReadable = value;
+        #end
+    }
 
     // TODO: expose in 7.0.0 once sprite.antialiasing is removed
     /**
