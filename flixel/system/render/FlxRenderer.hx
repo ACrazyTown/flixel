@@ -1,6 +1,6 @@
 package flixel.system.render;
 
-import flixel.graphics.FlxRenderTexture;
+import flixel.graphics.textures.FlxRenderTexture;
 import flixel.math.FlxRect;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;

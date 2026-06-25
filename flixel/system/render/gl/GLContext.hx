@@ -3,8 +3,8 @@ package flixel.system.render.gl;
 #if FLX_RENDER_OPENGL
 import lime.graphics.opengl.GLBuffer;
 import lime.utils.UInt8Array;
-import flixel.graphics.FlxTexture;
-import flixel.graphics.FlxRenderTexture;
+import flixel.graphics.textures.FlxTexture;
+import flixel.graphics.textures.FlxRenderTexture;
 import lime.graphics.opengl.GLTexture;
 import lime.graphics.opengl.GLFramebuffer;
 import openfl.display.BitmapData;

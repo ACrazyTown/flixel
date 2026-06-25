@@ -1,6 +1,6 @@
 package flixel.system.render.blit;
 
-import flixel.graphics.FlxRenderTexture;
+import flixel.graphics.textures.FlxRenderTexture;
 import lime.utils.UInt8Array;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;

@@ -1,12 +1,9 @@
-package flixel.graphics;
+package flixel.graphics.textures;
 
 import flixel.system.render.gl.GLHelper;
 import lime.graphics.opengl.GL;
 import flixel.util.FlxColor;
-
-// interface IFlxRenderTargetHandle implements
-
-typedef FlxRenderTargetHandle = #if FLX_RENDER_OPENGL flixel.system.render.gl.FlxGLRenderTarget #else Dynamic #end;
+import flixel.system.render.FlxRendererTypes;
 
 class FlxRenderTexture extends FlxTexture
 {
