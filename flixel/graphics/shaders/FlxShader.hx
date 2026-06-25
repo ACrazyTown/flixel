@@ -12,16 +12,13 @@ import lime.utils.Float32Array;
 import lime.utils.Int32Array;
 import openfl.display.Shader;
 import openfl.display.ShaderParameter;
+import flixel.system.render.FlxRendererTypes;
 
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLShader;
 #if FLX_RENDER_OPENGL // TODO: temp to pass CI, will be removed afterwards
 import flixel.system.render.gl.GLHelper;
 #end
-
-typedef FlxShaderAttributeLocation = Int;
-typedef FlxShaderUniformLocation = lime.graphics.opengl.GLUniformLocation;
-typedef FlxShaderHandle = lime.graphics.opengl.GLProgram;
 
 // TODO: support for WebGL2 specifics like uints and more matrices
 // TODO: get rid of all the traces bro & clean up
