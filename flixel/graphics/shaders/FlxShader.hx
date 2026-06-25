@@ -2,7 +2,7 @@ package flixel.graphics.shaders;
 
 // import flixel.graphics.shaders.FlxShaderUniforms;
 import openfl.display.BitmapData;
-import flixel.graphics.FlxTexture;
+import flixel.graphics.textures.FlxTexture;
 import flixel.system.FlxAssets.FlxShader as FlxLegacyShader;
 import flixel.system.render.quad.FlxGraphicsShader;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
