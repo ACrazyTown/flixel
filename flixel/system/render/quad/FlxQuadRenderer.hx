@@ -1,6 +1,6 @@
 package flixel.system.render.quad;
 
-import flixel.graphics.FlxRenderTexture;
+import flixel.graphics.textures.FlxRenderTexture;
 import flixel.math.FlxRect;
 import flixel.FlxG;
 import flixel.graphics.FlxBitmap;

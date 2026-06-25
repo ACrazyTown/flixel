@@ -1,23 +1,24 @@
 package flixel.system.render.gl;
 
 #if FLX_RENDER_OPENGL
-import flixel.system.render.FlxTopology;
-import lime.utils.Float32Array;
-import openfl.display.Shader;
-import flixel.system.render.gl.FlxDrawCall;
-import openfl.display.BitmapData;
-import lime.graphics.opengl.GLTexture;
-import flixel.system.render.FlxRenderer.FlxTypedRenderer;
-import lime.math.Matrix4;
 import flixel.graphics.FlxBitmap;
-import flixel.graphics.FlxTexture;
-import flixel.graphics.FlxRenderTexture;
-import flixel.util.FlxColor;
+import flixel.graphics.textures.FlxRenderTexture;
+import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
-import lime.utils.UInt8Array;
+import flixel.system.render.FlxRenderer.FlxTypedRenderer;
+import flixel.system.render.FlxRendererTypes;
+import flixel.system.render.FlxTopology;
+import flixel.system.render.gl.FlxDrawCall;
+import flixel.util.FlxColor;
 import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
 import lime.graphics.opengl.GL;
+import lime.graphics.opengl.GLTexture;
+import lime.math.Matrix4;
+import lime.utils.Float32Array;
+import lime.utils.UInt8Array;
+import openfl.display.BitmapData;
+import openfl.display.Shader;
 
 @:access(flixel.system.render.gl)
 @:access(flixel.graphics)
