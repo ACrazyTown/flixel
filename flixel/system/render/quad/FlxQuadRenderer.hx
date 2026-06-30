@@ -20,13 +20,13 @@ using flixel.util.FlxColorTransformUtil;
 
 @:access(flixel.FlxCamera)
 @:access(flixel.system.render.quad)
-@:access(flixel.graphics)
 class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 {
 	public function new()
 	{
 		super();
 		method = DRAW_TILES;
+		textures = new FlxQuadTextureSystem();
 		
 		#if FLX_OPENGL_AVAILABLE
 		if (hasGL)
@@ -65,17 +65,23 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 	{
 		FlxG.game.removeChild(view.flashSprite);
 	}
-	
+}
+
+@:access(flixel.graphics.textures.FlxTexture)
+class FlxQuadTextureSystem implements IFlxTextureSystem
+{
+	public function new() {}
+
 	// No-op, handle will get assigned at upload to avoid reallocating bitmaps
-	function createTextureHandle():FlxTextureHandle { return null; }
-	function destroyTextureHandle(handle:FlxTextureHandle):Void 
+	public function createHandle():FlxTextureHandle { return null; }
+	public function destroyHandle(handle:FlxTextureHandle):Void 
 	{
 		#if FLX_RENDER_DRAWQUADS
 		handle.destroy();
 		#end
 	}
 
-	function destroyTextureBitmap(bitmap:FlxBitmap):Void 
+	public function destroyBitmap(bitmap:FlxBitmap):Void 
 	{
 		#if (FLX_RENDER_DRAWQUADS && !flash)
 		// Since the bitmap is the same as the handle, we don't actually want to destroy it,
@@ -87,14 +93,14 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 		#end
 	}
 
-	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void 
+	public function uploadBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void 
 	{
 		#if FLX_RENDER_DRAWQUADS
 		texture._handle = bitmap;
 		#end
 	}
 
-	function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void 
+	public function readPixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void 
 	{
 		#if (FLX_RENDER_DRAWQUADS && FLX_OPENGL_AVAILABLE)
 		final gl = FlxG.stage.window.context.webgl;
@@ -124,7 +130,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 	}
 
 	// No-op, handled in the FlxDrawItems
-	function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
-	function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+	public function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+	public function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	// function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
 }

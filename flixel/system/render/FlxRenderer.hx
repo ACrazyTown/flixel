@@ -104,6 +104,13 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	 */
 	public var maxTextureSize(default, null):Int = -1;
 	
+	/**
+	 * Backend texture management.
+	 * 
+	 * Must be set by extending implementations.
+	 */
+	public var textures(default, null):IFlxTextureSystem;
+
 	function new() {}
 
 	/**
@@ -131,31 +138,29 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	abstract public function removeCameraView(view:TView):Void;
 	
 	abstract function createCameraView(camera:FlxCamera):TView;
+}
 
-	// =============================================================================
-	//{region                             TEXTURES
-	// =============================================================================
-
+/**
+ * Abstracted texture management used internally by the renderer.
+ * You probably shouldn't use this!
+ */
+// TODO: how many of these can just take handles?
+interface IFlxTextureSystem
+{
 	// life cycle
-	abstract function createTextureHandle():FlxTextureHandle;
-	abstract function destroyTextureHandle(handle:FlxTextureHandle):Void;
-	abstract function destroyTextureBitmap(bitmap:FlxBitmap):Void;
+	function createHandle():FlxTextureHandle;
+	function destroyHandle(handle:FlxTextureHandle):Void;
+	function destroyBitmap(bitmap:FlxBitmap):Void;
 
 	// upload
-	abstract function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void;
+	function uploadBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void;
 
 	// download
-	abstract function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void;
+	function readPixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void;
 
 	// properties
-	abstract function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void;
-	abstract function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
-	// TODO: expose in 7.0.0 once sprite.antialiasing is removed
-	// abstract function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void;
-
-	// =============================================================================
-	//}endregion                           TEXTURES
-	// =============================================================================
+	function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void;
+	function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
 }
 
 /**

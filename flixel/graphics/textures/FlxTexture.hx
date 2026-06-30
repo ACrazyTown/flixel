@@ -154,7 +154,7 @@ class FlxTexture implements IFlxDestroyable
         		FlxG.log.error('Texture dimensions (${width}x${height}) exceed the maximum allowed size (${max}x${max})');
         }
 
-        _handle = FlxG.renderer.createTextureHandle();
+        _handle = FlxG.renderer.textures.createHandle();
 
         // Invoke the setters to properly set up the texture state
         set_wrapU(wrapU);
@@ -169,7 +169,7 @@ class FlxTexture implements IFlxDestroyable
     {
         if (_handle != null)
         {
-            FlxG.renderer.destroyTextureHandle(_handle);
+            FlxG.renderer.textures.destroyHandle(_handle);
             _handle = null;
         }
 
@@ -196,7 +196,7 @@ class FlxTexture implements IFlxDestroyable
         if (readable == null)
             readable = defaultReadable;
 
-        FlxG.renderer.uploadTextureBitmap(this, bitmap);
+        FlxG.renderer.textures.uploadBitmap(this, bitmap);
         #if !flash
         _version = bitmap.readable ? bitmap.image.version : 0;
         #end
@@ -236,7 +236,7 @@ class FlxTexture implements IFlxDestroyable
         if (buffer == null)
             buffer = new UInt8Array(width * height * 4);
 
-        FlxG.renderer.readTexturePixels(this, buffer, rect);
+        FlxG.renderer.textures.readPixels(this, buffer, rect);
         return buffer;
     }
 
@@ -301,7 +301,7 @@ class FlxTexture implements IFlxDestroyable
 
             if (destroyBitmap && !FlxG.renderer.blit)
             {
-                FlxG.renderer.destroyTextureBitmap(_bitmap);
+                FlxG.renderer.textures.destroyBitmap(_bitmap);
                 _bitmap = null;
 
                 status = HARDWARE;
@@ -373,7 +373,7 @@ class FlxTexture implements IFlxDestroyable
     {
         if (wrapU != value)
         {
-            FlxG.renderer.setTextureWrapU(this, value);
+            FlxG.renderer.textures.setWrapU(this, value);
             wrapU = value;
         }
         return value;
@@ -383,7 +383,7 @@ class FlxTexture implements IFlxDestroyable
     {
         if (wrapV != value)
         {
-            FlxG.renderer.setTextureWrapV(this, value);
+            FlxG.renderer.textures.setWrapV(this, value);
             wrapV = value;
         }
         return value;

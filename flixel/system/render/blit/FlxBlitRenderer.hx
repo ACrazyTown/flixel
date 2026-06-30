@@ -42,6 +42,7 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 	{
 		super();
 		method = BLITTING;
+		textures = new FlxBlitTextureSystem();
 	}
 	
 	override function initGlobals()
@@ -82,15 +83,19 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 	{
 		FlxG.game.removeChild(view.flashSprite);
 	}
+}
+
+class FlxBlitTextureSystem implements IFlxTextureSystem
+{
+	public function new() {}
 	
-	function createTextureHandle():FlxTextureHandle {return null;}
-	function destroyTextureHandle(handle:FlxTextureHandle):Void {}
-	function destroyTextureBitmap(bitmap:FlxBitmap):Void {}
+	public function createHandle():FlxTextureHandle {return null;}
+	public function destroyHandle(handle:FlxTextureHandle):Void {}
+	public function destroyBitmap(bitmap:FlxBitmap):Void {}
 
-	function uploadTextureBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void {}
-	function readTexturePixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void {}
+	public function uploadBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void {}
+	public function readPixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void {}
 
-	function setTextureWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
-	function setTextureWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
-	// function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
+	public function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+	public function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 }
