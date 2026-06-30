@@ -1,28 +1,11 @@
 package flixel.system.render.blit;
 
 import lime.utils.UInt8Array;
-import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxFrame;
-import flixel.graphics.tile.FlxDrawTrianglesItem;
-import flixel.math.FlxMatrix;
-import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets;
 import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
-import flixel.util.FlxColor;
-import flixel.util.FlxDestroyUtil;
-import flixel.util.FlxSpriteUtil;
-import openfl.Vector;
 import flixel.graphics.FlxBitmap;
-import openfl.display.BlendMode;
-import openfl.display.Graphics;
-import openfl.display.Sprite;
-import openfl.geom.ColorTransform;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
 
 @:access(flixel.FlxCamera)
 @:access(flixel.system.render.blit)

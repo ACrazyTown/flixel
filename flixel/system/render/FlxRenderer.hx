@@ -1,21 +1,11 @@
 package flixel.system.render;
 
 import flixel.graphics.FlxBitmap;
-import flixel.graphics.FlxBitmap;
-import flixel.graphics.FlxGraphic;
 import flixel.graphics.textures.FlxTexture;
-import flixel.graphics.frames.FlxFrame;
-import flixel.math.FlxMatrix;
-import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.render.FlxRendererTypes;
-import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import lime.utils.UInt8Array;
-import openfl.display.BlendMode;
-import openfl.geom.ColorTransform;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
 
 /**
  * `FlxRenderer` is a global, base class that handles rendering.

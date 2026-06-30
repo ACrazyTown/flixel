@@ -1,8 +1,6 @@
 package flixel.system.render.quad;
 
 import flixel.math.FlxRect;
-import flixel.util.FlxColor;
-import flixel.graphics.FlxBitmap;
 import flixel.FlxG;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;
@@ -11,8 +9,6 @@ import flixel.system.render.FlxRendererTypes;
 import lime.utils.UInt8Array;
 
 #if FLX_OPENGL_AVAILABLE
-import lime.graphics.Image;
-import lime.graphics.ImageBuffer;
 import lime.graphics.opengl.GL;
 #end
 
