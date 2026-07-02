@@ -265,8 +265,8 @@ class FlxTexture implements IFlxDestroyable
             if (FlxG.renderer.tile)
             {
                 var image = new Image(new ImageBuffer(pixels, width, height, 32, RGBA32));
-                @:privateAccess image.version = _version;
                 @:privateAccess _handle.__fromImage(image);
+                _handle.image.version = _version;
 
                 _bitmap = _handle;
             }
