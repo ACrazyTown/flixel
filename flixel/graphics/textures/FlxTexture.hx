@@ -224,19 +224,20 @@ class FlxTexture implements IFlxDestroyable
      * 
      * @param   rect     Optional, the region of the texture to read from. If left
      *                   unspecified, the entire texture is read.
-     * @param   buffer   Optional, the buffer to read into. If left unspecified,
-     *                   a new buffer with the size of `width * height * 4` is created.
+     * @param   buffer   Optional, the buffer to read into. Must be `width * height * 4` bytes long.
+     *                   If left null, a new one will be created.
      * @return  A `UInt8Array` buffer containing the pixels.
      */
     public function readPixels(?rect:FlxRect, ?buffer:UInt8Array):UInt8Array
     {
-        final width:Int = rect == null ? this.width : Std.int(rect.width);
-        final height:Int = rect == null ? this.height : Std.int(rect.height);
+        if (rect == null)
+            rect = FlxRect.weak(0, 0, this.width, this.height);
 
         if (buffer == null)
-            buffer = new UInt8Array(width * height * 4);
+            buffer = new UInt8Array(Std.int(rect.width * rect.height * 4));
 
         FlxG.renderer.textures.readPixels(this, buffer, rect);
+        rect.putWeak();
         return buffer;
     }
 

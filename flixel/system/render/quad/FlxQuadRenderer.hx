@@ -111,11 +111,7 @@ class FlxQuadTextureSystem implements IFlxTextureSystem
 
         // Attach texture to framebuffer and read the pixels from it into the buffer
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glTexture, 0);
-        final x = rect != null ? Std.int(rect.x) : 0;
-        final y = rect != null ? Std.int(rect.y) : 0;
-        final w = rect != null ? Std.int(rect.width) : texture.width;
-        final h = rect != null ? Std.int(rect.height) : texture.height;
-        gl.readPixels(x, y, w, h, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
+        gl.readPixels(Std.int(rect.x), Std.int(rect.y), Std.int(rect.width), Std.int(rect.height), gl.RGBA, gl.UNSIGNED_BYTE, buffer);
 
         // Delete the framebuffer
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
