@@ -363,7 +363,7 @@ class FlxTexture implements IFlxDestroyable
     inline function get_status():FlxTextureStatus
     {
         #if !flash
-        if (_bitmap != null && _bitmap.image != null && _bitmap.image.version > _version)
+        if (!FlxG.renderer.blit && _bitmap != null && _bitmap.image != null && _bitmap.image.version > _version)
             status = READABLE(false);
         #end
 
