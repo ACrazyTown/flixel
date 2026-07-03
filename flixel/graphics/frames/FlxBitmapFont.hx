@@ -322,6 +322,7 @@ class FlxBitmapFont extends FlxFramesCollection
 			bmd.threshold(bmd, frameRect, point, "==", charBGColor, FlxColor.TRANSPARENT, FlxColor.WHITE, true);
 		}
 
+		graphic.texture.sync();
 		return font;
 	}
 

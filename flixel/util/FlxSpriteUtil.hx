@@ -610,6 +610,7 @@ class FlxSpriteUtil
 		}
 
 		sprite.pixels.draw(flashGfxSprite, drawStyle.matrix, drawStyle.colorTransform, drawStyle.blendMode, drawStyle.clipRect, drawStyle.smoothing);
+		sprite.graphic.texture.sync();
 		sprite.dirty = true;
 		return sprite;
 	}

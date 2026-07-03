@@ -987,6 +987,8 @@ class FlxText extends FlxSprite
 
 			drawTextFieldTo(graphic.texture.downloadBitmap());
 		}
+
+		graphic.texture.sync();
 		
 		resetFrame();
 	}

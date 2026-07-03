@@ -571,6 +571,7 @@ class FlxSprite extends FlxObject
 			brush = new FlxBitmap(brushSize, brushSize, FlxColor.TRANSPARENT);
 			_flashRect.setTo(Frame * brushSize, 0, brushSize, brushSize);
 			brush.copyPixels(full, _flashRect, _flashPointZero);
+			brushGraphic.texture.sync();
 		}
 
 		key += ":" + Rotations + ":" + AutoBuffer;
@@ -1106,6 +1107,7 @@ class FlxSprite extends FlxObject
 			_matrix.translate(X + frame.frame.x + Brush.origin.x, Y + frame.frame.y + Brush.origin.y);
 			var brushBlend:BlendMode = Brush.blend;
 			graphic.texture.downloadBitmap().draw(bitmapData, _matrix, null, brushBlend, null, Brush.antialiasing);
+			graphic.texture.sync();
 		}
 
 		if (FlxG.renderer.blit)
@@ -1178,8 +1180,11 @@ class FlxSprite extends FlxObject
 			return null;
 
 		var positions = FlxBitmapDataUtil.replaceColor(graphic.texture.downloadBitmap(), Color, NewColor, FetchPositions);
+
+		graphic.texture.sync();
 		if (positions != null)
 			dirty = true;
+
 		return positions;
 	}
 	

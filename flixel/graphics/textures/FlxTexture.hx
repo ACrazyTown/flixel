@@ -372,6 +372,7 @@ class FlxTexture implements IFlxDestroyable
             case READABLE(synced):
                 if (!synced)
                 {
+                    trace(width, height, _handle.encode(_handle.rect, new openfl.display.PNGEncoderOptions()).toString());
 					FlxG.log.warn("Automatic texture-bitmap syncing is deprecated and will be removed in the next major version. Use texture.sync() to apply changes made to the texture's bitmap.");
 					sync(false);
                 }

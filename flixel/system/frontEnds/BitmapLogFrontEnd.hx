@@ -29,12 +29,18 @@ class BitmapLogFrontEnd
 	function addGraphic(graphic:FlxGraphic, ?name:String):Void
 	{
 		#if FLX_DEBUG
-		if (graphic != null && graphic.texture.downloadBitmap() != null)
+		if (graphic != null)
 		{
-			if (name == null)
-				name = getGraphicName(graphic);
-			
-			add(graphic.texture.downloadBitmap(), name);
+			if (!graphic.texture.checkReadWrite())
+				return;
+
+			if (graphic.texture.downloadBitmap() != null)
+			{
+				if (name == null)
+					name = getGraphicName(graphic);
+				
+				add(graphic.texture.downloadBitmap(), name);
+			}
 		}
 		#end
 	}
@@ -88,6 +94,9 @@ class BitmapLogFrontEnd
 		clear();
 		for (cachedGraphic in FlxG.bitmap._cache)
 		{
+			if (!cachedGraphic.texture.checkReadWrite())
+				continue;
+
 			add(cachedGraphic.texture.downloadBitmap(), cachedGraphic.key);
 		}
 		#end
