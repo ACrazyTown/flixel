@@ -8,6 +8,10 @@ import lime.graphics.ImageBuffer;
 import lime.utils.UInt8Array;
 import flixel.system.render.FlxRendererTypes;
 
+// TODO, once it's possible:
+// - add a format enum?
+// - mipmapping?
+
 /**
  * Represents a GPU texture used for rendering.
  * While it is a reference to a GPU texture at its core, `FlxTexture` also provides some helper
@@ -224,6 +228,10 @@ class FlxTexture implements IFlxDestroyable
         if (!_allocated)
             _allocated = true;
 
+        // Clean up previous bitmap
+        if (_bitmap != null)
+            destroyBitmap();
+
         if (readable || FlxG.renderer.blit)
         {
             _bitmap = bitmap;
@@ -259,6 +267,29 @@ class FlxTexture implements IFlxDestroyable
         FlxG.renderer.textures.readPixels(this, buffer, rect);
         rect.putWeak();
         return buffer;
+    }
+
+    /**
+     * Immediately destroys the internal bitmap, while keeping the VRAM texture.
+     * This greatly reduces RAM usage, at the cost of not being able to read/write pixels.
+     * You can always recover the internal bitmap by calling `texture.downloadBitmap()`.
+     * 
+     * This method does nothing when using the blitting renderer, as it always requires the internal bitmap.
+     * 
+     * **NOTE:** If you want to apply the changes made to the bitmap before destroying it you should use
+     * `texture.sync(true);` instead!
+     */
+    public function destroyBitmap():Void
+    {
+        if (FlxG.renderer.blit)
+            return;
+
+        if (_bitmap != null)
+        {
+            FlxG.renderer.textures.destroyBitmap(_bitmap);
+            _bitmap = null;       
+            status = HARDWARE;
+        }   
     }
 
     /**
@@ -308,6 +339,8 @@ class FlxTexture implements IFlxDestroyable
     /**
 	 * Updates the texture based on the changes made to the bitmap, synchronising the two.
      * 
+     * This method does nothing when using the blitting renderer, as it always requires the internal bitmap.
+     * 
      * **NOTE:** This function is not thread-safe, and should only be called on the main thread!
      * 
      * @param   destroyBitmap   Whether the internal bitmap should be destroyed. Set this to `true`
@@ -316,18 +349,11 @@ class FlxTexture implements IFlxDestroyable
      */
 	public function sync(destroyBitmap:Bool = false) 
     {
+        if (FlxG.renderer.blit)
+            return;
+
         if (_bitmap != null)
-        {
-            uploadBitmap(_bitmap);
-
-            if (destroyBitmap && !FlxG.renderer.blit)
-            {
-                FlxG.renderer.textures.destroyBitmap(_bitmap);
-                _bitmap = null;
-
-                status = HARDWARE;
-            }
-        }
+            uploadBitmap(_bitmap, !destroyBitmap);
     }
 
     /**
