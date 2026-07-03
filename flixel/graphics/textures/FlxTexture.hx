@@ -65,6 +65,7 @@ class FlxTexture implements IFlxDestroyable
      * @param   readable   Whether the bitmap should be kept, to allow for read/write operations.
      *                     Set this to `true` if you plan on constantly read/writing pixels, otherwise
      *                     set it to `false` for a noticable decrease in memory usage.
+     *                     If left null, the value will be `FlxTexture.defaultReadable`.
      * @return  The newly created `FlxTexture`.
      */
     public static function fromBitmap(bitmap:FlxBitmap, ?readable:Bool):FlxTexture
@@ -214,6 +215,7 @@ class FlxTexture implements IFlxDestroyable
      * @param   readable   Whether the bitmap should be kept, to allow for read/write operations.
      *                     Set this to `true` if you plan on constantly read/writing pixels, otherwise
      *                     set it to `false` for a noticable decrease in memory usage.
+     *                     If left null, the value will be `FlxTexture.defaultReadable`.
      */
     public function uploadBitmap(bitmap:FlxBitmap, ?readable:Bool):Void 
     {
