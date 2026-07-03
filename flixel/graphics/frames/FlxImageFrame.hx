@@ -159,6 +159,9 @@ class FlxImageFrame extends FlxFramesCollection
 		if (graphic == null)
 			return null;
 
+		if (!graphic.texture.checkReadWrite())
+			return null;
+
 		var key:String = FlxG.bitmap.getKeyWithSpacesAndBorders(graphic.key, null, null, border, region);
 		var result:FlxGraphic = FlxG.bitmap.get(key);
 		if (result == null)

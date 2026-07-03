@@ -320,6 +320,9 @@ class FlxFrame implements IFlxDestroyable
 	 */
 	overload public inline extern function getPixelAt(frameX:Float, frameY:Float):Null<FlxColor>
 	{
+		if (!parent.texture.checkReadWrite())
+			return null;
+
 		final sourceX = Std.int(toSourceXHelper(frameX, frameY));
 		final sourceY = Std.int(toSourceYHelper(frameX, frameY));
 		return parent.texture.downloadBitmap().getPixel32(sourceX, sourceY);
@@ -391,6 +394,9 @@ class FlxFrame implements IFlxDestroyable
 	 */
 	public function paint(?bmd:FlxBitmap, ?point:Point, mergeAlpha = false, disposeIfNotEqual = false):FlxBitmap
 	{
+		if (!parent.texture.checkReadWrite())
+			return null;
+
 		bmd = checkInputBitmap(bmd, point, FlxFrameAngle.ANGLE_0, mergeAlpha, disposeIfNotEqual);
 
 		if (type == FlxFrameType.EMPTY)
@@ -436,6 +442,9 @@ class FlxFrame implements IFlxDestroyable
 	{
 		if (type == FlxFrameType.EMPTY && rotation == FlxFrameAngle.ANGLE_0)
 			return paint(bmd, point, mergeAlpha, disposeIfNotEqual);
+
+		if (!parent.texture.checkReadWrite())
+			return null;
 
 		bmd = checkInputBitmap(bmd, point, rotation, mergeAlpha, disposeIfNotEqual);
 

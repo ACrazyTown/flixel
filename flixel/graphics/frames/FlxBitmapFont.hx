@@ -212,6 +212,9 @@ class FlxBitmapFont extends FlxFramesCollection
 			frame = graphic.imageFrame.frame;
 		}
 
+		if (!graphic.texture.checkReadWrite())
+			return null;
+
 		var font:FlxBitmapFont = FlxBitmapFont.findFont(frame);
 		if (font != null)
 			return font;

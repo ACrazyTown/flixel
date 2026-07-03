@@ -553,6 +553,9 @@ class FlxSprite extends FlxObject
 		if (brushGraphic == null)
 			return this;
 
+		if (!brushGraphic.texture.checkReadWrite())
+			return null;
+
 		var brush:FlxBitmap = brushGraphic.texture.downloadBitmap();
 		var key:String = brushGraphic.key;
 
@@ -1076,6 +1079,9 @@ class FlxSprite extends FlxObject
 		if (graphic == null || Brush.graphic == null)
 			throw "Cannot stamp to or from a FlxSprite with no graphics.";
 
+		if (!Brush.graphic.texture.checkReadWrite())
+			return;
+
 		var bitmapData:FlxBitmap = Brush.framePixels;
 
 		if (isSimpleRenderBlit()) // simple render
@@ -1168,6 +1174,9 @@ class FlxSprite extends FlxObject
 	 */
 	public function replaceColor(Color:FlxColor, NewColor:FlxColor, FetchPositions:Bool = false):Array<FlxPoint>
 	{
+		if (!graphic.texture.checkReadWrite())
+			return null;
+
 		var positions = FlxBitmapDataUtil.replaceColor(graphic.texture.downloadBitmap(), Color, NewColor, FetchPositions);
 		if (positions != null)
 			dirty = true;

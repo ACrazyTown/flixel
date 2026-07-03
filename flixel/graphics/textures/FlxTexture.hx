@@ -183,6 +183,26 @@ class FlxTexture implements IFlxDestroyable
     }
 
     /**
+     * Check whether the current texture status allows for read/write operations, and log if it doesn't.
+     * @return  Whether the current texture status allows for read/write operations
+     */
+    public function checkReadWrite():Bool
+    {
+        if (status.match(INVALID))
+        {
+            FlxG.log.error("Cannot perform read/write operations on invalid texture.");
+            return false;
+        }
+        else if (!status.match(READABLE(_)))
+        {
+            FlxG.log.error("Cannot perform read/write operations on VRAM-only texture. Use texture.downloadBitmap() to fetch pixel data back from the GPU, first.");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Uploads texture data from a `FlxBitmap`.
      * The bitmap should match the texture in size.
      * 

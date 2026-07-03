@@ -637,7 +637,9 @@ class FlxBar extends FlxSprite
 		if (empty != null)
 		{
 			var emptyGraphic:FlxGraphic = FlxG.bitmap.add(empty);
-			
+			if (!emptyGraphic.texture.checkReadWrite())
+				return null;
+
 			switch FlxG.renderer.method
 			{
 				case DRAW_TILES:
@@ -679,6 +681,8 @@ class FlxBar extends FlxSprite
 		if (fill != null)
 		{
 			var filledGraphic:FlxGraphic = FlxG.bitmap.add(fill);
+			if (!filledGraphic.texture.checkReadWrite())
+				return null;
 			
 			switch FlxG.renderer.method
 			{
