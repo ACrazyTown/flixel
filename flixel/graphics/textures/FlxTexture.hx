@@ -217,6 +217,12 @@ class FlxTexture implements IFlxDestroyable
      */
     public function uploadBitmap(bitmap:FlxBitmap, ?readable:Bool):Void 
     {
+        if (width != bitmap.width || height != bitmap.height)
+        {
+            FlxG.log.error('Bitmap size must match texture size! (Got ${bitmap.width}x${bitmap.height} but want ${width}x${height})');
+            return;
+        }
+
         if (readable == null)
             readable = defaultReadable;
 
@@ -308,6 +314,9 @@ class FlxTexture implements IFlxDestroyable
      */
     public function downloadBitmap():FlxBitmap 
     {
+        if (status.match(INVALID))
+            throw "Can't perform any operations on uninitialized texture!";
+
         if (_bitmap == null)
         {
             final pixels = readPixels();
@@ -365,6 +374,9 @@ class FlxTexture implements IFlxDestroyable
      */
     public function clone():FlxTexture
     {
+        if (status.match(INVALID))
+            throw "Can't perform any operations on uninitialized texture!";
+
         var pixels:FlxBitmap = null;
 
         switch (status)
