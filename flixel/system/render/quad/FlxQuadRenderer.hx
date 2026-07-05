@@ -7,6 +7,7 @@ import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;
 import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
+import flixel.util.FlxColor;
 import lime.utils.UInt8Array;
 
 #if FLX_OPENGL_AVAILABLE

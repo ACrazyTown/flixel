@@ -7,6 +7,7 @@ import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
 import flixel.system.render.FlxRendererTypes;
 import flixel.util.FlxDestroyUtil;
+import flixel.util.FlxColor;
 import lime.utils.UInt8Array;
 
 /**
@@ -166,14 +167,12 @@ interface IFlxTextureSystem
 	function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
 }
 
-	abstract function createRenderTargetHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle;
-	abstract function destroyRenderTargetHandle(handle:FlxRenderTargetHandle):Void;
-	abstract function resizeRenderTarget(texture:FlxRenderTexture, width:Int, height:Int):Void;
-	abstract function clearRenderTarget(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
-
-	// =============================================================================
-	//}endregion                           TEXTURES
-	// =============================================================================
+interface IFlxRenderTargetSystem
+{
+	function createHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle;
+	function destroyHandle(handle:FlxRenderTargetHandle):Void;
+	function resize(texture:FlxRenderTexture, width:Int, height:Int):Void;
+	function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
 }
 
 /**
