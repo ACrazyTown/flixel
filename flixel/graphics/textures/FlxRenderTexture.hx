@@ -19,8 +19,8 @@ class FlxRenderTexture extends FlxTexture
         super(width, height);
         hasDepthStencil = depthStencil;
 
-        renderTarget = FlxG.renderer.createRenderTargetHandle(this, depthStencil);
-        FlxG.renderer.resizeRenderTarget(this, width, height);
+        renderTarget = FlxG.renderer.renderTargets.createHandle(this, depthStencil);
+        FlxG.renderer.renderTargets.resize(this, width, height);
     }
 
     override function destroy():Void
@@ -29,14 +29,14 @@ class FlxRenderTexture extends FlxTexture
 
         if (renderTarget != null)
         {
-            FlxG.renderer.destroyRenderTargetHandle(renderTarget);
+            FlxG.renderer.renderTargets.destroyHandle(renderTarget);
             renderTarget = null;
         }
     }
 
     public function clear(color:FlxColor, depth:Bool = true, stencil:Bool = true):Void
     {
-        FlxG.renderer.clearRenderTarget(this, color, depth, stencil);
+        FlxG.renderer.renderTargets.clear(this, color, depth, stencil);
     }
 
     public function resize(width:Int, height:Int):Void
@@ -46,6 +46,6 @@ class FlxRenderTexture extends FlxTexture
 
         this.width = width;
         this.height = height;
-        FlxG.renderer.resizeRenderTarget(this, width, height);
+        FlxG.renderer.renderTargets.resize(this, width, height);
     }
 }

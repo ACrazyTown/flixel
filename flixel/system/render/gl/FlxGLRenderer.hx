@@ -5,7 +5,7 @@ import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxRenderTexture;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
-import flixel.system.render.FlxRenderer.FlxTypedRenderer;
+import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
 import flixel.system.render.FlxTopology;
 import flixel.system.render.gl.FlxDrawCall;
@@ -21,7 +21,6 @@ import openfl.display.BitmapData;
 import openfl.display.Shader;
 
 @:access(flixel.system.render.gl)
-@:access(flixel.graphics)
 @:access(flixel.FlxCamera)
 class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 {
@@ -96,8 +95,8 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     {
         super();
         method = OPENGL;
-        textures = new FlxGLTextureSystem();
-        renderTargets = new FlxGLRenderTargetSystem();
+        textures = new FlxGLTextureSystem(this);
+        renderTargets = new FlxGLRenderTargetSystem(this);
         maxTextureSize = cast GL.getParameter(GL.MAX_TEXTURE_SIZE);
     }
 
@@ -246,23 +245,17 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     public function addCameraView(view:FlxGLView) {}
     public function addCameraViewAt(view:FlxGLView, index:Int) {}
     public function removeCameraView(view:FlxGLView) {}
-
-    public function resize(width:Int, height:Int):Void
-    {
-        if (_projectionWidth == width && _projectionHeight == height)
-            return;
-    
-        _projection.createOrtho(0, width, 0, height, -1000, 1000);
-        _projectionFlipped.createOrtho(0, width, height, 0, -1000, 1000);
-
-        _projectionWidth = width;
-        _projectionHeight = height;
-    }
 }
 
+@:access(flixel.graphics.textures)
 class FlxGLTextureSystem implements IFlxTextureSystem
 {
-	public function new() {}
+    public var renderer:FlxGLRenderer;
+
+	public function new(renderer:FlxGLRenderer) 
+    {
+        this.renderer = renderer;
+    }
 	
 	public function createHandle():FlxTextureHandle 
     {
@@ -305,21 +298,21 @@ class FlxGLTextureSystem implements IFlxTextureSystem
         #end
 
         if (!texture._allocated)
-            context.allocTextureData(texture, GL.RGBA, bitmap.data, dataFormat);
+            renderer.context.allocTextureData(texture, GL.RGBA, bitmap.data, dataFormat);
         else
-            context.uploadTextureData(texture, bitmap.data, dataFormat);
+            renderer.context.uploadTextureData(texture, bitmap.data, dataFormat);
     }
 
 	public function readPixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void 
     {
-        context.bindTexture(texture);
+        renderer.context.bindTexture(texture);
 
         // Create dummy framebuffer we'll read from
         var fb = GL.createFramebuffer();
         GL.bindFramebuffer(GL.FRAMEBUFFER, fb);
 
         // Attach texture to framebuffer and read the pixels from it into the buffer
-        GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, texture.handle, 0);
+        GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, texture._handle, 0);
         GLHelper.readPixels(Std.int(rect.x), Std.int(rect.y), Std.int(rect.width), Std.int(rect.height), GL.RGBA, GL.UNSIGNED_BYTE, buffer);
 
         // Delete the framebuffer
@@ -329,20 +322,25 @@ class FlxGLTextureSystem implements IFlxTextureSystem
 
 	public function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void 
     {
-        context.bindTexture(texture);
-        context.setTextureWrapU(wrap);
+        renderer.context.bindTexture(texture);
+        renderer.context.setTextureWrapU(wrap);
     }
 
 	public function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void 
     {
-        context.bindTexture(texture);
-        context.setTextureWrapV(wrap);
+        renderer.context.bindTexture(texture);
+        renderer.context.setTextureWrapV(wrap);
     }
 }
 
 class FlxGLRenderTargetSystem implements IFlxRenderTargetSystem
 {
-	public function new() {}
+    public var renderer:FlxGLRenderer;
+
+	public function new(renderer:FlxGLRenderer) 
+    {
+        this.renderer = renderer;
+    }
 
 	public function createHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle 
     {
@@ -359,13 +357,23 @@ class FlxGLRenderTargetSystem implements IFlxRenderTargetSystem
 
 	public function destroyHandle(handle:FlxRenderTargetHandle):Void 
     {
-        handle.destroy();
+        if (handle.framebuffer != null)
+        {
+            GL.deleteFramebuffer(handle.framebuffer);
+            handle.framebuffer = null;
+        }
+
+        if (handle.renderbuffer != null)
+        {
+            GL.deleteRenderbuffer(handle.renderbuffer);
+            handle.renderbuffer = null;
+        }
     }
 
 	public function resize(texture:FlxRenderTexture, width:Int, height:Int):Void 
     {
         final target = texture.renderTarget;
-        context.bindTexture(texture);
+        renderer.context.bindTexture(texture);
 
         // Reallocate texture with new size
         GLHelper.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width, height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null);

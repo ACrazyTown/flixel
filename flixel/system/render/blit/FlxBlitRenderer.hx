@@ -6,6 +6,7 @@ import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
 import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
+import flixel.util.FlxColor;
 import flixel.graphics.FlxBitmap;
 
 @:access(flixel.FlxCamera)
