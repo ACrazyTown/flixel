@@ -237,7 +237,7 @@ class FlxTexture implements IFlxDestroyable
             _allocated = true;
 
         // Clean up previous bitmap
-        if (_bitmap != null)
+        if (_bitmap != null && _bitmap != bitmap)
             destroyBitmap();
 
         if (readable || FlxG.renderer.blit)
