@@ -2,6 +2,7 @@ package flixel.system.render.gl;
 
 #if FLX_RENDER_OPENGL
 import flixel.graphics.FlxBitmap;
+import flixel.graphics.shaders.FlxShader;
 import flixel.graphics.textures.FlxRenderTexture;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
@@ -13,9 +14,12 @@ import flixel.util.FlxColor;
 import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
 import lime.graphics.opengl.GL;
+import lime.graphics.opengl.GLProgram;
+import lime.graphics.opengl.GLShader;
 import lime.graphics.opengl.GLTexture;
 import lime.math.Matrix4;
 import lime.utils.Float32Array;
+import lime.utils.Int32Array;
 import lime.utils.UInt8Array;
 import openfl.display.BitmapData;
 import openfl.display.Shader;
@@ -97,6 +101,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         method = OPENGL;
         textures = new FlxGLTextureSystem(this);
         renderTargets = new FlxGLRenderTargetSystem(this);
+        shaders = new FlxGLShaderSystem(this);
         maxTextureSize = cast GL.getParameter(GL.MAX_TEXTURE_SIZE);
     }
 
@@ -149,9 +154,25 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         // Set up render state
         context.setBlendMode(dc.blend);
 
-		shader.setMatrixTypedArray("flixel_uMatrix", projection, MAT4X4);
-        // TODO: setTexture breaks OpenFL shaders, which do not use FlxTexture
-		shader.setTexture("flixel_uTexture", dc.texture.texture, dc.textureSmoothing);
+		shader.setMatrixTypedArray("flixel_uMatrix", projection);
+
+        if (shader.data.flash != null)
+        {
+            // We cannot use our fancy API for OpenFL shaders so we have to set these manually :(
+            var flashShader = shader.data.flash.shader;
+
+            GL.activeTexture(0);
+            GL.bindTexture(GL.TEXTURE_2D, dc.texture.texture._handle);
+
+            final filter = flashShader.data.bitmap.filter == openfl.display3D.Context3DTextureFilter.LINEAR ? GL.LINEAR : GL.NEAREST;
+            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+
+            GL.uniform1i(flashShader.data.bitmap.index, 0);
+        }
+        else
+            shader.setTexture("flixel_uTexture", dc.texture.texture, dc.textureSmoothing);
+
 		if (shader.hasUniform("flixel_uTextureSize"))
 			shader.setInt2("flixel_uTextureSize", dc.texture.width, dc.texture.height);
 
@@ -414,5 +435,374 @@ class FlxGLRenderTargetSystem implements IFlxRenderTargetSystem
     // =============================================================================
 	//}endregion                        INHERITED
 	// =============================================================================
+}
+
+class FlxGLShaderSystem implements IFlxShaderSystem
+{
+    public var renderer:FlxGLRenderer;
+
+    public function new(renderer:FlxGLRenderer)
+    {
+        this.renderer = renderer;
+    }
+
+    public function createHandle(data:FlxShaderData):FlxShaderHandle
+    {
+        // TODO: use default shader data when certain params are null
+
+        #if !flash
+        if (data.flash != null)
+        {
+            var fshader = data.flash.shader;
+
+            // https://github.com/openfl/openfl/blob/de55e8c592826d6f56b424badeaf2eebd1a7b0c2/src/openfl/display/OpenGLRenderer.hx#L537-L554
+            @:privateAccess
+            {
+                if (fshader.__context == null)
+                {
+                    fshader.__context = FlxG.stage.context3D;
+                    fshader.__init();
+                }
+            }
+
+            return fshader.glProgram;
+        }
+        #end
+
+        var program = GL.createProgram();
+
+        if (data.glsl.vertex != null)
+        {
+            var vs = createShader(GL.VERTEX_SHADER, data.glsl.vertex);
+            GL.attachShader(program, vs);
+
+            // Before linking the shader program we want to ensure our attributes
+            // will be assigned to the locations we want them to be in
+            // This is so that we can take advantage of VAOs properly
+            if (data.glsl.vertex.attributes != null)
+            {
+                for (i in 0...data.glsl.vertex.attributes.length)
+                    GL.bindAttribLocation(program, i, data.glsl.vertex.attributes[i]);
+            }
+        }
+
+        if (data.glsl.fragment != null)
+        {
+            var fs = createShader(GL.FRAGMENT_SHADER, data.glsl.fragment);
+            GL.attachShader(program, fs);
+        }
+
+        GL.linkProgram(program);
+
+        if (GL.getProgramParameter(program, GL.LINK_STATUS) == 0)
+        {
+            var error = GL.getProgramInfoLog(program);
+            trace('Error linking program:\n$error');
+        }
+
+        return program;
+    }
+
+    public function destroyHandle(handle:FlxShaderHandle):Void
+    {
+        GL.deleteProgram(handle);
+    }
+
+    public function getUniformLocation(handle:FlxShaderHandle, name:String):FlxShaderUniformLocation 
+    {
+        return GL.getUniformLocation(handle, name);
+    }
+
+    public function fetchUniforms(handle:FlxShaderHandle):Array<FlxShaderUniform<Any>>
+    {
+        var uniforms:Array<FlxShaderUniform<Any>> = [];
+
+        // start from 1 because we're manually going to assign 0 to the main texture
+        var lastTextureSlot:Int = 1;
+
+        var numUniforms = GL.getProgramParameter(handle, GL.ACTIVE_UNIFORMS);
+        for (i in 0...numUniforms)
+        {
+            var info = GL.getActiveUniform(handle, i);
+            var location = GL.getUniformLocation(handle, info.name);
+
+            var u:FlxShaderUniform<Any> = null;
+
+            // Non-array uniforms
+            if (info.size == 1)
+            {
+                u = switch info.type
+                {
+                    case GL.FLOAT: new FlxShaderUniform<Float>(FLOAT1, info.name, location, 0);
+                    case GL.FLOAT_VEC2: new FlxShaderUniform<ShaderVec2<Float>>(FLOAT2, info.name, location, {x: 0, y: 0});
+                    case GL.FLOAT_VEC3: new FlxShaderUniform<ShaderVec3<Float>>(FLOAT3, info.name, location, {x: 0, y: 0, z: 0});
+                    case GL.FLOAT_VEC4: new FlxShaderUniform<ShaderVec4<Float>>(FLOAT4, info.name, location, {x: 0, y: 0, z: 0, w: 0});
+
+                    // Booleans don't really exist, so we'll represent them as integers
+                    case GL.INT, GL.BOOL: new FlxShaderUniform<Int>(INT1, info.name, location, 0);
+                    case GL.INT_VEC2: new FlxShaderUniform<ShaderVec2<Int>>(INT2, info.name, location, {x: 0, y: 0});
+                    case GL.INT_VEC3: new FlxShaderUniform<ShaderVec3<Int>>(INT3, info.name, location, {x: 0, y: 0, z: 0});
+                    case GL.INT_VEC4: new FlxShaderUniform<ShaderVec4<Int>>(INT4, info.name, location, {x: 0, y: 0, z: 0, w: 0});
+
+                    case GL.FLOAT_MAT4: new FlxShaderUniform<ShaderMatrix>(MAT4X4, info.name, location, {data: null, transpose: false});
+                    case GL.FLOAT_MAT4x3: new FlxShaderUniform<ShaderMatrix>(MAT4X3, info.name, location, {data: null, transpose: false});
+                    case GL.FLOAT_MAT4x2: new FlxShaderUniform<ShaderMatrix>(MAT4X2, info.name, location, {data: null, transpose: false});
+                    case GL.FLOAT_MAT3x4: new FlxShaderUniform<ShaderMatrix>(MAT3X4, info.name, location, {data: null, transpose: false});
+                    case GL.FLOAT_MAT3: new FlxShaderUniform<ShaderMatrix>(MAT3X3, info.name, location, {data: null, transpose: false});
+                    case GL.FLOAT_MAT3x2: new FlxShaderUniform<ShaderMatrix>(MAT3X2, info.name, location, {data: null, transpose: false});
+                    case GL.FLOAT_MAT2x4: new FlxShaderUniform<ShaderMatrix>(MAT2X4, info.name, location, {data: null, transpose: false});
+                    case GL.FLOAT_MAT2x3: new FlxShaderUniform<ShaderMatrix>(MAT2X3, info.name, location, {data: null, transpose: false});
+                    case GL.FLOAT_MAT2: new FlxShaderUniform<ShaderMatrix>(MAT2X2, info.name, location, {data: null, transpose: false});
+
+                    // GL_SAMPLER_2D_MULTISAMPLE = 0x9108
+                    case GL.SAMPLER_2D, 0x9108:
+                        // Special case, where if the uniform is "flixel_Texture" (the main texture) we'll manually assign it the 0 slot,
+                        // and otherwise we'll just assign the slots in random order
+                        new FlxShaderUniform<ShaderTexture>(TEXTURE, info.name, location, {texture: null, smoothing: false, slot: info.name == "flixel_uTexture" ? 0 : lastTextureSlot++});
+
+                    default: null;
+                }
+            }
+            else // Array uniforms
+            {
+                u = switch info.type
+                {
+                    case GL.FLOAT: new FlxShaderUniform<ShaderArray<Float32Array>>(FLOAT_ARRAY, info.name, location, {data: null, dimension: SCALAR});
+                    case GL.FLOAT_VEC2: new FlxShaderUniform<ShaderArray<Float32Array>>(FLOAT_ARRAY, info.name, location, {data: null, dimension: VEC2});
+                    case GL.FLOAT_VEC3: new FlxShaderUniform<ShaderArray<Float32Array>>(FLOAT_ARRAY, info.name, location, {data: null, dimension: VEC3});
+                    case GL.FLOAT_VEC4: new FlxShaderUniform<ShaderArray<Float32Array>>(FLOAT_ARRAY, info.name, location, {data: null, dimension: VEC4});
+
+                    // Booleans don't really exist, so we'll represent them as integers
+                    case GL.INT, GL.BOOL: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: new Int32Array(info.size), dimension: SCALAR});
+                    case GL.INT_VEC2: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC2});
+                    case GL.INT_VEC3: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC3});
+                    case GL.INT_VEC4: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC4});
+
+                    // TODO: matrix array
+
+                    default: null;
+                }
+            }
+
+            if (u == null)
+            {
+                FlxG.log.warn('Unhandled shader uniform type (name: ${info.name}, type: ${info.type}, size: ${info.size}). You should report this!');
+                continue;
+            }
+
+            // uniforms.set(info.name, u);
+            // _uniformList.push(u);
+            uniforms.push(u);
+        }
+
+        return uniforms;
+    }
+
+    public function getAttributeLocation(handle:FlxShaderHandle, name:String):FlxShaderAttributeLocation 
+    {
+        return GL.getAttribLocation(handle, name);
+    }
+
+    public function setUniformInt(location:FlxShaderUniformLocation, v:Int):Void
+    {
+        GL.uniform1i(location, v);
+    }
+
+	public function setUniformInt2(location:FlxShaderUniformLocation, v1:Int, v2:Int):Void
+    {
+        GL.uniform2i(location, v1, v2);
+    }
+
+	public function setUniformInt3(location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int):Void
+    {
+        GL.uniform3i(location, v1, v2, v3);    
+    }
+
+	public function setUniformInt4(location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int, v4:Int):Void
+    {
+        GL.uniform4i(location, v1, v2, v3, v4);
+    }
+
+	public function setUniformIntArray(location:FlxShaderUniformLocation, v:Int32Array, dimension:FlxShaderArrayDimension):Void
+    {
+        switch dimension
+        {
+            case SCALAR: GLHelper.uniform1iv(location, v);
+            case VEC2: GLHelper.uniform2iv(location, v);
+            case VEC3: GLHelper.uniform3iv(location, v);
+            case VEC4: GLHelper.uniform4iv(location, v);
+        }
+    }
+
+	public function setUniformFloat(location:FlxShaderUniformLocation, v:Float):Void
+    {
+        GL.uniform1f(location, v);
+    }
+
+	public function setUniformFloat2(location:FlxShaderUniformLocation, v1:Float, v2:Float):Void
+    {
+        GL.uniform2f(location, v1, v2);
+    }
+
+	public function setUniformFloat3(location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float):Void
+    {
+        GL.uniform3f(location, v1, v2, v3);
+    }
+
+	public function setUniformFloat4(location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float, v4:Float):Void
+    {
+        GL.uniform4f(location, v1, v2, v3, v4);
+    }
+
+	public function setUniformFloatArray(location:FlxShaderUniformLocation, v:Float32Array, dimension:FlxShaderArrayDimension):Void
+    {
+        switch dimension
+        {
+            case SCALAR: GLHelper.uniform1fv(location, v);
+            case VEC2: GLHelper.uniform2fv(location, v);
+            case VEC3: GLHelper.uniform3fv(location, v);
+            case VEC4: GLHelper.uniform4fv(location, v);
+        }
+    }
+
+    // TODO: IMPLEMENT NON-SQUARE MATRIX METHODS
+
+	public function setUniformMatrix4x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+        GLHelper.uniformMatrix4fv(location, transpose, v);
+    }
+
+	public function setUniformMatrix4x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+
+    }
+
+	public function setUniformMatrix4x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+
+    }
+
+	public function setUniformMatrix3x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+
+    }
+
+	public function setUniformMatrix3x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+        GLHelper.uniformMatrix3fv(location, transpose, v);
+    }
+
+	public function setUniformMatrix3x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+
+    }
+
+	public function setUniformMatrix2x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+
+    }
+
+	public function setUniformMatrix2x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+
+    }
+
+    public function setUniformTexture(location:FlxShaderUniformLocation, v:FlxTexture, smoothing:Bool, slot:Int):Void
+    {
+        // Activate the slot and bind our texture to it
+        GL.activeTexture(GL.TEXTURE0 + slot);
+        renderer.context.bindTexture(v);
+        
+        // Apply smoothing
+        var filter = smoothing ? GL.LINEAR : GL.NEAREST;
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+
+        // Write the texture's slot to our texture uniform
+        GL.uniform1i(location, slot);
+    }
+
+	public function setUniformMatrix2x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+        GLHelper.uniformMatrix2fv(location, transpose, v);
+    }
+
+    function createShader(type:Int, data:GLSLShader):GLShader 
+    {
+        var shader = GL.createShader(type);
+        var src = processShaderSource(data);
+        GL.shaderSource(shader, src);
+        GL.compileShader(shader);
+
+        if (GL.getShaderParameter(shader, GL.COMPILE_STATUS) == 0)
+        {
+            var error = GL.getShaderInfoLog(shader);
+            trace('Error compiling ${type == GL.FRAGMENT_SHADER ? 'fragment' : 'vertex'} shader:\n$error');
+            trace(src);
+        }
+
+        return shader;
+    }
+
+    function processShaderSource(shader:GLSLShader):String
+    {
+        var prefix:StringBuf = new StringBuf();
+
+        var versionRegex = ~/^#version/m;
+
+        if (shader.version != null)
+        {
+            if (!versionRegex.match(shader.source))
+                prefix.add('#version ${shader.version}\n');
+            else
+                FlxG.log.warn("Can't inject shader version because the shader code already specifies it!");
+
+            // if (shader.allowConvert)
+            // {
+            //     // Based off of the implementation by EliteMasterEric (https://github.com/openfl/openfl/pull/2722)
+            //     var attributeRegex = ~/attribute ([A-Za-z0-9]+) ([A-Za-z0-9_]+)/g;
+            //     var varyingRegex = ~/varying ([A-Za-z0-9]+) ([A-Za-z0-9_]+)/g;
+
+            //     var texture2DRegex = ~/texture2D/g;
+            //     var glFragColorRegex = ~/gl_FragColor/g;
+
+            //     switch (shader.version)
+            // }
+        }
+
+        var precisionRegex = ~/^precision/m;
+
+        // Precision qualifiers are only supported on OpenGL ES and WebGL
+        if (GL.type != OPENGL && shader.precision != null)
+        {
+            if (!precisionRegex.match(shader.source))
+            {
+                prefix.add("#ifdef GL_ES\n");
+
+                // Not all GPUs support high precision so we have to see if its available
+                // and fallback to medium if it's not
+                if (shader.precision == HIGH)
+                {
+                    prefix.add("#ifdef GL_FRAGMENT_PRECISION_HIGH\n");
+                    prefix.add("precision highp float;\n");
+                    prefix.add("#else\n");
+                    prefix.add("precision mediump float;\n");
+                    prefix.add("#endif\n");
+                }
+                else
+                {
+                    prefix.add('precision ${shader.precision} float;\n');
+                }
+
+                prefix.add("#endif\n");
+            }
+            else
+                FlxG.log.warn("Can't inject shader precision qualifier because the shader code already specifies it!");
+        }
+
+        prefix.add("\n");
+
+        return prefix.toString() + shader.source;
+    }
 }
 #end
