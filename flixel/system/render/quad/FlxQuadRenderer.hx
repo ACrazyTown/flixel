@@ -1,20 +1,23 @@
 package flixel.system.render.quad;
 
-import flixel.graphics.textures.FlxRenderTexture;
-import flixel.math.FlxRect;
 import flixel.FlxG;
 import flixel.graphics.FlxBitmap;
+import flixel.graphics.shaders.FlxShader;
+import flixel.graphics.textures.FlxRenderTexture;
 import flixel.graphics.textures.FlxTexture;
+import flixel.math.FlxRect;
 import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
 import flixel.util.FlxColor;
+import lime.utils.Float32Array;
+import lime.utils.Int32Array;
 import lime.utils.UInt8Array;
 
+using flixel.util.FlxColorTransformUtil;
 #if FLX_OPENGL_AVAILABLE
 import lime.graphics.opengl.GL;
 #end
 
-using flixel.util.FlxColorTransformUtil;
 
 @:access(flixel.FlxCamera)
 @:access(flixel.system.render.quad)
@@ -139,4 +142,26 @@ class FlxQuadRenderTargetSystem implements IFlxRenderTargetSystem
 	public function destroyHandle(handle:FlxRenderTargetHandle):Void {}
 	public function resize(texture:FlxRenderTexture, width:Int, height:Int):Void {}
 	public function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
+
+	public function fetchUniforms(handle:FlxShaderHandle):Array<FlxShaderUniform<Any>> {return null;}
+	public function setUniformInt(location:FlxShaderUniformLocation, v:Int):Void {}
+	public function setUniformInt2(location:FlxShaderUniformLocation, v1:Int, v2:Int):Void {}
+	public function setUniformInt3(location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int):Void {}
+	public function setUniformInt4(location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int, v4:Int):Void {}
+	public function setUniformIntArray(location:FlxShaderUniformLocation, v:Int32Array, dimension:FlxShaderArrayDimension):Void {}
+	public function setUniformFloat(location:FlxShaderUniformLocation, v:Float):Void {}
+	public function setUniformFloat2(location:FlxShaderUniformLocation, v1:Float, v2:Float):Void {}
+	public function setUniformFloat3(location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float):Void {}
+	public function setUniformFloat4(location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float, v4:Float):Void {}
+	public function setUniformFloatArray(location:FlxShaderUniformLocation, v:Float32Array, dimension:FlxShaderArrayDimension):Void {}
+	public function setUniformMatrix4x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix4x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix4x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix3x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix3x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix3x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix2x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix2x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix2x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformTexture(location:FlxShaderUniformLocation, v:FlxTexture, smoothing:Bool, slot:Int):Void {}
 }

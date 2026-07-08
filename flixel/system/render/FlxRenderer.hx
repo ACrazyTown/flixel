@@ -1,17 +1,19 @@
 package flixel.system.render;
 
-import lime.math.Matrix3;
+import flixel.graphics.FlxBitmap;
+// import flixel.graphics.shaders.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 // import flixel.graphics.shaders.FlxShaderUniforms.FlxShaderUniform;
 // import flixel.graphics.shaders.FlxShaderUniforms.FlxShaderUniformLocation;
-// import flixel.graphics.shaders.FlxShader;
 import flixel.graphics.textures.FlxRenderTexture;
-import flixel.math.FlxRect;
-import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
+import flixel.math.FlxRect;
 import flixel.system.render.FlxRendererTypes;
-import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
+import lime.utils.Float32Array;
+import lime.utils.Int32Array;
 import lime.utils.UInt8Array;
 
 /**
@@ -119,6 +121,13 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	 */
 	public var renderTargets(default, null):IFlxRenderTargetSystem;
 
+	/**
+	 * Backend shader management.
+	 * 
+	 * Must be set by extending implementations.
+	 */
+	public var shaders(default, null):IFlxShaderSystem;
+
 	function new() {}
 
 	/**
@@ -177,6 +186,39 @@ interface IFlxRenderTargetSystem
 	function destroyHandle(handle:FlxRenderTargetHandle):Void;
 	function resize(texture:FlxRenderTexture, width:Int, height:Int):Void;
 	function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
+}
+
+interface IFlxShaderSystem
+{
+	function createHandle(data:FlxShaderData):FlxShaderHandle;
+	function destroyHandle(handle:FlxShaderHandle):Void;
+	// TODO: how do I get rid of the slot
+	// function updateUniform(location:FlxShaderUniformLocation, value:FlxShaderUniformValue, slot:Int):Void;
+
+	function getUniformLocation(handle:FlxShaderHandle, name:String):FlxShaderUniformLocation;
+	function getAttributeLocation(handle:FlxShaderHandle, name:String):FlxShaderAttributeLocation;
+
+	function fetchUniforms(handle:FlxShaderHandle):Array<FlxShaderUniform<Any>>;
+	function setUniformInt(location:FlxShaderUniformLocation, v:Int):Void;
+	function setUniformInt2(location:FlxShaderUniformLocation, v1:Int, v2:Int):Void;
+	function setUniformInt3(location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int):Void;
+	function setUniformInt4(location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int, v4:Int):Void;
+	function setUniformIntArray(location:FlxShaderUniformLocation, v:Int32Array, dimension:FlxShaderArrayDimension):Void;
+	function setUniformFloat(location:FlxShaderUniformLocation, v:Float):Void;
+	function setUniformFloat2(location:FlxShaderUniformLocation, v1:Float, v2:Float):Void;
+	function setUniformFloat3(location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float):Void;
+	function setUniformFloat4(location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float, v4:Float):Void;
+	function setUniformFloatArray(location:FlxShaderUniformLocation, v:Float32Array, dimension:FlxShaderArrayDimension):Void;
+	function setUniformMatrix4x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformMatrix4x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformMatrix4x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformMatrix3x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformMatrix3x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformMatrix3x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformMatrix2x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformMatrix2x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformMatrix2x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
+	function setUniformTexture(location:FlxShaderUniformLocation, v:FlxTexture, smoothing:Bool, slot:Int):Void;
 }
 
 /**
