@@ -75,7 +75,10 @@ class FlxDrawCall implements IFlxDestroyable
 		// this.texture = texture;
 		// this.textureSmoothing = textureSmoothing;
 
-		this.textures.fill(null);
+		// TODO: Replace with haxe.ds.Vector.fill() when minimum Haxe is 4.3
+		for (i in 0..._textures.length)
+			_textures[i] = null;
+
 		Vector.blit(textures, 0, this.textures, 0, textures.length);
 		Vector.blit(texturesSmoothing, 0, this.texturesSmoothing, 0, texturesSmoothing.length);
 
