@@ -81,20 +81,6 @@ class GLContext
         GLHelper.texSubImage2D(GL.TEXTURE_2D, 0, 0, 0, texture.width, texture.height, dataFormat, GL.UNSIGNED_BYTE, data);
     }
 
-    @:deprecated
-    public function setTexture(texture:FlxTexture, repeat:Bool, smoothing:Bool):Void
-    {
-        GL.bindTexture(GL.TEXTURE_2D, texture._handle);
-
-        var wrap = repeat ? GL.REPEAT : GL.CLAMP_TO_EDGE;
-        var filter = smoothing ? GL.LINEAR : GL.NEAREST;
-
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, wrap);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, wrap);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
-    }
-
     // =============================================================================
 	//}endregion                          TEXTURES
 	// =============================================================================

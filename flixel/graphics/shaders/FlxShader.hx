@@ -710,7 +710,7 @@ class FlxShader implements IFlxDestroyable
         if (uniform.value.texture != texture || uniform.value.smoothing != smoothing)
         {
             uniform.value.texture = texture;
-            uniform.value.smoothing = true;
+            uniform.value.smoothing = smoothing;
             uniform.dirty = true;
         }
     }
