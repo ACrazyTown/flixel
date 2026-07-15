@@ -111,9 +111,17 @@ class BitmapFrontEnd
 	 * @param   graphic  The graphic to cache.
 	 * @return  The cached graphic.
 	 */
-	public inline function addGraphic(graphic:FlxGraphic):FlxGraphic
+	public function addGraphic(graphic:FlxGraphic):FlxGraphic
 	{
-		_cache.set(graphic.key, graphic);
+		if (!_cache.exists(graphic.key) || _cache.get(graphic.key) == null)
+		{
+			_cache.set(graphic.key, graphic);
+		}
+		else if (_cache.get(graphic.key) != graphic)
+		{
+			removeByKey(graphic.key);
+			_cache.set(graphic.key, graphic);
+		}
 		return graphic;
 	}
 
@@ -123,7 +131,7 @@ class BitmapFrontEnd
 	 * @param   key  The FlxGraphics key (or name).
 	 * @return  The FlxGraphic with the specified key, or null if the object doesn't exist.
 	 */
-	public inline function get(key:String):FlxGraphic
+	public function get(key:String):FlxGraphic
 	{
 		return _cache.get(key);
 	}
@@ -294,7 +302,7 @@ class BitmapFrontEnd
 		}
 	}
 
-	inline function removeKey(key:String):Void
+	function removeKey(key:String):Void
 	{
 		if (key != null)
 		{
