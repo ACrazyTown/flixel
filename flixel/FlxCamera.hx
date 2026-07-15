@@ -938,9 +938,6 @@ class FlxCamera extends FlxBasic
 				{
 					_fxShakeYOffset = FlxG.random.float(-1, 1) * _fxShakeIntensity * height;
 					if (pixelPerfect)
-<<<<<<< HEAD
-						_fxShakeYOffset = Math.fround(_fxShakeYOffset);
-=======
 						shakePixels = Math.round(shakePixels);
 				}
 
