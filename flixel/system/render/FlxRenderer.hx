@@ -1,10 +1,7 @@
 package flixel.system.render;
 
 import flixel.graphics.FlxBitmap;
-// import flixel.graphics.shaders.FlxShader;
 import flixel.graphics.shaders.FlxShader;
-// import flixel.graphics.shaders.FlxShaderUniforms.FlxShaderUniform;
-// import flixel.graphics.shaders.FlxShaderUniforms.FlxShaderUniformLocation;
 import flixel.graphics.textures.FlxRenderTexture;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
@@ -192,8 +189,6 @@ interface IFlxShaderSystem
 {
 	function createHandle(data:FlxShaderData):FlxShaderHandle;
 	function destroyHandle(handle:FlxShaderHandle):Void;
-	// TODO: how do I get rid of the slot
-	// function updateUniform(location:FlxShaderUniformLocation, value:FlxShaderUniformValue, slot:Int):Void;
 
 	function getUniformLocation(handle:FlxShaderHandle, name:String):FlxShaderUniformLocation;
 	function getAttributeLocation(handle:FlxShaderHandle, name:String):FlxShaderAttributeLocation;
@@ -219,6 +214,9 @@ interface IFlxShaderSystem
 	function setUniformMatrix2x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
 	function setUniformMatrix2x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void;
 	function setUniformTexture(location:FlxShaderUniformLocation, v:FlxTexture, smoothing:Bool, slot:Int):Void;
+
+	function getMaxTexturesInShader():Int;
+	function getMaxIfStatementsInShader(initialAmount:Int):Int;
 }
 
 /**

@@ -49,9 +49,39 @@ class GLHelper
         gl.uniformMatrix4fv(location, transpose, data, srcOffset, srcLength);
     }
 
+    public static inline function uniformMatrix4x3fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
+    {
+        gl.uniformMatrix4x3fv(location, transpose, data, srcOffset, srcLength);
+    }
+
+    public static inline function uniformMatrix4x2fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
+    {
+        gl.uniformMatrix4x2fv(location, transpose, data, srcOffset, srcLength);
+    }
+
+    public static inline function uniformMatrix3x4fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
+    {
+        gl.uniformMatrix3x4fv(location, transpose, data, srcOffset, srcLength);
+    }
+
     public static inline function uniformMatrix3fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
     {
         gl.uniformMatrix3fv(location, transpose, data, srcOffset, srcLength);
+    }
+
+    public static inline function uniformMatrix3x2fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
+    {
+        gl.uniformMatrix3x2fv(location, transpose, data, srcOffset, srcLength);
+    }
+
+    public static inline function uniformMatrix2x4fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
+    {
+        gl.uniformMatrix2x4fv(location, transpose, data, srcOffset, srcLength);
+    }
+
+    public static inline function uniformMatrix2x3fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void
+    {
+        gl.uniformMatrix2x3fv(location, transpose, data, srcOffset, srcLength);
     }
 
     public static inline function uniformMatrix2fv(location:GLUniformLocation, transpose:Bool, data:Dynamic, ?srcOffset:Int, ?srcLength:Int):Void

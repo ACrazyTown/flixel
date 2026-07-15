@@ -1,12 +1,14 @@
 package flixel.system.render.gl;
 
+import flixel.graphics.shaders.FlxBatcherShader;
+import haxe.ds.Vector;
 import flixel.util.FlxDestroyUtil;
 import lime.graphics.opengl.GLBuffer;
 import lime.graphics.opengl.GLFramebuffer;
 import flixel.system.render.FlxTopology;
 import flixel.graphics.shaders.FlxShader;
 import openfl.display.BlendMode;
-import flixel.graphics.FlxGraphic;
+import flixel.graphics.textures.FlxTexture;
 import flixel.util.FlxPool;
 
 /**
@@ -35,13 +37,20 @@ class FlxDrawCall implements IFlxDestroyable
 	public var topology:FlxTopology;
 	public var shader:FlxShader;
 	public var blend:BlendMode;
-    public var texture:FlxGraphic;
-    public var textureRepeat:Bool;
-    public var textureSmoothing:Bool;
+
+    // public var texture:FlxTexture; // Main texture, others should be bound via shader
+    // public var textureSmoothing:Bool;
+	public var textures:Vector<FlxTexture>;
+	public var texturesSmoothing:Vector<Bool>;
 
     var _inPool:Bool = false;
 
-    function new() {}
+    function new() 
+	{
+		final maxTextures = #if FLX_OPENGL_BATCH_TEXTURES FlxBatcherShader.maxTextures #else 1 #end;
+		textures = new Vector<FlxTexture>(FlxBatcherShader.maxTextures);
+		texturesSmoothing = new Vector<Bool>(FlxBatcherShader.maxTextures);
+	}
 
     public inline function destroy():Void {}
 
@@ -54,8 +63,8 @@ class FlxDrawCall implements IFlxDestroyable
 		return this;
 	}
 	
-	public inline function setState(topology:FlxTopology, shader:FlxShader, blend:BlendMode, texture:FlxGraphic, textureRepeat:Bool,
-			textureSmoothing:Bool):FlxDrawCall
+	// public inline function setState(topology:FlxTopology, shader:FlxShader, blend:BlendMode, texture:FlxTexture, textureSmoothing:Bool):FlxDrawCall
+	public inline function setState(topology:FlxTopology, shader:FlxShader, blend:BlendMode, textures:Vector<FlxTexture>, texturesSmoothing:Vector<Bool>):FlxDrawCall
 	{
 		this.topology = topology;
 		
@@ -63,9 +72,12 @@ class FlxDrawCall implements IFlxDestroyable
 		
 		this.blend = blend;
 		
-		this.texture = texture;
-		this.textureRepeat = textureRepeat;
-		this.textureSmoothing = textureSmoothing;
+		// this.texture = texture;
+		// this.textureSmoothing = textureSmoothing;
+
+		this.textures.fill(null);
+		Vector.blit(textures, 0, this.textures, 0, textures.length);
+		Vector.blit(texturesSmoothing, 0, this.texturesSmoothing, 0, texturesSmoothing.length);
 
 		return this;
 	}
@@ -79,14 +91,3 @@ class FlxDrawCall implements IFlxDestroyable
         }
     }
 }
-
-// typedef GLAttribute =
-// {
-//     buffer:GLBuffer,
-//     name:String,
-//     size:Int,
-//     type:Int,
-//     normalized:Bool,
-//     stride:Int,
-//     offset:Int
-// }
