@@ -317,28 +317,37 @@ class FlxBatcher implements IFlxDestroyable
             #if FLX_OPENGL_BATCH_TEXTURES
             // Check if we can batch the texture only if we've passed the previous batching rules,
             // and if the current shader supports texture batching.
-            if (batchable && _canBatchTextures)
+            if (_canBatchTextures)
             {
-                // haxe.ds.Vector has no indexOf() ...
-                for (i in 0..._numTextureSlots)
+                if (batchable)
                 {
-                    if (_textures[i] == next.texture)
+                    // haxe.ds.Vector has no indexOf() ...
+                    for (i in 0..._numTextureSlots)
                     {
-                        foundTextureSlot = i;
-                        break;
+                        if (_textures[i] == next.texture)
+                        {
+                            foundTextureSlot = i;
+                            break;
+                        }
                     }
-                }
 
-                // The texture is not in our current pool, or its filter has changed
-                if (foundTextureSlot == -1 || (foundTextureSlot != -1 && _texturesSmoothing[foundTextureSlot] != next.textureSmoothing))
-                {
-                    // Can't add it because we're out of space, break the batch
-                    if (_numTextureSlots == _textures.length)
+                    // The texture is not in our current pool, or its filter has changed
+                    if (foundTextureSlot == -1 || (foundTextureSlot != -1 && _texturesSmoothing[foundTextureSlot] != next.textureSmoothing))
                     {
-                        batchable = false;
-                        foundTextureSlot = -1;
+                        // Can't add it because we're out of space, break the batch
+                        if (_numTextureSlots == _textures.length)
+                        {
+                            batchable = false;
+                            foundTextureSlot = -1;
+                        }
                     }
                 }
+            }
+            else 
+            {
+                // Texture batching is disabled, so in addition to the previous batching rules
+                // we also check if the texture and its filter are the same as the current.
+                batchable = batchable && _textures[0] == next.texture && _texturesSmoothing[0] == next.textureSmoothing;
             }
 
             #else
