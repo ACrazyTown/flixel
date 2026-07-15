@@ -182,16 +182,21 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
         if (shader.data.flash != null)
 		{
 		    // We cannot use our fancy API for OpenFL shaders so we have to set these manually :(
-		    var flashShader = shader.data.flash.shader;
-		
+		    final flashShader = shader.data.flash.shader;
+            final texture = dc.textures[0];
+
 		    GL.activeTexture(GL.TEXTURE0);
-		    GL.bindTexture(GL.TEXTURE_2D, dc.textures.get(0)._handle);
+		    GL.bindTexture(GL.TEXTURE_2D, texture._handle);
 		
 		    final filter = flashShader.data.bitmap.filter == openfl.display3D.Context3DTextureFilter.LINEAR ? GL.LINEAR : GL.NEAREST;
 		    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
 		    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
 		
 		    GL.uniform1i(flashShader.data.bitmap.index, 0);
+
+            // This is set later by the OpenFL shader during shader.updateUniforms();
+            @:privateAccess
+            flashShader.__textureSize.value = [texture.width, texture.height];
 		}
         else
         {
