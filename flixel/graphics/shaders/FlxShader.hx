@@ -725,15 +725,15 @@ class FlxShader implements IFlxDestroyable
             // but we only update uniforms and skip attributes
             @:privateAccess
             {
-                var textureCount = 0;
+                // var textureCount = 0;
 
-                for (input in data.flash.shader.__inputBitmapData)
-                {
-                    if (!input.__isUniform) continue;
+                // for (input in data.flash.shader.__inputBitmapData)
+                // {
+                //     if (!input.__isUniform) continue;
 
-                    input.__updateGL(data.flash.shader.__context, textureCount);
-                    textureCount++;
-                }
+                //     input.__updateGL(data.flash.shader.__context, textureCount);
+                //     textureCount++;
+                // }
 
                 for (parameter in data.flash.shader.__paramBool)
                 {
