@@ -444,7 +444,7 @@ class FlxBatcher implements IFlxDestroyable
         if (_numVertices == maxVertices)
         {
             // "orphan" (reallocate) the entire buffer to prevent stalls
-            // GLHelper.bufferData(GL.ARRAY_BUFFER, null, GL.STREAM_DRAW);
+            GLHelper.bufferData(GL.ARRAY_BUFFER, null, GL.STREAM_DRAW);
             GLHelper.bufferSubData(GL.ARRAY_BUFFER, 0, _positions);
         }
         else
@@ -458,7 +458,7 @@ class FlxBatcher implements IFlxDestroyable
         if (_numIndices == maxIndices)
         {
             // "orphan" (reallocate) the entire buffer to prevent stalls
-            // GLHelper.bufferData(GL.ELEMENT_ARRAY_BUFFER, null, GL.STREAM_DRAW);
+            GLHelper.bufferData(GL.ELEMENT_ARRAY_BUFFER, null, GL.STREAM_DRAW);
             GLHelper.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, 0, _indices);
         }
         else
