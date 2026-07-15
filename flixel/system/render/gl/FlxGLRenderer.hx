@@ -796,7 +796,6 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         // Apply smoothing
         if (v._smooth != smoothing)
         {
-            trace('Changing smoothing: ', smoothing);
             var filter = smoothing ? GL.LINEAR : GL.NEAREST;
             GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
             GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
