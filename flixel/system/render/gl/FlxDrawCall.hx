@@ -48,8 +48,8 @@ class FlxDrawCall implements IFlxDestroyable
     function new() 
 	{
 		final maxTextures = #if FLX_OPENGL_BATCH_TEXTURES FlxBatcherShader.maxTextures #else 1 #end;
-		textures = new Vector<FlxTexture>(FlxBatcherShader.maxTextures);
-		texturesSmoothing = new Vector<Bool>(FlxBatcherShader.maxTextures);
+		textures = new Vector<FlxTexture>(maxTextures);
+		texturesSmoothing = new Vector<Bool>(maxTextures);
 	}
 
     public inline function destroy():Void {}
