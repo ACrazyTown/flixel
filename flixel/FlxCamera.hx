@@ -927,7 +927,7 @@ class FlxCamera extends FlxBasic
 				final pixelPerfect = pixelPerfectShake == null ? pixelPerfectRender : pixelPerfectShake;
 				if (_fxShakeAxes.x)
 				{
-					_fxShakeXOffset = FlxG.random.float(-1, 1) * _fxShakeIntensity * width;
+					var shakePixels = FlxG.random.float(-1, 1) * _fxShakeIntensity * width;
 					if (pixelPerfect)
 						shakePixels = Math.round(shakePixels);
 					
@@ -936,12 +936,15 @@ class FlxCamera extends FlxBasic
 
 				if (_fxShakeAxes.y)
 				{
-					_fxShakeYOffset = FlxG.random.float(-1, 1) * _fxShakeIntensity * height;
+					var shakePixels = FlxG.random.float(-1, 1) * _fxShakeIntensity * height;
 					if (pixelPerfect)
 						shakePixels = Math.round(shakePixels);
+
+					offsetY = shakePixels * zoom * FlxG.scaleMode.scale.y;
 				}
 
 				view.offsetView(offsetX, offsetY);
+			}
 
 			if (shakeMatrixFix)
 			{
@@ -1214,46 +1217,6 @@ class FlxCamera extends FlxBasic
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Fill the camera with the specified color.
-	 *
-	 * @param   Color        The color to fill with in `0xAARRGGBB` hex format.
-	 * @param   BlendAlpha   Whether to blend the alpha value or just wipe the previous contents. Default is `true`.
-	 */
-	public function fill(Color:FlxColor, BlendAlpha:Bool = true, FxAlpha:Float = 1.0, ?graphics:Graphics):Void
-	{
-		if (FlxG.renderBlit)
-		{
-			if (BlendAlpha)
-			{
-				_fill.fillRect(_flashRect, Color);
-				buffer.copyPixels(_fill, _flashRect, _flashPoint, null, null, BlendAlpha);
-			}
-			else
-			{
-				buffer.fillRect(_flashRect, Color);
-			}
-		}
-		else
-		{
-			if (FxAlpha == 0)
-				return;
-
-			final bounds = __get__bounds();
-			final targetGraphics = (graphics == null) ? canvas.graphics : graphics;
-
-			targetGraphics.overrideBlendMode(null);
-			targetGraphics.beginFill(Color, FxAlpha);
-			// i'm drawing rect with these parameters to avoid light lines at the top and left of the camera,
-			// which could appear while cameras fading
-			targetGraphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-			targetGraphics.endFill();
-		}
-	}
-
-	/**
-=======
->>>>>>> shade
 	 * Internal helper function, handles the actual drawing of all the special effects.
 	 */
 	@:allow(flixel.system.render.FlxCameraView)
@@ -1910,9 +1873,6 @@ class FlxCamera extends FlxBasic
 	@:deprecated("don't reference camera.cameras")
 	@:noCompletion
 	override function set_cameras(value:Array<FlxCamera>):Array<FlxCamera> throw "don't reference camera.cameras";
-<<<<<<< HEAD
-
-=======
 	
 	//{ region ------ DEPRECATED VIEW FIELDS ------
 	
@@ -2408,7 +2368,6 @@ class FlxCamera extends FlxBasic
 	
 	
 	//{ endregion --- DEPRECATED VIEW FIELDS ------
->>>>>>> shade
 }
 
 enum FlxCameraFollowStyle

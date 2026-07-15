@@ -330,7 +330,7 @@ class FlxGame extends Sprite
 			_total = ticks;
 		});
 		#end
-		stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		// stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		#if FLX_RENDER_OPENGL
 		stage.addEventListener(RenderEvent.RENDER_OPENGL, onRenderOpenGL);
 		#end

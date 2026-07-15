@@ -884,9 +884,7 @@ class FlxText extends FlxSprite
 
 	override function set_graphic(Value:FlxGraphic):FlxGraphic
 	{
-		var oldGraphic:FlxGraphic = graphic;
 		var graph:FlxGraphic = super.set_graphic(Value);
-		FlxG.bitmap.removeIfNoUse(oldGraphic);
 		return graph;
 	}
 
@@ -953,19 +951,8 @@ class FlxText extends FlxSprite
 		final newWidth:Int = Math.ceil(newWidthFloat + borderWidth);
 		final newHeight:Int = Math.ceil(newHeightFloat + borderHeight);
 
-		if (oldBorderPixels != null)
-		{
-			oldBorderPixels.dispose();
-			_borderPixels = null;
-		}
-
 		if (graphic == null || oldWidth != newWidth || oldHeight != newHeight)
 		{
-			if (oldGraphic != null)
-			{
-				oldGraphic.destroy();
-			}
-
 			// Need to generate a new buffer to store the text graphic
 			final key:String = FlxG.bitmap.getUniqueKey("text");
 			makeGraphic(newWidth, newHeight, FlxColor.TRANSPARENT, false, key);
@@ -1000,7 +987,7 @@ class FlxText extends FlxSprite
 
 		if (_hasBorderAlpha)
 		{
-			_borderPixels = new BitmapData(frameWidth, frameHeight, true, FlxColor.TRANSPARENT);
+			_borderPixels = new FlxBitmap(frameWidth, frameHeight, FlxColor.TRANSPARENT);
 		}
 
 		if (textField != null && textField.text != null && textField.text != "")
