@@ -2,7 +2,7 @@ package flixel.ui;
 
 import flixel.FlxSprite;
 import flixel.ui.FlxButton;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import massive.munit.Assert;
 
 class FlxButtonTest extends FlxTest
@@ -26,7 +26,7 @@ class FlxButtonTest extends FlxTest
 	@Test
 	function testLoadGraphicStatusAnimations()
 	{
-		var graphic = new BitmapData(3, 1);
+		var graphic = new FlxBitmap(3, 1);
 		button.loadGraphic(graphic, true, 1, 1);
 
 		assertStatusAnimationsExist();
@@ -36,7 +36,7 @@ class FlxButtonTest extends FlxTest
 	function testLoadGraphicFromSpriteStatusAnimations()
 	{
 		var sprite = new FlxSprite();
-		var graphic = new BitmapData(3, 1);
+		var graphic = new FlxBitmap(3, 1);
 		sprite.loadGraphic(graphic, true, 1, 1);
 
 		button.loadGraphicFromSprite(sprite);

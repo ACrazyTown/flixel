@@ -7,7 +7,7 @@ import flixel.tile.FlxTilemap;
 import flixel.util.FlxDirectionFlags;
 import haxe.PosInfos;
 import massive.munit.Assert;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 using StringTools;
 
@@ -24,7 +24,7 @@ class FlxPathfinderTest extends FlxTest
 	@Before
 	function before()
 	{
-		final bitmapData = new BitmapData(UNIT * 16, UNIT);
+		final bitmapData = new FlxBitmap(UNIT * 16, UNIT);
 		bigMover = new BigMoverPathfinder(2, 2);
 		
 		map4x4 = new FlxTilemap();

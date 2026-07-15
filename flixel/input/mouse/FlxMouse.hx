@@ -1,8 +1,9 @@
 package flixel.input.mouse;
 
 #if FLX_MOUSE
-import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.display.Bitmap;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 import openfl.display.Stage;
 import openfl.events.Event;
@@ -27,7 +28,7 @@ import flash.ui.MouseCursorData;
 #end
 
 @:bitmap("assets/images/ui/cursor.png")
-private class GraphicCursor extends BitmapData {}
+private class GraphicCursor extends openfl.display.BitmapData {}
 
 /**
  * This class helps contain and track the mouse pointer in your game.
@@ -268,8 +269,8 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	#end
 
 	@:deprecated("_cursor is deprecated, use the new, public cursor, instead")
-	var _cursor(get, set):Bitmap;
-	var _cursorBitmapData:BitmapData;
+    var _cursor(get, set):Bitmap;
+	var _cursorBitmapData:FlxBitmap;
 	var _wheelUsed:Bool = false;
 	var _visibleWhenFocusLost:Bool = true;
 
@@ -379,7 +380,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		var bitmapWidth:Int = scaledWidth + XOffset;
 		var bitmapHeight:Int = scaledHeight + YOffset;
 
-		var cursorBitmap:BitmapData = new BitmapData(bitmapWidth, bitmapHeight, true, 0x0);
+		var cursorBitmap:FlxBitmap = new FlxBitmap(bitmapWidth, bitmapHeight, 0x0);
 		if (_matrix != null)
 		{
 			_matrix.identity();
@@ -448,13 +449,13 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 * @param   cursorData   MouseCursorData contains the bitmap, hotspot etc
 	 * @since   4.2.0
 	 */
-	public function registerSimpleNativeCursorData(name:String, cursorBitmap:BitmapData, ?hotSpot:Point):MouseCursorData
+	public function registerSimpleNativeCursorData(name:String, cursorBitmap:FlxBitmap, ?hotSpot:Point):MouseCursorData
 	{
-		var cursorVector = new Vector<BitmapData>();
+		var cursorVector = new Vector<FlxBitmap>();
 		cursorVector[0] = cursorBitmap;
 
 		if (cursorBitmap.width > 32 || cursorBitmap.height > 32)
-			throw "BitmapData files used for native cursors cannot exceed 32x32 pixels due to an OS limitation.";
+			throw "FlxBitmap files used for native cursors cannot exceed 32x32 pixels due to an OS limitation.";
 		
 		if(hotSpot == null)
 			hotSpot = new Point();
@@ -476,7 +477,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 * @param   name         The ID name used for the cursor
 	 * @param   cursorData   MouseCursorData contains the bitmap, hotspot etc
 	 */
-	public function setSimpleNativeCursorData(name:String, cursorBitmap:BitmapData):MouseCursorData
+	public function setSimpleNativeCursorData(name:String, cursorBitmap:FlxBitmap):MouseCursorData
 	{
 		var data = registerSimpleNativeCursorData(name, cursorBitmap);
 		setNativeCursor(name);
@@ -699,6 +700,8 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		// Call set_visible with the value visible has been initialized with
 		// (unless set in create() of the initial state)
 		set_visible(visible);
+
+		_visibleWhenFocusLost = visible;
 	}
 
 	/**

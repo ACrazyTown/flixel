@@ -12,7 +12,7 @@ import flixel.util.FlxSignal;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 import lime.system.Clipboard;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.Rectangle;
 import openfl.text.TextFormat;
 import openfl.utils.QName;

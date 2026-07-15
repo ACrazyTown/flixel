@@ -1,7 +1,7 @@
 package flixel.system.debug.completion;
 
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFieldAutoSize;
@@ -15,8 +15,8 @@ class CompletionListEntry extends Sprite
 	static inline var COLOR_HIGHLIGHT = 0xFF6D6D6D;
 	static inline var GUTTER = 4;
 
-	static var normalBitmapData:BitmapData;
-	static var highlightBitmapData:BitmapData;
+	static var normalBitmapData:FlxBitmap;
+	static var highlightBitmapData:FlxBitmap;
 
 	public var selected(default, set):Bool = false;
 
@@ -40,9 +40,9 @@ class CompletionListEntry extends Sprite
 	function initBitmapDatas()
 	{
 		if (normalBitmapData == null)
-			normalBitmapData = new BitmapData(WIDTH, HEIGHT, true, COLOR_NORMAL);
+			normalBitmapData = new FlxBitmap(WIDTH, HEIGHT, COLOR_NORMAL);
 		if (highlightBitmapData == null)
-			highlightBitmapData = new BitmapData(WIDTH, HEIGHT, true, COLOR_HIGHLIGHT);
+			highlightBitmapData = new FlxBitmap(WIDTH, HEIGHT, COLOR_HIGHLIGHT);
 	}
 
 	public function setItem(item:String)

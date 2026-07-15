@@ -1,6 +1,6 @@
 package flixel.system.debug;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 #if FLX_DEBUG
 import flixel.FlxG;
@@ -384,7 +384,7 @@ class FlxDebugger extends openfl.display.Sprite
 	 * @param   UpdateLayout   Whether to update the button layout.
 	 * @return  The added button.
 	 */
-	public function addButton(Position:FlxHorizontalAlign, ?Icon:BitmapData, ?UpHandler:Void->Void, ToggleMode:Bool = false,
+	public function addButton(Position:FlxHorizontalAlign, ?Icon:FlxBitmap, ?UpHandler:Void->Void, ToggleMode:Bool = false,
 			UpdateLayout:Bool = false):FlxSystemButton
 	{
 		var button = new FlxSystemButton(Icon, UpHandler, ToggleMode);
@@ -417,7 +417,7 @@ class FlxDebugger extends openfl.display.Sprite
 			resetButtonLayout();
 	}
 
-	public function addWindowToggleButton(window:Window, icon:FlxGraphicSource):Void
+	public function addWindowToggleButton(window:Window, icon:FlxGraphicAsset):Void
 	{
 		var button = addButton(RIGHT, icon.resolveBitmapData(), window.toggleVisible, true, true);
 		window.toggleButton = button;
@@ -508,9 +508,9 @@ class FlxDebugger extends openfl.display.Sprite
 	inline function openGitHub():Void
 	{
 		var url = "https://github.com/HaxeFlixel/flixel";
-		if (FlxVersion.sha != "")
+		if (FlxG.VERSION.sha != "")
 		{
-			url += '/commit/${FlxVersion.sha}';
+			url += '/commit/${FlxG.VERSION.sha}';
 		}
 		FlxG.openURL(url);
 	}

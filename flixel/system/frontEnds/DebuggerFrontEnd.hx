@@ -10,7 +10,7 @@ import flixel.system.debug.watch.Tracker;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxHorizontalAlign;
 import flixel.util.FlxSignal;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 using flixel.util.FlxArrayUtil;
 using flixel.util.FlxStringUtil;
@@ -100,7 +100,7 @@ class DebuggerFrontEnd
 	 * @param   UpdateLayout   Whether to update the button layout.
 	 * @return  The added button.
 	 */
-	public function addButton(Alignment:FlxHorizontalAlign, Icon:BitmapData, UpHandler:Void->Void, ToggleMode:Bool = false,
+	public function addButton(Alignment:FlxHorizontalAlign, Icon:FlxBitmap, UpHandler:Void->Void, ToggleMode:Bool = false,
 			UpdateLayout:Bool = true):FlxSystemButton
 	{
 		#if FLX_DEBUG

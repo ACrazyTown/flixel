@@ -1,16 +1,16 @@
 package flixel.tile;
 
-import openfl.display.BitmapData;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.math.FlxMatrix;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
+import openfl.geom.Point;
+import openfl.geom.Rectangle;
 
 /**
  * A helper object to keep tilemap drawing performance decent across the new multi-camera system.
@@ -55,15 +55,15 @@ class FlxTilemapBuffer implements IFlxDestroyable
 
 	/**
 	 * Whether or not the coordinates should be rounded during draw(), true by default (recommended for pixel art).
-	 * Only affects tilesheet rendering and rendering using BitmapData.draw() in blitting.
+	 * Only affects tilesheet rendering and rendering using FlxBitmap.draw() in blitting.
 	 * (copyPixels() only renders on whole pixels by nature). Causes draw() to be used if false, which is more expensive.
 	 */
 	public var pixelPerfectRender:Null<Bool>;
 
 	/**
-	 * The actual buffer BitmapData. (Only used if FlxG.renderBlit == true)
+	 * The actual buffer FlxBitmap. (Only used with the blitting renderer)
 	 */
-	public var pixels(default, null):BitmapData;
+	public var pixels(default, null):FlxBitmap;
 
 	public var blend:BlendMode;
 	public var antialiasing:Bool = false;
@@ -117,14 +117,14 @@ class FlxTilemapBuffer implements IFlxDestroyable
 		updateColumns(tileWidth, widthInTiles, scaleX, camera);
 		updateRows(tileHeight, heightInTiles, scaleY, camera);
 
-		if (FlxG.renderBlit)
+		if (FlxG.renderer.blit)
 		{
 			final newWidth = Std.int(columns * tileWidth);
 			final newHeight = Std.int(rows * tileHeight);
 			
 			if (pixels == null)
 			{
-				pixels = new BitmapData(newWidth, newHeight, true, 0);
+				pixels = new FlxBitmap(newWidth, newHeight, 0);
 				_flashRect = new Rectangle(0, 0, newWidth, newHeight);
 				_matrix = new FlxMatrix();
 				dirty = true;
@@ -132,7 +132,7 @@ class FlxTilemapBuffer implements IFlxDestroyable
 			else if (pixels.width != newWidth || pixels.height != newHeight)
 			{
 				FlxDestroyUtil.dispose(pixels);
-				pixels = new BitmapData(newWidth, newHeight, true, 0);
+				pixels = new FlxBitmap(newWidth, newHeight, 0);
 				_flashRect.setTo(0, 0, newWidth, newHeight);
 				dirty = true;
 			}
@@ -144,7 +144,7 @@ class FlxTilemapBuffer implements IFlxDestroyable
 	 */
 	public function destroy():Void
 	{
-		if (FlxG.renderBlit)
+		if (FlxG.renderer.blit)
 		{
 			pixels = FlxDestroyUtil.dispose(pixels);
 			blend = null;
@@ -161,7 +161,7 @@ class FlxTilemapBuffer implements IFlxDestroyable
 	 */
 	public function fill(color = FlxColor.TRANSPARENT):Void
 	{
-		if (FlxG.renderBlit)
+		if (FlxG.renderer.blit)
 		{
 			pixels.fillRect(_flashRect, color);
 		}
@@ -180,17 +180,17 @@ class FlxTilemapBuffer implements IFlxDestroyable
 			flashPoint.x = Math.floor(flashPoint.x);
 			flashPoint.y = Math.floor(flashPoint.y);
 		}
-		
+
 		if (isPixelPerfectRender(camera) && (scaleX == 1.0 && scaleY == 1.0) && blend == null)
 		{
-			camera.copyPixels(pixels, _flashRect, flashPoint, null, null, true);
+			camera.view.copyPixels(pixels, _flashRect, flashPoint, null, null, true);
 		}
 		else
 		{
 			_matrix.identity();
 			_matrix.scale(scaleX, scaleY);
 			_matrix.translate(flashPoint.x, flashPoint.y);
-			camera.drawPixels(pixels, _matrix, null, blend, antialiasing);
+			camera.view.drawPixels(pixels, _matrix, null, blend, antialiasing);
 		}
 	}
 	

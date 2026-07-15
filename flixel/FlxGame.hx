@@ -1,7 +1,7 @@
 package flixel;
 
-import flixel.graphics.tile.FlxDrawBaseItem;
 import flixel.system.FlxSplash;
+import flixel.system.render.FlxRenderer;
 import flixel.util.FlxArrayUtil;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.typeLimit.NextState;
@@ -14,6 +14,9 @@ import openfl.events.Event;
 import openfl.filters.BitmapFilter;
 #if desktop
 import openfl.events.FocusEvent;
+#end
+#if FLX_RENDER_OPENGL
+import openfl.events.RenderEvent;
 #end
 #if FLX_DEBUG
 import flixel.system.debug.FlxDebugger;
@@ -131,7 +134,7 @@ class FlxGame extends Sprite
 	 * Mouse cursor.
 	 */
 	@:allow(flixel.FlxG)
-	@:allow(flixel.system.frontEnds.CameraFrontEnd)
+	@:allow(flixel.system.render)
 	var _inputContainer:Sprite;
 
 	#if FLX_SOUND_TRAY
@@ -327,6 +330,10 @@ class FlxGame extends Sprite
 			_total = ticks;
 		});
 		#end
+		stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		#if FLX_RENDER_OPENGL
+		stage.addEventListener(RenderEvent.RENDER_OPENGL, onRenderOpenGL);
+		#end
 
 		// We need to listen for resize event which means new context
 		// it means that we need to recreate BitmapDatas of dumped tilesheets
@@ -468,7 +475,10 @@ class FlxGame extends Sprite
 					// to game objects (e.g. moving things around).
 					if (debugger.interaction.isActive())
 					{
+						#if !FLX_RENDER_OPENGL
+						// TODO ant: properly seperate update and draw so we don't have to wrap this?
 						draw();
+						#end
 					}
 					#end
 					return;
@@ -481,7 +491,10 @@ class FlxGame extends Sprite
 			FlxBasic.visibleCount = 0;
 			#end
 
+			#if !FLX_RENDER_OPENGL
+			// TODO ant: properly seperate update and draw so we don't have to wrap this?
 			draw();
+			#end
 
 			#if FLX_DEBUG
 			debugger.stats.visibleObjects(FlxBasic.visibleCount);
@@ -490,8 +503,22 @@ class FlxGame extends Sprite
 		}
 		#if !flash
 		super.__enterFrame(deltaTime);
+
+		#if FLX_RENDER_OPENGL
+		// Force a redraw every frame
+		invalidate();
+		#end
 		#end
 	}
+
+	#if FLX_RENDER_OPENGL
+	function onRenderOpenGL(_):Void
+	{
+		// Draw the game when we're in a safe spot to mess with the OpenGL context
+		cast (FlxG.renderer, flixel.system.render.gl.FlxGLRenderer).context.invalidate();
+		draw();
+	}
+	#end
 
 	/**
 	 * Internal method to create a new instance of `_initialState` and reset the game.
@@ -770,10 +797,7 @@ class FlxGame extends Sprite
 
 		FlxG.signals.preDraw.dispatch();
 
-		if (FlxG.renderTile)
-			FlxDrawBaseItem.drawCalls = 0;
-
-		FlxG.cameras.lock();
+		FlxG.renderer.startFrame();
 
 		if (FlxG.plugins.drawOnTop)
 		{
@@ -786,16 +810,14 @@ class FlxGame extends Sprite
 			_state.draw();
 		}
 
-		if (FlxG.renderTile)
-		{
-			FlxG.cameras.render();
+		FlxG.renderer.endFrame();
 
+		if (FlxG.renderer.tile)
+		{
 			#if FLX_DEBUG
-			debugger.stats.drawCalls(FlxDrawBaseItem.drawCalls);
+			debugger.stats.drawCalls(FlxG.renderer.totalDrawCalls);
 			#end
 		}
-
-		FlxG.cameras.unlock();
 
 		FlxG.signals.postDraw.dispatch();
 

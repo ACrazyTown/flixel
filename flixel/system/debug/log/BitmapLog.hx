@@ -10,7 +10,7 @@ import flixel.util.FlxSignal;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxStringUtil;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Graphics;
 import openfl.display.LineScaleMode;
 import openfl.display.Shape;
@@ -23,7 +23,7 @@ import openfl.text.TextField;
 using flixel.util.FlxBitmapDataUtil;
 
 /**
- * An output window that lets you paste BitmapData in the debugger overlay.
+ * An output window that lets you paste FlxBitmap in the debugger overlay.
  */
 class BitmapLog extends Window
 {
@@ -46,7 +46,7 @@ class BitmapLog extends Window
 		minSize.x = 165;
 		minSize.y = Window.HEADER_HEIGHT * 2 + 1;
 		
-		canvas = new Bitmap(new BitmapData(Std.int(width), Std.int(height - 15), true, FlxColor.TRANSPARENT));
+		canvas = new Bitmap(new FlxBitmap(Std.int(width), Std.int(height - 15), FlxColor.TRANSPARENT));
 		canvas.x = 0;
 		canvas.y = 15;
 		addChild(canvas);
@@ -151,7 +151,7 @@ class BitmapLog extends Window
 		
 		if (canvasWidth > 0 && canvasHeight > 0)
 		{
-			canvas.bitmapData = new BitmapData(canvasWidth, canvasHeight, true, FlxColor.TRANSPARENT);
+			canvas.bitmapData = new FlxBitmap(canvasWidth, canvasHeight, FlxColor.TRANSPARENT);
 			drawCanvas();
 		}
 		
@@ -165,10 +165,10 @@ class BitmapLog extends Window
 	inline function resetSettings()
 	{
 		zoom = 1;
-		canvasOffset.set();
+		canvasOffset.zero();
 	}
 	
-	function indexOf(bitmap:BitmapData)
+	function indexOf(bitmap:FlxBitmap)
 	{
 		for (i => entry in entries)
 		{
@@ -178,7 +178,7 @@ class BitmapLog extends Window
 		return -1;
 	}
 	
-	function entryOf(bitmap:BitmapData):Null<BitmapLogEntry>
+	function entryOf(bitmap:FlxBitmap):Null<BitmapLogEntry>
 	{
 		for (entry in entries)
 		{
@@ -188,7 +188,7 @@ class BitmapLog extends Window
 		return null;
 	}
 	
-	public function has(bitmap:BitmapData)
+	public function has(bitmap:FlxBitmap)
 	{
 		for (i => entry in entries)
 		{
@@ -199,9 +199,9 @@ class BitmapLog extends Window
 	}
 	
 	/**
-	 * Add a BitmapData to the log
+	 * Add a FlxBitmap to the log
 	 */
-	public function add(bitmap:BitmapData, name:String = ""):Bool
+	public function add(bitmap:FlxBitmap, name:String = ""):Bool
 	{
 		if (bitmap == null)
 			return false;
@@ -217,7 +217,7 @@ class BitmapLog extends Window
 		return true;
 	}
 	
-	public function remove(bitmap:BitmapData)
+	public function remove(bitmap:FlxBitmap)
 	{
 		final index = indexOf(bitmap);
 		if (index != -1)
@@ -248,6 +248,7 @@ class BitmapLog extends Window
 	public function clear():Void
 	{
 		entries.resize(0);
+		index = -1;
 		drawCanvas();
 	}
 	
@@ -319,7 +320,7 @@ class BitmapLog extends Window
 		return index;
 	}
 	
-	function drawBoundingBox(bitmap:BitmapData):Void
+	function drawBoundingBox(bitmap:FlxBitmap):Void
 	{
 		var gfx:Graphics = FlxSpriteUtil.flashGfx;
 		gfx.clear();
@@ -331,7 +332,7 @@ class BitmapLog extends Window
 
 typedef BitmapLogEntry =
 {
-	bitmap:BitmapData,
+	bitmap:FlxBitmap,
 	name:String
 }
 

@@ -6,7 +6,7 @@ import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import openfl.Lib;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
@@ -72,7 +72,7 @@ class FlxSoundTray extends Sprite
 		visible = false;
 		scaleX = _defaultScale;
 		scaleY = _defaultScale;
-		_bg = new Bitmap(new BitmapData(_minWidth, 30, true, 0x7F000000));
+		_bg = new Bitmap(new FlxBitmap(_minWidth, 30, 0x7F000000));
 		screenCenter();
 		addChild(_bg);
 
@@ -102,7 +102,7 @@ class FlxSoundTray extends Sprite
 		var tmp:Bitmap;
 		for (i in 0...10)
 		{
-			tmp = new Bitmap(new BitmapData(4, i + 1, false, FlxColor.WHITE));
+			tmp = new Bitmap(new FlxBitmap(4, i + 1, FlxColor.WHITE));
 			addChild(tmp);
 			_bars.push(tmp);
 		}
@@ -154,7 +154,7 @@ class FlxSoundTray extends Sprite
 	public function showAnim(volume:Float, ?sound:FlxSoundAsset, duration = 1.0, label = "VOLUME")
 	{
 		if (sound != null)
-			FlxG.sound.play(FlxG.assets.getSoundAddExt(sound));
+			FlxG.sound.play(sound.resolveSound(true, true));
 		
 		_timer = duration;
 		y = 0;

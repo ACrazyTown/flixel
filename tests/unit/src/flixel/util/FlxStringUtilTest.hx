@@ -1,15 +1,21 @@
 package flixel.util;
 
-import openfl.display.BitmapData;
 import flixel.system.debug.FlxDebugger.FlxDebuggerLayout;
 import massive.munit.Assert;
+import flixel.graphics.FlxBitmap;
 
 class FlxStringUtilTest
 {
+	@Before
+	function before()
+	{
+		FlxStringUtil.isBrowserManipulatingImages = false;
+	}
+	
 	@Test
 	function testBitmapToCSVSimple()
 	{
-		var bitmapData = new BitmapData(3, 3);
+		var bitmapData = new FlxBitmap(3, 3);
 		bitmapData.setPixel32(0, 0, FlxColor.BLACK);
 		bitmapData.setPixel32(1, 1, FlxColor.BLACK);
 		bitmapData.setPixel32(2, 2, FlxColor.BLACK);
@@ -23,7 +29,7 @@ class FlxStringUtilTest
 	@Test
 	function testBitmapToCSVInverted()
 	{
-		var bitmapData = new BitmapData(3, 3, true, FlxColor.BLACK);
+		var bitmapData = new FlxBitmap(3, 3, FlxColor.BLACK);
 		bitmapData.setPixel32(0, 0, FlxColor.WHITE);
 		bitmapData.setPixel32(1, 1, FlxColor.WHITE);
 		bitmapData.setPixel32(2, 2, FlxColor.WHITE);
@@ -37,7 +43,7 @@ class FlxStringUtilTest
 	@Test
 	function testBitmapToCSVWithScale()
 	{
-		var bitmapData = new BitmapData(2, 2);
+		var bitmapData = new FlxBitmap(2, 2);
 		bitmapData.setPixel32(0, 0, FlxColor.BLACK);
 		bitmapData.setPixel32(1, 1, FlxColor.BLACK);
 
@@ -50,19 +56,100 @@ class FlxStringUtilTest
 	@Test
 	function testBitmapToCSVWithColorMap()
 	{
-		var bitmapData = new BitmapData(3, 3);
+		var bitmapData = new FlxBitmap(3, 3);
 		bitmapData.setPixel32(0, 0, FlxColor.BLACK);
 		bitmapData.setPixel32(1, 1, FlxColor.RED);
+		bitmapData.setPixel32(2, 1, 0x80ff0000); // ignore alpha
 		bitmapData.setPixel32(2, 2, FlxColor.YELLOW);
 
-		var expected = "1, 0, 0\n" + "0, 2, 0\n" + "0, 0, 3";
+		final expected = "1, 0, 0\n" + "0, 2, 2\n" + "0, 0, 3";
 
-		var colorMap = [FlxColor.WHITE, FlxColor.BLACK, FlxColor.RED, FlxColor.YELLOW];
-		var actual = FlxStringUtil.bitmapToCSV(bitmapData, false, 1, colorMap);
+		final colorMap = [FlxColor.WHITE, FlxColor.BLACK, FlxColor.RED, FlxColor.YELLOW];
+		final actual = FlxStringUtil.bitmapToCSV(bitmapData, 1, colorMap);
 
 		Assert.areEqual(expected, actual);
 	}
 
+	@Test
+	function testBitmap32ToCSV()
+	{
+		final bitmapData = new FlxBitmap(3, 3);
+		bitmapData.setPixel32(0, 0, FlxColor.BLACK);
+		bitmapData.setPixel32(1, 1, FlxColor.RED);
+		bitmapData.setPixel32(2, 1, 0x80ff0000); // honor alpha
+		bitmapData.setPixel32(2, 2, FlxColor.YELLOW);
+		
+		final expected = '1, 0, 0\n0, 2, 4\n0, 0, 3';
+		final colorMap = [FlxColor.WHITE, FlxColor.BLACK, FlxColor.RED, FlxColor.YELLOW, 0x80ff0000];
+		final actual = FlxStringUtil.bitmap32ToCSV(bitmapData, 1, colorMap);
+
+		Assert.areEqual(expected, actual);
+	}
+
+	@Test
+	@:haxe.warning("-WDeprecated")
+	function testBitmapToCSVOverloads()
+	{
+		final bitmapData = new FlxBitmap(3, 3);
+		final colorMap = [FlxColor.WHITE, FlxColor.BLACK, FlxColor.RED, FlxColor.YELLOW];
+		FlxStringUtil.bitmapToCSV(bitmapData, false, 1, colorMap); // deprecated
+		FlxStringUtil.bitmapToCSV(bitmapData, false, 1);
+		FlxStringUtil.bitmapToCSV(bitmapData, false);
+		FlxStringUtil.bitmapToCSV(bitmapData, 1, colorMap);
+		FlxStringUtil.bitmap32ToCSV(bitmapData, 1, colorMap);
+		#if !flash
+		FlxStringUtil.bitmapToCSV(bitmapData, 1);
+		FlxStringUtil.bitmapToCSV(bitmapData, colorMap);
+		FlxStringUtil.bitmap32ToCSV(bitmapData, colorMap);
+		#end
+	}
+	
+	@Test // https://github.com/HaxeFlixel/flixel/issues/3541
+	function testBitmapToCSVAntiFarbling()
+	{
+		final bitManips = [0x00000000, 0x01000000, 0x00010000, 0x00000100, 0x00000001];
+		final columns = bitManips.length;
+		final bitmapData = new FlxBitmap(columns, 2);
+		for (i in 0...columns * bitmapData.height)
+		{
+			final column = i % columns;
+			final row = Std.int(i / columns);
+			final color = (i < columns ? 0xFF000000 : 0xFFffffff) ^ bitManips[column];
+			bitmapData.setPixel32(column, row, color);
+		}
+		
+		// without farbling
+		var errorCount = 0;
+		function onError(data, ?pos) errorCount++;
+		
+		FlxG.log.styles.error.onLog.add(onError);
+		FlxStringUtil.isBrowserManipulatingImages = false;
+		final expected = '0, 0, 0, 0, 0\n1, 0, 0, 0, 0';
+		final actual = FlxStringUtil.bitmap32ToCSV(bitmapData, 1, [FlxColor.BLACK, FlxColor.WHITE]);
+		Assert.areEqual(expected, actual);
+		Assert.areEqual(8, errorCount);
+		FlxG.log.styles.error.onLog.remove(onError);
+		
+		// with farbling
+		var noticeCount = 0;
+		function onNotice(_, ?_) noticeCount++;
+		
+		FlxG.log.styles.notice.onLog.add(onNotice);
+		FlxStringUtil.isBrowserManipulatingImages = true;
+		
+		final expected = '0, 0, 0, 0, 0\n1, 1, 1, 1, 1';
+		final actual = FlxStringUtil.bitmap32ToCSV(bitmapData, 1, [FlxColor.BLACK, FlxColor.WHITE]);
+		Assert.areEqual(expected, actual);
+		Assert.areEqual(8, noticeCount);
+		FlxG.log.styles.notice.onLog.remove(onNotice);
+	}
+
+	@Test
+	function testArrayToCSV()
+	{
+		Assert.areEqual("0, 3, 4\n5, 0, 7", FlxStringUtil.arrayToCSV([0, 3, 4, 5, 0, 7], 3));
+	}
+	
 	@Test
 	function testFormatMoney()
 	{

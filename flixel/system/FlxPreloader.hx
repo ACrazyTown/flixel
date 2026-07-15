@@ -1,7 +1,7 @@
 package flixel.system;
 
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.display.Sprite;
 import openfl.Lib;
@@ -10,10 +10,10 @@ import openfl.text.TextFormat;
 import flixel.FlxG;
 
 @:keep @:bitmap("assets/images/preloader/light.png")
-private class GraphicLogoLight extends BitmapData {}
+private class GraphicLogoLight extends openfl.display.BitmapData {}
 
 @:keep @:bitmap("assets/images/preloader/corners.png")
-private class GraphicLogoCorners extends BitmapData {}
+private class GraphicLogoCorners extends openfl.display.BitmapData {}
 
 /**
  * This is the Default HaxeFlixel Themed Preloader
@@ -53,7 +53,7 @@ class FlxPreloader extends FlxBasePreloader
 		addChild(_buffer);
 		_width = Std.int(Lib.current.stage.stageWidth / _buffer.scaleX);
 		_height = Std.int(Lib.current.stage.stageHeight / _buffer.scaleY);
-		_buffer.addChild(new Bitmap(new BitmapData(_width, _height, false, 0x00345e)));
+		_buffer.addChild(new Bitmap(new FlxBitmap(_width, _height, 0x00345e)));
 
 		var logoLight = createBitmap(GraphicLogoLight, function(logoLight:Bitmap)
 		{
@@ -62,7 +62,7 @@ class FlxPreloader extends FlxBasePreloader
 		});
 		logoLight.smoothing = true;
 		_buffer.addChild(logoLight);
-		_bmpBar = new Bitmap(new BitmapData(1, 7, false, 0x5f6aff));
+		_bmpBar = new Bitmap(new FlxBitmap(1, 7, 0x5f6aff));
 		_bmpBar.x = 4;
 		_bmpBar.y = _height - 11;
 		_buffer.addChild(_bmpBar);
@@ -98,7 +98,7 @@ class FlxPreloader extends FlxBasePreloader
 		corners.smoothing = true;
 		_buffer.addChild(corners);
 
-		var bitmap = new Bitmap(new BitmapData(_width, _height, false, 0xffffff));
+		var bitmap = new Bitmap(new FlxBitmap(_width, _height, 0xffffff));
 		var i:Int = 0;
 		var j:Int = 0;
 		while (i < _height)

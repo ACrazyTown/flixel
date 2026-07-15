@@ -1,5 +1,6 @@
 package flixel.system.frontEnds;
 
+import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxPoint;
@@ -7,10 +8,8 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import openfl.Assets;
-import openfl.display.BitmapData;
-#if FLX_OPENGL_AVAILABLE
-import lime.graphics.opengl.GL;
-#end
+import flixel.graphics.FlxBitmap;
+import flixel.graphics.textures.FlxTexture;
 
 /**
  * Internal storage system to prevent graphics from being used repeatedly in memory.
@@ -19,7 +18,6 @@ import lime.graphics.opengl.GL;
  */
 class BitmapFrontEnd
 {
-	#if FLX_OPENGL_AVAILABLE
 	/**
 	 * Returns the maximum allowed width and height (in pixels) for a texture.
 	 * This value is only available on hardware-accelerated targets that use OpenGL.
@@ -27,12 +25,12 @@ class BitmapFrontEnd
 	 * 
 	 * @see https://opengl.gpuinfo.org/displaycapability.php?name=GL_MAX_TEXTURE_SIZE
 	 */
+	@:deprecated("maxTextureSize is deprecated, use FlxG.renderer.maxTextureSize instead.")
 	public var maxTextureSize(get, never):Int;
-	#end
 
 	/**
 	 * Helper FlxFrame object. Containing only one frame.
-	 * Useful for drawing colored rectangles of all sizes in FlxG.renderTile mode.
+	 * Useful for drawing colored rectangles of all sizes when not using the blitting renderer.
 	 */
 	public var whitePixel(get, never):FlxFrame;
 
@@ -77,7 +75,7 @@ class BitmapFrontEnd
 	 * @param   width   How wide the rectangle should be.
 	 * @param   height  How high the rectangle should be.
 	 * @param   color   What color the rectangle should be (0xAARRGGBB).
-	 * @param   unique  Ensures that the bitmap data uses a new slot in the cache.
+	 * @param   unique  Ensures that the graphic uses a new slot in the cache.
 	 * @param   key     Force the cache to use a specific Key to index the bitmap.
 	 * @return  The created graphic.
 	 */
@@ -89,13 +87,17 @@ class BitmapFrontEnd
 	/**
 	 * Loads a bitmap from a file, clones it if necessary and caches it.
 	 * @param   graphic  Optional FlxGraphics object to create FlxGraphic from.
-	 * @param   unique   Ensures that the bitmap data uses a new slot in the cache.
+	 * @param   unique   Ensures that the graphic uses a new slot in the cache.
 	 * @param   key      Force the cache to use a specific Key to index the bitmap.
 	 * @return  The FlxGraphic we just created.
 	 */
 	public function add(graphic:FlxGraphicAsset, unique = false, ?key:String):FlxGraphic
 	{
-		if ((graphic is FlxGraphic))
+		if ((graphic is FlxTexture))
+		{
+			return FlxGraphic.fromTexture(cast graphic, unique, key);
+		}
+		else if ((graphic is FlxGraphic))
 		{
 			return FlxGraphic.fromGraphic(cast graphic, unique, key);
 		}
@@ -140,26 +142,29 @@ class BitmapFrontEnd
 	}
 
 	/**
-	 * Gets a key from a cached BitmapData.
+	 * Gets a key from a cached FlxBitmap.
 	 *
-	 * @param   bmd  BitmapData to find in the cache.
-	 * @return  The BitmapData's key or null if there isn't such BitmapData in cache.
+	 * @param   bmd  FlxBitmap to find in the cache.
+	 * @return  The FlxBitmap's key or null if there isn't such FlxBitmap in cache.
 	 */
-	public function findKeyForBitmap(bmd:BitmapData):String
+	@:access(flixel.graphics)
+	public function findKeyForBitmap(bmd:FlxBitmap):String
 	{
+		#if FLX_RENDER_DRAWQUADS
 		for (key in _cache.keys())
 		{
 			var obj = _cache.get(key);
-			if (obj != null && obj.bitmap == bmd)
+			if (obj != null && obj.texture._handle == bmd)
 				return key;
 		}
+		#end
 		return null;
 	}
 
 	/**
 	 * Helper method for getting cache key for FlxGraphic objects created from the class.
 	 *
-	 * @param   source  BitmapData source class.
+	 * @param   source  FlxBitmap source class.
 	 * @return  Full name for provided class.
 	 */
 	public inline function getKeyForClass(source:Class<Dynamic>):String
@@ -349,24 +354,16 @@ class BitmapFrontEnd
 		}
 	}
 
-	#if FLX_OPENGL_AVAILABLE
-	static var _maxTextureSize = -1;
-
-	@:allow(flixel.FlxG)
-	function get_maxTextureSize():Int
+	inline function get_maxTextureSize():Int
 	{
-		if (_maxTextureSize < 0)
-			_maxTextureSize = FlxG.renderTile ? cast GL.getParameter(GL.MAX_TEXTURE_SIZE) : 0;
-		
-		return _maxTextureSize;
+		return FlxG.renderer.maxTextureSize;
 	}
-	#end
 
 	function get_whitePixel():FlxFrame
 	{
 		if (_whitePixel == null)
 		{
-			var bd = new BitmapData(10, 10, true, FlxColor.WHITE);
+			var bd = new FlxBitmap(10, 10, FlxColor.WHITE);
 			var graphic:FlxGraphic = FlxG.bitmap.add(bd, true, "whitePixels");
 			graphic.persist = true;
 			_whitePixel = graphic.imageFrame.frame;

@@ -5,6 +5,8 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.math.FlxVelocity;
 import flixel.path.FlxPath;
+import flixel.system.render.FlxCameraView;
+import flixel.system.render.FlxCanvas;
 import flixel.tile.FlxBaseTilemap;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
@@ -1055,6 +1057,67 @@ class FlxObject extends FlxBasic
 	}
 
 	/**
+	 * Returns the view position of this object
+	 *
+	 * @param   result  Optional arg for the returning poin
+	 * @param   camera  The desired "view" coordinate space. If `null`, `getDefaultCamera()` is used
+	 * @return  The view position of this objects
+	 * @since 6.2.0
+	 */
+	public function getViewPosition(?camera:FlxCamera, ?result:FlxPoint):FlxPoint
+	{
+		if (result == null)
+			result = FlxPoint.get();
+		
+		if (camera == null)
+			camera = getDefaultCamera();
+		
+		return result.set(getViewXHelper(camera), getViewYHelper(camera));
+	}
+	
+	/**
+	 * Returns the view position of this object
+	 *
+	 * @param   camera  The desired "view" coordinate space. If `null`, `getDefaultCamera()` is used
+	 * @return  The view position of this object
+	 * @since 6.2.0
+	 */
+	public function getViewX(?camera:FlxCamera)
+	{
+		if (camera == null)
+			camera = getDefaultCamera();
+		
+		return getViewXHelper(camera);
+	}
+	
+	inline function getViewXHelper(camera:FlxCamera)
+	{
+		final x = pixelPerfectPosition ? Math.floor(this.x) : this.x;
+		return (x - (camera.scroll.x * scrollFactor.x) - camera.viewMarginX) * camera.zoom;
+	}
+	
+	/**
+	 * Returns the view position of this object
+	 *
+	 * @param   camera  The desired "view" coordinate space. If `null`, `getDefaultCamera()` is used
+	 * @return  The view position of this object
+	 * @since 6.2.0
+	 */
+	public function getViewY(?camera:FlxCamera)
+	{
+		if (camera == null)
+			camera = getDefaultCamera();
+		
+		return getViewYHelper(camera);
+	}
+	
+	inline function getViewYHelper(camera:FlxCamera)
+	{
+		final y = pixelPerfectPosition ? Math.floor(this.y) : this.y;
+		return (y - (camera.scroll.y * scrollFactor.y) - camera.viewMarginY) * camera.zoom;
+	}
+	
+	/**
 	 * Returns the world position of this object.
 	 * 
 	 * @param   result  Optional arg for the returning point.
@@ -1102,7 +1165,7 @@ class FlxObject extends FlxBasic
 		wasTouching = FlxDirectionFlags.NONE;
 		setPosition(x, y);
 		last.set(this.x, this.y);
-		velocity.set();
+		velocity.zero();
 		revive();
 	}
 
@@ -1245,33 +1308,39 @@ class FlxObject extends FlxBasic
 	{
 		if (!camera.visible || !camera.exists || !isOnScreen(camera))
 			return;
-
+		
 		final rect = getBoundingBox(camera);
-		if (FlxG.renderTile)
+		
+		// TODO: Remove and handle this in the view via drawDebugRect
+		if (FlxG.renderer.tile)
 		{
-			final PAD = 2;
 			final view = camera.getViewMarginRect();
-			view.left -= PAD;
-			view.top -= PAD;
-			view.right += PAD;
-			view.bottom += PAD;
+			view.pad(2);
 			rect.clipTo(view);
 			view.put();
 		}
 		
 		if (rect.width > 0 && rect.height > 0)
 		{
-			final gfx = beginDrawDebug(camera);
-			drawDebugBoundingBox(gfx, rect, allowCollisions, immovable);
-			endDrawDebug(camera);
+			camera.view.beginDrawDebug();
+			drawDebugBoundingBoxTo(camera.view.getDebugBuffer(), rect);
+			camera.view.endDrawDebug();
 		}
 	}
 
+	// TODO: throw warning on overrides
+	@:deprecated("drawDebugBoundingBox is deprecated, use drawDebugBoundingBoxTo instead") // 6.2.0
 	function drawDebugBoundingBox(gfx:Graphics, rect:FlxRect, allowCollisions:FlxDirectionFlags, partial:Bool)
 	{
 		// Find the color to use
 		final color = getDebugBoundingBoxColor(allowCollisions);
 		drawDebugBoundingBoxColor(gfx, rect, color);
+	}
+	
+	@:haxe.warning("-WDeprecated")
+	function drawDebugBoundingBoxTo(buffer:FlxCanvas, rect:FlxRect)
+	{
+		drawDebugBoundingBox(buffer, rect, allowCollisions, immovable);
 	}
 	
 	function getDebugBoundingBoxColor(allowCollisions:FlxDirectionFlags)
@@ -1289,30 +1358,31 @@ class FlxObject extends FlxBasic
 		
 	}
 	
+	// TODO: throw warning on overrides
+	@:deprecated("beginDrawDebug(gfx) is deprecated, drawDebugBoundingBoxTo instead")
 	function drawDebugBoundingBoxColor(gfx:Graphics, rect:FlxRect, color:FlxColor)
 	{
-		// fill static graphics object with square shape
-		gfx.lineStyle(1, color, 0.75, false, null, null, MITER, 255);
-		gfx.drawRect(rect.x + 0.5, rect.y + 0.5, rect.width - 1.0, rect.height - 1.0);
+		final buffer:FlxCanvas = gfx;
+		buffer.drawRect(rect.x + 0.5, rect.y + 0.5, rect.width - 1.0, rect.height - 1.0, color, 1);
 	}
-
+	
+	@:haxe.warning("-WDeprecated")
+	function drawDebugBoundingBoxColorTo(view:FlxCameraView, bounds:FlxRect, color:FlxColor)
+	{
+		drawDebugBoundingBoxColor(view.getDebugBuffer(), bounds, color);
+	}
+	
+	@:deprecated("beginDrawDebug(camera) is deprecated, use camera.view.beginDrawDebug() instead")
 	inline function beginDrawDebug(camera:FlxCamera):Graphics
 	{
-		if (FlxG.renderBlit)
-		{
-			FlxSpriteUtil.flashGfx.clear();
-			return FlxSpriteUtil.flashGfx;
-		}
-		else
-		{
-			return camera.debugLayer.graphics;
-		}
+		camera.view.beginDrawDebug();
+		return camera.view.getDebugBuffer();
 	}
 
+	@:deprecated("endDrawDebug(camera) is deprecated, use camera.view.endDrawDebug() instead")
 	inline function endDrawDebug(camera:FlxCamera)
 	{
-		if (FlxG.renderBlit)
-			camera.buffer.draw(FlxSpriteUtil.flashGfxSprite);
+		camera.view.endDrawDebug();
 	}
 	#end
 

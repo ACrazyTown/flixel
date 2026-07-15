@@ -1,9 +1,9 @@
 package flixel.util;
 
-import openfl.display.BitmapData;
+import flixel.util.FlxPool.IFlxPooled;
+import flixel.graphics.FlxBitmap;
 import openfl.display.DisplayObject;
 import openfl.display.DisplayObjectContainer;
-import flixel.util.FlxPool.IFlxPooled;
 
 class FlxDestroyUtil
 {
@@ -40,17 +40,31 @@ class FlxDestroyUtil
 	}
 
 	/**
-	 * Checks if an object is not null before putting it back into the pool, always returns null.
+	 * Checks if an object is not `null` before putting it back into the pool, always returns `null`
 	 *
-	 * @param	object	An IFlxPooled object that will be put back into the pool if it's not null
-	 * @return	null
+	 * @param   object  An `IFlxPooled` object that will be put back into the pool if it's not `null`
+	 * @return  `null`
 	 */
 	public static function put<T:IFlxPooled>(object:IFlxPooled):T
 	{
 		if (object != null)
-		{
 			object.put();
-		}
+		
+		return null;
+	}
+
+	/**
+	 * Checks if an object is not null before calling `putWeak`, always returns `null`
+	 *
+	 * @param   object  An `IFlxPooled` object that will be put back into the pool if it's not `null`
+	 * @return  `null`
+	 * @since 6.2.0
+	 */
+	public static function putWeak<T:IFlxPooled>(object:IFlxPooled):T
+	{
+		if (object != null)
+			object.putWeak();
+		
 		return null;
 	}
 
@@ -74,12 +88,12 @@ class FlxDestroyUtil
 
 	#if !macro
 	/**
-	 * Checks if a BitmapData object is not null before calling dispose() on it, always returns null.
+	 * Checks if a FlxBitmap object is not null before calling dispose() on it, always returns null.
 	 *
-	 * @param	Bitmap	A BitmapData to be disposed if not null
+	 * @param	Bitmap	A FlxBitmap to be disposed if not null
 	 * @return 	null
 	 */
-	public static function dispose(bitmapData:BitmapData):BitmapData
+	public static function dispose(bitmapData:FlxBitmap):FlxBitmap
 	{
 		if (bitmapData != null)
 		{
@@ -89,9 +103,9 @@ class FlxDestroyUtil
 	}
 
 	/**
-	 * Checks if a BitmapData object is not null and it's size isn't equal to specified one before calling dispose() on it.
+	 * Checks if a FlxBitmap object is not null and it's size isn't equal to specified one before calling dispose() on it.
 	 */
-	public static function disposeIfNotEqual(bitmapData:BitmapData, width:Float, height:Float):BitmapData
+	public static function disposeIfNotEqual(bitmapData:FlxBitmap, width:Float, height:Float):FlxBitmap
 	{
 		if (bitmapData != null && (bitmapData.width != width || bitmapData.height != height))
 		{

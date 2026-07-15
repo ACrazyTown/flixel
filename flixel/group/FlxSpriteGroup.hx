@@ -1,7 +1,5 @@
 package flixel.group;
 
-import openfl.display.BitmapData;
-import openfl.display.BlendMode;
 import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxFrame;
@@ -15,6 +13,8 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxSort;
+import flixel.graphics.FlxBitmap;
+import openfl.display.BlendMode;
 
 /**
  * `FlxSpriteGroup` is a special `FlxSprite` that can be treated like a single sprite even if it's
@@ -601,7 +601,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite implements IFlxGroupabl
 		x = X;
 		y = Y;
 		// last.set(x, y); // null on sprite groups
-		velocity.set();
+		velocity.zero();
 		super.revive();
 
 		_skipTransformChildren = false;
@@ -1156,7 +1156,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite implements IFlxGroupabl
 		return this;
 	}
 
-	override function set_pixels(Value:BitmapData):BitmapData
+	override function set_pixels(Value:FlxBitmap):FlxBitmap
 	{
 		return Value;
 	}
@@ -1166,7 +1166,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite implements IFlxGroupabl
 		return Value;
 	}
 
-	override function get_pixels():BitmapData
+	override function get_pixels():FlxBitmap
 	{
 		return null;
 	}

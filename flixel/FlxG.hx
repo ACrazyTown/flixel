@@ -18,6 +18,7 @@ import flixel.system.frontEnds.SignalFrontEnd;
 import flixel.system.frontEnds.SoundFrontEnd;
 import flixel.system.frontEnds.VCRFrontEnd;
 import flixel.system.frontEnds.WatchFrontEnd;
+import flixel.system.render.FlxRenderer;
 import flixel.system.scaleModes.BaseScaleMode;
 import flixel.system.scaleModes.RatioScaleMode;
 import flixel.util.FlxCollision;
@@ -103,7 +104,9 @@ class FlxG
 	 * The HaxeFlixel version, in semantic versioning syntax. Use `Std.string()`
 	 * on it to get a `String` formatted like this: `"HaxeFlixel MAJOR.MINOR.PATCH-COMMIT_SHA"`.
 	 */
-	public static final VERSION = new FlxVersion(6, 1, 2);
+	#if !macro
+	public static final VERSION:FlxVersion = new flixel.system.FlxAutoVersion<"flixel">();
+	#end
 
 	/**
 	 * Internal tracker for game object.
@@ -144,10 +147,33 @@ class FlxG
 	 */
 	public static var onMobile(get, never):Bool;
 
-	public static var renderMethod(default, null):FlxRenderMethod;
+	@:deprecated("renderMethod is deprecated, use FlxG.renderer.method, instead.")
+	public static var renderMethod(get, null):flixel.system.render.FlxRenderer.FlxRenderMethod;
+	@:noCompletion static inline function get_renderMethod():flixel.system.render.FlxRenderer.FlxRenderMethod
+	{
+		return renderer.method;
+	}
 
-	public static var renderBlit(default, null):Bool;
-	public static var renderTile(default, null):Bool;
+	@:deprecated("renderBlit is deprecated, compare against FlxG.renderer.blit, instead.")
+	public static var renderBlit(get, never):Bool;
+	@:noCompletion static inline function get_renderBlit():Bool
+	{
+		return renderer.blit;
+	}
+
+	@:deprecated("renderTile is deprecated, compare against FlxG.renderer.tile, instead.")
+	public static var renderTile(get, never):Bool;
+	@:noCompletion static inline function get_renderTile():Bool
+	{
+		return renderer.tile;
+	}
+
+	/**
+	 * The global renderer instance.
+	 * 
+	 * @see `FlxRenderer`
+	 */
+	public static var renderer(default, null):FlxRenderer;
 
 	/**
 	 * Represents the amount of time in seconds that passed since last frame.
@@ -310,7 +336,7 @@ class FlxG
 	public static var vcr(default, null):VCRFrontEnd;
 
 	/**
-	 * Contains things related to bitmaps, for example regarding the `BitmapData` cache and the cache itself.
+	 * Contains things related to bitmaps, for example regarding the `FlxBitmap` cache and the cache itself.
 	 */
 	public static var bitmap(default, null):BitmapFrontEnd = new BitmapFrontEnd();
 
@@ -553,10 +579,6 @@ class FlxG
 		FlxG.height = height;
 
 		initRenderMethod();
-		#if FLX_OPENGL_AVAILABLE
-		// Query once when window is created and cache for later
-		bitmap.get_maxTextureSize();
-		#end
 
 		FlxG.initialWidth = width;
 		FlxG.initialHeight = height;
@@ -606,28 +628,8 @@ class FlxG
 
 	static function initRenderMethod():Void
 	{
-		#if !flash
-		renderMethod = switch (stage.window.context.type)
-		{
-			case OPENGL, OPENGLES, WEBGL: DRAW_TILES;
-			default: BLITTING;
-		}
-		#else
-		#if web
-		renderMethod = BLITTING;
-		#else
-		renderMethod = DRAW_TILES;
-		#end
-		#end
-
-		#if air
-		renderMethod = BLITTING;
-		#end
-
-		renderBlit = renderMethod == BLITTING;
-		renderTile = renderMethod == DRAW_TILES;
-
-		FlxObject.defaultPixelPerfectPosition = renderBlit;
+		renderer = FlxRenderer.create();
+		renderer.initGlobals();
 	}
 
 	#if FLX_SAVE
@@ -754,8 +756,5 @@ class FlxG
 	}
 }
 
-enum FlxRenderMethod
-{
-	DRAW_TILES;
-	BLITTING;
-}
+@:deprecated("FlxG.FlxRenderMethod is deprecated, use FlxRenderer.FlxRenderMethod instead")
+typedef FlxRenderMethod = flixel.system.render.FlxRenderer.FlxRenderMethod;

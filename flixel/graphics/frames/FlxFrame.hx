@@ -10,7 +10,7 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxStringUtil;
 import haxe.ds.ArraySort;
 import haxe.ds.Vector;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
@@ -159,7 +159,7 @@ class FlxFrame implements IFlxDestroyable
 		offset = FlxPoint.get();
 
 		blitMatrix = new MatrixVector();
-		if (FlxG.renderTile)
+		if (FlxG.renderer.tile)
 			tileMatrix = new MatrixVector();
 	}
 
@@ -169,7 +169,7 @@ class FlxFrame implements IFlxDestroyable
 	{
 		blitMatrix.copyFrom(this, true);
 
-		if (FlxG.renderTile)
+		if (FlxG.renderer.tile)
 			tileMatrix.copyFrom(this, false);
 	}
 	
@@ -279,7 +279,7 @@ class FlxFrame implements IFlxDestroyable
 	 */
 	public function prepareMatrix(mat:FlxMatrix, rotation:FlxFrameAngle = FlxFrameAngle.ANGLE_0, flipX:Bool = false, flipY:Bool = false):FlxMatrix
 	{
-		if (FlxG.renderBlit)
+		if (FlxG.renderer.blit)
 		{
 			mat.identity();
 			return mat;
@@ -295,21 +295,108 @@ class FlxFrame implements IFlxDestroyable
 
 		return rotateAndFlip(mat, rotation, doFlipX, doFlipY);
 	}
-
+	
 	/**
-	 * Draws frame on specified `BitmapData` object.
+	 * Finds the pixel at the position of this frame
+	 * 
+	 * @param   framePos  The position in this frame
+	 * @return  The color of the pixel on this frame
+	 * @since 6.2.0
+	 */
+	overload public inline extern function getPixelAt(framePos:FlxPoint):Null<FlxColor>
+	{
+		final result = getPixelAt(framePos.x, framePos.y);
+		framePos.putWeak();
+		return result;
+	}
+	
+	/**
+	 * Finds the pixel color at the position of this frame
+	 * 
+	 * @param   frameX  The X position in this frame
+	 * @param   frameY  The Y position in this frame
+	 * @return  The color of the pixel on this frame
+	 * @since 6.2.0
+	 */
+	overload public inline extern function getPixelAt(frameX:Float, frameY:Float):Null<FlxColor>
+	{
+		if (!parent.texture.checkReadWrite())
+			return null;
+
+		final sourceX = Std.int(toSourceXHelper(frameX, frameY));
+		final sourceY = Std.int(toSourceYHelper(frameX, frameY));
+		return parent.texture.downloadBitmap().getPixel32(sourceX, sourceY);
+	}
+	
+	/**
+	 * Takes the given frame position and returns the equivalent position on the source image
+	 * 
+	 * @param   framePos  The position in this frame
+	 * @param   result    Optional arg for the returning point
+	 * @since 6.2.0
+	 */
+	public function toSourcePosition(framePos:FlxPoint, ?result:FlxPoint)
+	{
+		if (result == null)
+			result = FlxPoint.get();
+		
+		if (type == FlxFrameType.EMPTY)
+			return result.set(0, 0);
+		
+		final sourceX = Std.int(toSourceXHelper(framePos.x, framePos.y));
+		final sourceY = Std.int(toSourceYHelper(framePos.x, framePos.y));
+		framePos.putWeak();
+		return result.set(sourceX, sourceY);
+	}
+	
+	
+	function toSourceXHelper(frameX:Float, frameY:Float):Float
+	{
+		return frame.x + switch angle
+		{
+			// frame.flipX seems to have no effect on tile or blit targets 
+			// TODO: investigate
+			// case ANGLE_0: flipX ? frame.width - frameX : frameX;
+			// case ANGLE_90: flipX ? frameY : frame.height - frameY;
+			// case ANGLE_270: flipX ? frameY : frame.height - frameY;
+			case ANGLE_0: frameX;
+			case ANGLE_90: frameY;
+			case ANGLE_270: frame.height - frameY;
+		}
+	}
+	
+	function toSourceYHelper(frameX:Float, frameY:Float):Float
+	{
+		return frame.y + switch angle
+		{
+			// frame.flipX seems to have no effect on tile or blit targets 
+			// TODO: investigate
+			// case ANGLE_0: flipY ? frame.height - frameY : frameY;
+			// case ANGLE_90: flipY ? frameX : frame.width - frameX;
+			// case ANGLE_270: flipY ? frame.width - frameX : frameX;
+			case ANGLE_0: frameY;
+			case ANGLE_90: frame.width - frameX;
+			case ANGLE_270: frameX;
+		}
+	}
+	
+	/**
+	 * Draws frame on specified `FlxBitmap` object.
 	 *
-	 * @param   bmd                 `BitmapData` object to draw this frame on.
-	 *                              If bmd is `null` then new a `BitmapData` is created.
-	 * @param   point               Where to draw this frame on the specified `BitmapData` object.
+	 * @param   bmd                 `FlxBitmap` object to draw this frame on.
+	 *                              If bmd is `null` then new a `FlxBitmap` is created.
+	 * @param   point               Where to draw this frame on the specified `FlxBitmap` object.
 	 * @param   mergeAlpha          Whether to merge alphas or not.
-	 *                              (works like with `BitmapData`'s `copyPixels()` method).
+	 *                              (works like with `FlxBitmap`'s `copyPixels()` method).
 	 * @param   disposeIfNotEqual   Whether dispose passed `bmd` or not if its size isn't
 	 *                              equal to frame's original size (`sourceSize`)
-	 * @return  Modified or newly created `BitmapData` with frame image on it.
+	 * @return  Modified or newly created `FlxBitmap` with frame image on it.
 	 */
-	public function paint(?bmd:BitmapData, ?point:Point, mergeAlpha = false, disposeIfNotEqual = false):BitmapData
+	public function paint(?bmd:FlxBitmap, ?point:Point, mergeAlpha = false, disposeIfNotEqual = false):FlxBitmap
 	{
+		if (!parent.texture.checkReadWrite())
+			return null;
+
 		bmd = checkInputBitmap(bmd, point, FlxFrameAngle.ANGLE_0, mergeAlpha, disposeIfNotEqual);
 
 		if (type == FlxFrameType.EMPTY)
@@ -321,7 +408,7 @@ class FlxFrame implements IFlxDestroyable
 			if (point != null)
 				_point.offset(point.x, point.y);
 				
-			bmd.copyPixels(parent.bitmap, frame.copyToFlash(_rect), _point, null, null, mergeAlpha);
+			bmd.copyPixels(parent.texture.downloadBitmap(), frame.copyToFlash(_rect), _point, null, null, mergeAlpha);
 		}
 		else
 		{
@@ -329,32 +416,35 @@ class FlxFrame implements IFlxDestroyable
 			if (point != null)
 				_matrix.translate(point.x, point.y);
 				
-			bmd.draw(parent.bitmap, _matrix, null, null, getDrawFrameRect(_matrix, _rect));
+			bmd.draw(parent.texture.downloadBitmap(), _matrix, null, null, getDrawFrameRect(_matrix, _rect));
 		}
 
 		return bmd;
 	}
 
 	/**
-	 * Draws rotated and flipped frame on specified BitmapData object.
+	 * Draws rotated and flipped frame on specified FlxBitmap object.
 	 *
-	 * @param   bmd                 BitmapData object to draw this frame on.
-	 *                              If `bmd` is `null` then new `BitmapData` created.
-	 * @param   point               Where to draw this frame on the specified `BitmapData` object
+	 * @param   bmd                 FlxBitmap object to draw this frame on.
+	 *                              If `bmd` is `null` then new `FlxBitmap` created.
+	 * @param   point               Where to draw this frame on the specified `FlxBitmap` object
 	 * @param   rotation            How much rotate the frame.
 	 * @param   flipX               Do we need to flip frame horizontally.
 	 * @param   flipY               Do we need to flip frame vertically.
 	 * @param   mergeAlpha          Whether to merge alphas or not
-	 *                              (works like with `BitmapData`'s `copyPixels()` method).
+	 *                              (works like with `FlxBitmap`'s `copyPixels()` method).
 	 * @param   disposeIfNotEqual   Whether dispose passed `bmd` or not if its size isn't
 	 *                              equal to frame's original size (`sourceSize`)
-	 * @return  Modified or newly created `BitmapData` with frame image on it.
+	 * @return  Modified or newly created `FlxBitmap` with frame image on it.
 	 */
-	public function paintRotatedAndFlipped(?bmd:BitmapData, ?point:Point, rotation:FlxFrameAngle = FlxFrameAngle.ANGLE_0, flipX:Bool = false,
-			flipY:Bool = false, mergeAlpha:Bool = false, disposeIfNotEqual:Bool = false):BitmapData
+	public function paintRotatedAndFlipped(?bmd:FlxBitmap, ?point:Point, rotation:FlxFrameAngle = FlxFrameAngle.ANGLE_0, flipX:Bool = false,
+			flipY:Bool = false, mergeAlpha:Bool = false, disposeIfNotEqual:Bool = false):FlxBitmap
 	{
 		if (type == FlxFrameType.EMPTY && rotation == FlxFrameAngle.ANGLE_0)
 			return paint(bmd, point, mergeAlpha, disposeIfNotEqual);
+
+		if (!parent.texture.checkReadWrite())
+			return null;
 
 		bmd = checkInputBitmap(bmd, point, rotation, mergeAlpha, disposeIfNotEqual);
 
@@ -369,24 +459,24 @@ class FlxFrame implements IFlxDestroyable
 		if (point != null)
 			_matrix.translate(point.x, point.y);
 			
-		bmd.draw(parent.bitmap, _matrix, null, null, getDrawFrameRect(_matrix, _rect));
+		bmd.draw(parent.texture.downloadBitmap(), _matrix, null, null, getDrawFrameRect(_matrix, _rect));
 		return bmd;
 	}
 
 	/**
-	 * Internal method which runs few checks on specified `BitmapData` object.
+	 * Internal method which runs few checks on specified `FlxBitmap` object.
 	 *
-	 * @param   bmd                 `BitmapData` object to check against.
+	 * @param   bmd                 `FlxBitmap` object to check against.
 	 * @param   point               Optional point for mergeAlpha checks
 	 * @param   rotation            How much we will rotate the frame when we will be
-	 *                              drawing it on specified `BitmapData`.
+	 *                              drawing it on specified `FlxBitmap`.
 	 * @param   mergeAlpha          Whether to merge alphas or not
-	 *                              (works like with `BitmapData`'s `copyPixels()` method).
+	 *                              (works like with `FlxBitmap`'s `copyPixels()` method).
 	 * @param   disposeIfNotEqual   Whether dispose passed bmd or not if its size isn't
 	 *                              equal to frame's original size (`sourceSize`).
-	 * @return  Prepared `BitmapData` for further frame blitting. Output `BitmapData` could be a different object.
+	 * @return  Prepared `FlxBitmap` for further frame blitting. Output `FlxBitmap` could be a different object.
 	 */
-	inline function checkInputBitmap(?bmd:BitmapData, ?point:Point, rotation = FlxFrameAngle.ANGLE_0, mergeAlpha = false, disposeIfNotEqual = false):BitmapData
+	inline function checkInputBitmap(?bmd:FlxBitmap, ?point:Point, rotation = FlxFrameAngle.ANGLE_0, mergeAlpha = false, disposeIfNotEqual = false):FlxBitmap
 	{
 		final flipXY = rotation != FlxFrameAngle.ANGLE_0;
 		final w = Std.int(flipXY ? sourceSize.y : sourceSize.x);
@@ -406,7 +496,7 @@ class FlxFrame implements IFlxDestroyable
 		}
 		else if (bmd == null)
 		{
-			bmd = new BitmapData(w, h, true, FlxColor.TRANSPARENT);
+			bmd = new FlxBitmap(w, h, FlxColor.TRANSPARENT);
 		}
 
 		return bmd;
@@ -761,8 +851,15 @@ enum abstract FlxFrameAngle(Int) from Int to Int
  * `bottom`. This is for optimization reasons, to reduce arithmetic when drawing vertices
  */
 @:forward(put)
-abstract FlxUVRect(FlxRect) from FlxRect to flixel.util.FlxPool.IFlxPooled
+abstract FlxUVRect(FlxRect) from FlxRect // to flixel.util.FlxPool.IFlxPooled
 {
+	// https://github.com/HaxeFlixel/flixel/pull/3609
+	// Needed to work with hscript-improved
+	@:to inline function toIFlxPooled():flixel.util.FlxPool.IFlxPooled
+	{
+		return this;
+	}
+
 	public var left(get, set):Float;
 	inline function get_left():Float { return this.x; }
 	inline function set_left(value):Float { return this.x = value; }

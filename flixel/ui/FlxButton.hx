@@ -1,6 +1,5 @@
 package flixel.ui;
 
-import openfl.events.MouseEvent;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.atlas.FlxAtlas;
@@ -14,6 +13,7 @@ import flixel.math.FlxPoint;
 import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.util.FlxDestroyUtil;
+import openfl.events.MouseEvent;
 #if FLX_TOUCH
 import flixel.input.touch.FlxTouch;
 #end
@@ -270,7 +270,7 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 		status = NORMAL;
 
 		// Since this is a UI element, the default scrollFactor is (0, 0)
-		scrollFactor.set();
+		scrollFactor.zero();
 
 		#if FLX_MOUSE
 		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onUpEventListener);
@@ -400,7 +400,10 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	 */
 	public function stampOnAtlas(atlas:FlxAtlas):Bool
 	{
-		var buttonNode:FlxNode = atlas.addNode(graphic.bitmap, graphic.key);
+		if (!graphic.texture.checkReadWrite())
+			return false;
+
+		var buttonNode:FlxNode = atlas.addNode(graphic.texture.downloadBitmap(), graphic.key);
 		var result:Bool = (buttonNode != null);
 
 		if (buttonNode != null)
@@ -413,7 +416,7 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 
 		if (result && label != null)
 		{
-			var labelNode:FlxNode = atlas.addNode(label.graphic.bitmap, label.graphic.key);
+			var labelNode:FlxNode = atlas.addNode(label.graphic.texture.downloadBitmap(), label.graphic.key);
 			result = result && (labelNode != null);
 
 			if (labelNode != null)

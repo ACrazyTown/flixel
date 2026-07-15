@@ -12,7 +12,7 @@ class FlxBGSprite extends FlxSprite
 		super();
 		// TODO: Use unique:false, now that we're not editing the pixels
 		makeGraphic(1, 1, FlxColor.WHITE, true, FlxG.bitmap.getUniqueKey("bg_graphic_"));
-		scrollFactor.set();
+		scrollFactor.zero();
 	}
 
 	/**
@@ -31,7 +31,8 @@ class FlxBGSprite extends FlxSprite
 			_matrix.identity();
 			_matrix.scale(camera.viewWidth + 1, camera.viewHeight + 1);
 			_matrix.translate(camera.viewMarginLeft, camera.viewMarginTop);
-			camera.drawPixels(frame, _matrix, colorTransform);
+
+			camera.view.drawFrame(frame, _matrix, colorTransform);
 
 			#if FLX_DEBUG
 			FlxBasic.visibleCount++;

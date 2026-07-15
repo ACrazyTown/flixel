@@ -10,7 +10,7 @@ import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import haxe.xml.Access;
 import openfl.Assets;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
@@ -80,7 +80,7 @@ class FlxBitmapFont extends FlxFramesCollection
 	var frame:FlxFrame;
 
 	/**
-	 * Creates a new bitmap font using specified bitmap data and letter input.
+	 * Creates a new bitmap font using specified graphic and letter input.
 	 */
 	function new(frame:FlxFrame, ?border:FlxPoint)
 	{
@@ -118,7 +118,7 @@ class FlxBitmapFont extends FlxFramesCollection
 		}
 
 		var letters:UnicodeString = "";
-		var bd:BitmapData = new BitmapData(700, 9, true, 0xFF888888);
+		var bd:FlxBitmap = new FlxBitmap(700, 9, 0xFF888888);
 		graphic = FlxG.bitmap.add(bd, false, DEFAULT_FONT_KEY);
 
 		var letterPos:Int = 0;
@@ -212,6 +212,9 @@ class FlxBitmapFont extends FlxFramesCollection
 			frame = graphic.imageFrame.frame;
 		}
 
+		if (!graphic.texture.checkReadWrite())
+			return null;
+
 		var font:FlxBitmapFont = FlxBitmapFont.findFont(frame);
 		if (font != null)
 			return font;
@@ -220,7 +223,7 @@ class FlxBitmapFont extends FlxFramesCollection
 		font = new FlxBitmapFont(frame);
 		font.fontName = graphic.key;
 
-		var bmd:BitmapData = graphic.bitmap;
+		var bmd:FlxBitmap = graphic.texture.downloadBitmap();
 
 		var p:Point = new Point();
 		p.setTo(0, 0);
@@ -319,6 +322,7 @@ class FlxBitmapFont extends FlxFramesCollection
 			bmd.threshold(bmd, frameRect, point, "==", charBGColor, FlxColor.TRANSPARENT, FlxColor.WHITE, true);
 		}
 
+		graphic.texture.sync();
 		return font;
 	}
 
