@@ -707,12 +707,11 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        if (uniform.value.texture != texture || uniform.value.smoothing != smoothing)
-        {
-            uniform.value.texture = texture;
-            uniform.value.smoothing = smoothing;
-            uniform.dirty = true;
-        }
+        // This is intentionally always set as dirty because textures need to be rebound
+        // if the shader changes in the meantime, but it's easier to just always do it here... (for now?)
+        uniform.value.texture = texture;
+        uniform.value.smoothing = smoothing;
+        uniform.dirty = true;
     }
 
     @:allow(flixel.system.render)
