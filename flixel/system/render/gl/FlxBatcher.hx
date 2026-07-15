@@ -228,7 +228,9 @@ class FlxBatcher implements IFlxDestroyable
         _currentTopology = TRIANGLE_LIST;
         _currentBlendMode = null;
         _currentShader = null;
-        _textures.fill(null);
+        // TODO: Replace with haxe.ds.Vector.fill() when minimum Haxe is 4.3
+        for (i in 0..._textures.length)
+            _textures[i] = null;
         _numTextureSlots = 0;
         _currentTextureSlot = -1;
 
@@ -357,7 +359,10 @@ class FlxBatcher implements IFlxDestroyable
                 // Also reset our texture pool
                 if (_canBatchTextures)
                 {
-                    _textures.fill(null);
+                    // TODO: Replace with haxe.ds.Vector.fill() when minimum Haxe is 4.3
+                    for (i in 0..._textures.length)
+                        _textures[i] = null;
+
                     _numTextureSlots = 0;
                     _currentTextureSlot = -1;
                 }
