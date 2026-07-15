@@ -11,9 +11,6 @@ import lime.utils.Int32Array;
 import openfl.display.BitmapData;
 import openfl.display.Shader;
 
-// TODO: support for WebGL2 specifics like uints and more matrices
-// TODO: get rid of all the traces bro & clean up
-
 /**
  * A `FlxShader` represents a single-pass shader program used to render a sprite.
  */
@@ -76,6 +73,12 @@ class FlxShader implements IFlxDestroyable
      */
     var _uniforms:Array<FlxShaderUniform<Any>>;
 
+    /**
+     * Whether the texture slots were bound.
+     * This will be set to true during the first `updateUniforms()` call.
+     */
+    var _boundTextureSlots:Bool = false;
+
     public function new(data:FlxShaderData)
     {
         this.data = data;
@@ -85,9 +88,12 @@ class FlxShader implements IFlxDestroyable
 
         // To be able to modify the uniforms by name we need a fast way to fetch them so
         // we'll also make a map
-        _uniformMap = new StringMap<FlxShaderUniform<Any>>();
-        for (uniform in _uniforms)
-            _uniformMap.set(uniform.name, uniform);
+        if (_uniforms != null)
+        {
+            _uniformMap = new StringMap<FlxShaderUniform<Any>>();
+            for (uniform in _uniforms)
+                _uniformMap.set(uniform.name, uniform);
+        }
 
         _attributeLocations = new StringMap<FlxShaderAttributeLocation>();
     }
@@ -350,9 +356,12 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        uniform.value.data = v;
-        uniform.value.dimension = dimension;
-        uniform.dirty = true;
+        if (uniform.value.data != v || uniform.value.dimension != dimension)
+        {
+            uniform.value.data = v;
+            uniform.value.dimension = dimension;
+            uniform.dirty = true;
+        }
     }
 
     /**
@@ -507,9 +516,12 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        uniform.value.data = v;
-        uniform.value.dimension = dimension;
-        uniform.dirty = true;
+        if (uniform.value.data != v || uniform.value.dimension != dimension)
+        {
+            uniform.value.data = v;
+            uniform.value.dimension = dimension;
+            uniform.dirty = true;
+        }
     }
 
     /**
@@ -638,37 +650,40 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        uniform.value.data = v;
-        uniform.value.transpose = transpose;
-        uniform.dirty = true;
+        if (uniform.value.data != v || uniform.value.transpose != transpose)
+        {
+            uniform.value.data = v;
+            uniform.value.transpose = transpose;
+            uniform.dirty = true;
+        }
     }
 
-    /**
-     * Sets the value of the specified uniform to `bitmap`.
-     * 
-     * @param   name        The uniform's name in the shader.
-     * @param   bitmap      The `BitmapData` to set the uniform's value to.
-     * @param   smoothing   Whether the bitmap should be smoothed.
-     */
-    public function setBitmap(name:String, bitmap:BitmapData, smoothing:Bool)
-    {
-        if (data.flash != null)
-        {
-            var input:openfl.display.ShaderInput<BitmapData> = Reflect.field(data.flash.shader.data, name);
-            input.filter = smoothing ? LINEAR : NEAREST;
-            input.input = bitmap;
-            return;
-        }
+    // /**
+    //  * Sets the value of the specified uniform to `bitmap`.
+    //  * 
+    //  * @param   name        The uniform's name in the shader.
+    //  * @param   bitmap      The `BitmapData` to set the uniform's value to.
+    //  * @param   smoothing   Whether the bitmap should be smoothed.
+    //  */
+    // public function setBitmap(name:String, bitmap:BitmapData, smoothing:Bool)
+    // {
+    //     if (data.flash != null)
+    //     {
+    //         var input:openfl.display.ShaderInput<BitmapData> = Reflect.field(data.flash.shader.data, name);
+    //         input.filter = smoothing ? LINEAR : NEAREST;
+    //         input.input = bitmap;
+    //         return;
+    //     }
 
-        var uniform = cast _uniformMap.get(name);
-        if (uniform == null) 
-        {
-            FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
-            return; 
-        }
+    //     var uniform = cast _uniformMap.get(name);
+    //     if (uniform == null) 
+    //     {
+    //         FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
+    //         return; 
+    //     }
 
-        // uniform.value = BITMAP(bitmap, smoothing);
-    }
+    //     uniform.value = BITMAP(bitmap, smoothing);
+    // }
 
     /**
      * Sets the value of the specified uniform to `texture`.
@@ -692,9 +707,12 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        uniform.value.texture = texture;
-        uniform.value.smoothing = smoothing;
-        uniform.dirty = true;
+        if (uniform.value.texture != texture || uniform.value.smoothing != smoothing)
+        {
+            uniform.value.texture = texture;
+            uniform.value.smoothing = true;
+            uniform.dirty = true;
+        }
     }
 
     @:allow(flixel.system.render)
@@ -743,6 +761,23 @@ class FlxShader implements IFlxDestroyable
         }
         #end
 
+        // We already know texture slot locations, so we do an extra loop once
+        // to send them to the shader. This way we don't have to send them with every draw call.
+        // TODO: could go even further and do this once per shader program, not per instance
+        if (!_boundTextureSlots)
+        {
+            for (uniform in _uniforms)
+            {
+                if (uniform.type == TEXTURE)
+                {
+                    var t:ShaderTexture = cast uniform.value;
+                    FlxG.renderer.shaders.setUniformInt(uniform.location, t.slot);
+                }
+            }
+
+            _boundTextureSlots = true;
+        }
+
         for (uniform in _uniforms)
         {
             if (!uniform.dirty)
@@ -771,8 +806,8 @@ class FlxShader implements IFlxDestroyable
                     FlxG.renderer.shaders.setUniformIntArray(uniform.location, v.data, v.dimension);
 
                 case FLOAT1:
-                    var v:Int = cast uniform.value;
-                    FlxG.renderer.shaders.setUniformInt(uniform.location, v);
+                    var v:Float = cast uniform.value;
+                    FlxG.renderer.shaders.setUniformFloat(uniform.location, v);
                 
                 case FLOAT2:
                     var v:ShaderVec2<Float> = cast uniform.value;
@@ -830,6 +865,8 @@ class FlxShader implements IFlxDestroyable
                     var v:ShaderTexture = cast uniform.value;
                     FlxG.renderer.shaders.setUniformTexture(uniform.location, v.texture, v.smoothing, v.slot);
             }
+            
+            uniform.dirty = false;
         }
     }
 
@@ -886,19 +923,24 @@ typedef FlxGLSLShaderData =
     @:optional var vertex:GLSLShader & 
     {
         /**
-         * Optional ordered array of vertex attribute names.
-         * If this is provided, the vertex attribute locations will be bound to their corresponding index
-         * in the array. 
+         * Ordered array of vertex attribute names.
+         * If this is provided, the vertex attribute locations will be bound to their corresponding index in the array. 
          * If your shaders share the same vertex attributes, you should bind them in the same order so the
          * renderer can take advantage of internal optimisations.
          */
-        @:optional var attributes:Array<String>;
+        var attributes:Array<String>;
     };
 
     /**
      * Data for the fragment shader.
      */
-    var fragment:GLSLShader;
+    var fragment:GLSLShader &
+    {
+        /**
+         * 
+         */
+        @:optional var injectBuiltins:Bool;
+    };
 }
 
 typedef GLSLShader = 
@@ -909,35 +951,26 @@ typedef GLSLShader =
     var source:String;
 
     /**
-     * The wanted GLSL shader version.
+     * Optional, the wanted GLSL shader version.
+     * 
+     * The default value is left unspecified, and as such will be automatically
+     * set by the GPU driver. In this case you should assume you're working with the
+     * lowest version possible (`110` on desktop and `100` on mobile/web).
      * 
      * Note that this will be ignored if the version is already set in the GLSL shader code.
      */
     @:optional var version:String;
 
     /**
-     * When enabled, if the GLSL shader source is written against an older version, but
-     * the target version is higher, Flixel will process the shader code and attempt to convert
-     * it to be compatible with the target version.
-     */
-    @:optional var allowConvert:Bool;
-
-    /**
-     * The wanted floating-point precision for the shader.
+     * Optional, the wanted floating-point precision for the shader.
      * This only has an effect when targeting OpenGL ES (mobile) or WebGL (HTML5).
+     * 
+     * Default value is `HIGH`.
      * 
      * Note that this will be ignored if the precision qualifier is already
      * set in the GLSL shader code.
      */
     @:optional var precision:GLSLPrecision;
-
-    @:optional var extensions:Array<GLShaderExtension>;
-}
-
-typedef GLShaderExtension =
-{
-    name:String,
-    behavior:GLShaderExtensionBehavior
 }
 
 enum abstract GLSLPrecision(String) from String to String
@@ -945,14 +978,6 @@ enum abstract GLSLPrecision(String) from String to String
     var HIGH = "highp";
     var MEDIUM = "mediump";
     var LOW = "lowp";
-}
-
-enum abstract GLShaderExtensionBehavior(String) from String to String
-{
-    var REQUIRE = "require";
-    var ENABLE = "enable";
-    var WARN = "warn";
-    var DISABLE = "disable";
 }
 
 // Under are various defines for internal shader uniform state. These have @:noCompletion instead of

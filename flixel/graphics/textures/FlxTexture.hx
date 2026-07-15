@@ -138,6 +138,13 @@ class FlxTexture implements IFlxDestroyable
     var _allocated:Bool = false;
 
     /**
+     * Helper, keeps track of the current texture filtering state and is
+     * set by the renderer to prevent redundant graphics API calls.
+     */
+    @:allow(flixel.system.render)
+    var _smooth:Bool = false;
+
+    /**
      * Creates a new `FlxTexture` instance. 
      * The texture is NOT ready to be used yet, make sure to upload data to it before using it.
      * 

@@ -22,11 +22,11 @@ typedef FlxShaderHandle = #if FLX_RENDER_OPENGL lime.graphics.opengl.GLProgram #
  * Underlying representation of a shader attribute location.
  * The actual type is dependant on the renderer, and is determined at compile time.
  */
-typedef FlxShaderAttributeLocation = Int;
+typedef FlxShaderAttributeLocation = Null<Int>;
 
 /**
  * Underlying representation of a shader uniform location.
  * The actual type is dependant on the renderer, and is determined at compile time.
  */
-typedef FlxShaderUniformLocation = #if FLX_RENDER_OPENGL lime.graphics.opengl.GLUniformLocation #else Dynamic #end;
+typedef FlxShaderUniformLocation = #if FLX_RENDER_OPENGL Null<lime.graphics.opengl.GLUniformLocation> #else Dynamic #end;
 

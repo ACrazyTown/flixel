@@ -1,21 +1,21 @@
 package flixel.system.render.gl;
 
 #if FLX_RENDER_OPENGL
+import haxe.ds.Vector;
 import flixel.system.render.FlxTopology;
 import flixel.system.render.gl.FlxDrawCall;
 import flixel.system.render.gl.FlxDrawData;
-import flixel.graphics.FlxGraphic;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
-import flixel.util.FlxPool;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
-import lime.graphics.opengl.GLFramebuffer;
 import lime.utils.ArrayBuffer;
 import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 import lime.utils.Int32Array;
 import openfl.display.BlendMode;
 import flixel.graphics.shaders.FlxShader;
+import flixel.graphics.shaders.FlxBatcherShader;
+import flixel.graphics.textures.FlxTexture;
 import flixel.util.FlxColor;
 
 /**
@@ -23,20 +23,6 @@ import flixel.util.FlxColor;
  */
 class FlxBatcher implements IFlxDestroyable
 {
-    /**
-     * The quad batcher uses 7 vertex attributes:
-     * - X position
-     * - Y position
-     * - U texture mapping
-     * - V texture mapping
-     * - Color multiplier
-     * - Color offset
-     * - Texture slot (used only if multitexture batching is enabled)
-     */
-    public final ATTRIBUTES_PER_VERTEX:Int = 6; // TODO ant: TEMP, should be 7
-
-    // public var attributes:Array<GLAttribute>;
-
     public var maxVertices:Int;
     public var maxIndices:Int;
 
@@ -48,13 +34,17 @@ class FlxBatcher implements IFlxDestroyable
     var _numVertices:Int = 0;
     var _numIndices:Int = 0;
 
-    // Draw state
+    // Render state
 	var _currentTopology:FlxTopology;
     var _currentShader:FlxShader;
     var _currentBlendMode:BlendMode;
-    var _currentTexture:FlxGraphic; // TODO ant: replace these 3 with FlxTexture
-    var _currentTextureRepeat:Bool;
-    var _currentTextureSmoothing:Bool;
+
+    // Texture state
+    var _canBatchTextures:Bool = #if FLX_OPENGL_BATCH_TEXTURES true #else false #end;    
+    var _textures:Vector<FlxTexture>;
+    var _texturesSmoothing:Vector<Bool>;
+    var _currentTextureSlot:Int = -1;
+    var _numTextureSlots:Int = 0;
 
     // Draw call data
     var _count:Int = 0;
@@ -81,50 +71,13 @@ class FlxBatcher implements IFlxDestroyable
     {
         this.maxVertices = maxVertices;
         this.maxIndices = maxIndices;
-
         this.attributesPerVertex = attributesPerVertex;
 
-        initBuffers();
+        final maxTextures = #if FLX_OPENGL_BATCH_TEXTURES FlxBatcherShader.maxTextures #else 1 #end;
+        _textures = new Vector<FlxTexture>(maxTextures);
+        _texturesSmoothing = new Vector<Bool>(maxTextures);
 
-        // final stride = attributesPerVertex * Float32Array.BYTES_PER_ELEMENT;
-        // attributes = [
-        //     {
-        //         buffer: _glVertexBuffer,
-		//         name: "flixel_aPosition",
-        //         size: 2,
-        //         type: GL.FLOAT,
-        //         normalized: false,
-        //         stride: stride,
-        //         offset: 0
-        //     },
-        //     {
-        //         buffer: _glVertexBuffer,
-		//         name: "flixel_aTextureCoord",
-        //         size: 2,
-        //         type: GL.FLOAT,
-        //         normalized: false,
-        //         stride: stride,
-        //         offset: 8, // 2 * 4
-        //     },
-        //     {
-        //         buffer: _glVertexBuffer,
-		//         name: "flixel_aColorMultiplier",
-        //         size: 4,
-        //         type: GL.UNSIGNED_BYTE,
-        //         normalized: true,
-        //         stride: stride,
-        //         offset: 16 // prev + 2 * 4
-        //     },
-        //     {
-        //         buffer: _glVertexBuffer,
-		//         name: "flixel_aColorOffset",
-        //         size: 4,
-        //         type: GL.UNSIGNED_BYTE,
-        //         normalized: true,
-        //         stride: stride,
-        //         offset: 20 // prev + 4
-        //     }
-        // ];
+        initBuffers();
     }
 
     public function destroy():Void
@@ -133,6 +86,9 @@ class FlxBatcher implements IFlxDestroyable
         _positions = null;
         _colors = null;
         _indices = null;
+
+        _textures = null;
+        _texturesSmoothing = null;
         
         for (dc in _drawCalls)
             dc.put();
@@ -169,7 +125,7 @@ class FlxBatcher implements IFlxDestroyable
             flush();
 
         // Check if the sprite we're about to add requires a new draw call
-        drawIfNeeded(data);
+        updateRenderState(data);
 
         // Prepare the vertices
         final scaledWX = data.frame.frame.width * data.matrix.a;
@@ -191,10 +147,10 @@ class FlxBatcher implements IFlxDestroyable
         final y4 = scaledWY + scaledHY + data.matrix.ty;
 
         // Feed it all to the buffer
-        addVertex(x1, y1, data.frame.uv.left, data.frame.uv.top, data.colorMultiplier, data.colorOffset);
-        addVertex(x2, y2, data.frame.uv.right, data.frame.uv.top, data.colorMultiplier, data.colorOffset);
-        addVertex(x3, y3, data.frame.uv.left, data.frame.uv.bottom, data.colorMultiplier, data.colorOffset);
-        addVertex(x4, y4, data.frame.uv.right, data.frame.uv.bottom, data.colorMultiplier, data.colorOffset);
+        addVertex(x1, y1, data.frame.uv.left, data.frame.uv.top, data.colorMultiplier, data.colorOffset, _currentTextureSlot);
+        addVertex(x2, y2, data.frame.uv.right, data.frame.uv.top, data.colorMultiplier, data.colorOffset, _currentTextureSlot);
+        addVertex(x3, y3, data.frame.uv.left, data.frame.uv.bottom, data.colorMultiplier, data.colorOffset, _currentTextureSlot);
+        addVertex(x4, y4, data.frame.uv.right, data.frame.uv.bottom, data.colorMultiplier, data.colorOffset, _currentTextureSlot);
 
         _indices[_indicesIndex++] = _numVertices + 0; 
         _indices[_indicesIndex++] = _numVertices + 1;
@@ -202,14 +158,6 @@ class FlxBatcher implements IFlxDestroyable
         _indices[_indicesIndex++] = _numVertices + 1;
         _indices[_indicesIndex++] = _numVertices + 2;
         _indices[_indicesIndex++] = _numVertices + 3;
-
-        // Set up the render state
-		_currentTopology = TRIANGLE_LIST;
-        _currentTexture = data.texture;
-        _currentTextureRepeat = data.textureRepeat;
-        _currentTextureSmoothing = data.textureSmoothing;
-        _currentBlendMode = data.blend;
-        _currentShader = resolveShader(data.shader);
 
         _numVertices += FlxGLRenderer.VERTICES_PER_QUAD;
         _numIndices += FlxGLRenderer.INDICES_PER_QUAD;
@@ -220,13 +168,13 @@ class FlxBatcher implements IFlxDestroyable
 
     public function addTriangles(data:FlxTrianglesDrawData):Void
     {
-        // Check if the sprite we're about to add requires a new draw call
-        drawIfNeeded(data);
-
         // Flush buffer if we can't fit anymore
         if (_numVertices + data.vertices.length > maxVertices
             || _numIndices + data.indices.length > maxIndices)
             flush();
+
+        // Check if the sprite we're about to add requires a new draw call
+        updateRenderState(data);
 
         // Update vertices
         for (i in 0...data.vertices.length)
@@ -245,22 +193,12 @@ class FlxBatcher implements IFlxDestroyable
 
             final transformedX = data.matrix.transformX(x, y);
             final transformedY = data.matrix.transformY(x, y);
-            addVertex(transformedX, transformedY, u, v, color, data.colorOffset);
+            addVertex(transformedX, transformedY, u, v, color, data.colorOffset, _currentTextureSlot);
         }
 
         // Update indices
         for (i in 0...data.indices.length)
-        {
             _indices[_indicesIndex++] = _numVertices + data.indices[i];
-        }
-
-        // Set up the render state
-		_currentTopology = TRIANGLE_LIST;
-        _currentTexture = data.texture;
-        _currentTextureRepeat = data.textureRepeat;
-        _currentTextureSmoothing = data.textureSmoothing;
-        _currentBlendMode = data.blend;
-        _currentShader = resolveShader(data.shader);
 
         _numVertices += data.vertices.length;
         _numIndices += data.indices.length;
@@ -275,15 +213,24 @@ class FlxBatcher implements IFlxDestroyable
         // queue up whatever was left
         if (_count > 0)
         {
-			final dc = BatchDrawCall.get(this, _count, _offset, _currentTopology, _currentShader, _currentBlendMode, _currentTexture, _currentTextureRepeat,
-				_currentTextureSmoothing);
+            final dc = BatchDrawCall.get(this, _count, _offset, _currentTopology, _currentShader, _currentBlendMode, _textures, _texturesSmoothing);
             _drawCalls.push(dc);
         }
 
         uploadBuffers();
 
         for (dc in _drawCalls)
+        {
             _renderer.draw(dc);
+            dc.put();
+        }
+
+        _currentTopology = TRIANGLE_LIST;
+        _currentBlendMode = null;
+        _currentShader = null;
+        _textures.fill(null);
+        _numTextureSlots = 0;
+        _currentTextureSlot = -1;
 
         _drawCalls.resize(0);
         _count = 0;
@@ -327,34 +274,127 @@ class FlxBatcher implements IFlxDestroyable
         // Setup and enable color offset attribute
 		GL.vertexAttribPointer(shader.getAttributeLocation("flixel_aColorOffset"), 4, GL.UNSIGNED_BYTE, true, stride, offset);
 		GL.enableVertexAttribArray(shader.getAttributeLocation("flixel_aColorOffset"));
+
+        #if FLX_OPENGL_BATCH_TEXTURES
+        if (shader is FlxBatcherShader)
+        {
+            offset += 4;
+            
+            // Setup and enable texture slot attribute
+            GL.vertexAttribPointer(shader.getAttributeLocation("flixel_aTextureSlot"), 1, GL.FLOAT, false, stride, offset);
+            GL.enableVertexAttribArray(shader.getAttributeLocation("flixel_aTextureSlot"));
+        }
+        #end
     }
 
-    function drawIfNeeded(next:FlxDrawData):Void
-    {
-        // Skip if this is the first sprite being drawn because everything we're about to check is null
-        if (_numVertices == 0)
-            return;
-
-        // As it is right now, it's only safe to batch shaders if the
-        // instance is the exact same, as uniforms are linked to the instance
-        var sameShader = _currentShader == resolveShader(next.shader);
-        var sameBlendMode = _currentBlendMode == next.blend;
-
-        var sameTextureRepeat = _currentTextureRepeat == next.textureRepeat;
-        var sameTextureSmoothing = _currentTextureSmoothing == next.textureSmoothing;
-        var sameTexture = (_currentTexture == next.texture) && sameTextureRepeat && sameTextureSmoothing;
-
-		var sameTopology = _currentTopology == next.topology;
-		
-		if (!(sameShader && sameBlendMode && sameTexture && sameTopology) && true)
+    /**
+     * Checks if `next` can be batched according to the current render state, and if
+     * not, starts a new batch and updates the render state accordingly.
+     * 
+     * @param   next   Draw data to compare against.
+     */
+    function updateRenderState(next:FlxDrawData):Void
+    { 
+        inline function resolveShader(shader:FlxShader):FlxShader
         {
-			final dc = BatchDrawCall.get(this, _count, _offset, _currentTopology, _currentShader, _currentBlendMode, _currentTexture, _currentTextureRepeat,
-				_currentTextureSmoothing);
-            _drawCalls.push(dc);
-
-            _offset += _count * UInt16Array.BYTES_PER_ELEMENT;
-            _count = 0;
+            return shader == null ? FlxGLRenderer.defaultShader : shader;
         }
+
+        #if FLX_OPENGL_BATCH_TEXTURES
+        var foundTextureSlot = -1;
+        #end
+
+        // No bother checking if we can batch if there's nothing in the buffer
+        if (_numVertices > 0)
+        {
+            // First, compare the render states
+            // We can only batch if the topology, blend mode and shader are the same.
+            // Textures are a bit more complicated... more on that in a second
+            var batchable:Bool = _currentTopology == next.topology && _currentShader == resolveShader(next.shader) && _currentBlendMode == next.blend;
+
+            #if FLX_OPENGL_BATCH_TEXTURES
+            // Check if we can batch the texture only if we've passed the previous batching rules,
+            // and if the current shader supports texture batching.
+            if (batchable && _canBatchTextures)
+            {
+                // haxe.ds.Vector has no indexOf() ...
+                for (i in 0..._numTextureSlots)
+                {
+                    if (_textures[i] == next.texture)
+                    {
+                        foundTextureSlot = i;
+                        break;
+                    }
+                }
+
+                // The texture is not in our current pool, or its filter has changed
+                if (foundTextureSlot == -1 || (foundTextureSlot != -1 && _texturesSmoothing[foundTextureSlot] != next.textureSmoothing))
+                {
+                    // Can't add it because we're out of space, break the batch
+                    if (_numTextureSlots == _textures.length)
+                    {
+                        batchable = false;
+                        foundTextureSlot = -1;
+                    }
+                }
+            }
+
+            #else
+            // Texture batching is disabled, so in addition to the previous batching rules
+            // we also check if the texture and its filter are the same as the current.
+            batchable = batchable && _textures[0] == next.texture && _texturesSmoothing[0] == next.textureSmoothing;
+            #end
+
+            if (!batchable)
+            {
+                // Push a draw call with the previous render state
+                final dc = BatchDrawCall.get(this, _count, _offset, _currentTopology, _currentShader, _currentBlendMode, _textures, _texturesSmoothing);
+                _drawCalls.push(dc);
+                _offset += _count * UInt16Array.BYTES_PER_ELEMENT;
+                _count = 0;
+
+                #if FLX_OPENGL_BATCH_TEXTURES
+                // Also reset our texture pool
+                if (_canBatchTextures)
+                {
+                    _textures.fill(null);
+                    _numTextureSlots = 0;
+                    _currentTextureSlot = -1;
+                }
+                #end
+            }
+        }
+
+        // Finally, update the render state
+        _currentTopology = next.topology;
+        _currentBlendMode = next.blend;
+        _currentShader = resolveShader(next.shader);
+
+        #if FLX_OPENGL_BATCH_TEXTURES
+        // We can only batch textures with a compatible shader, which is currently ONLY FlxBatcherShader...
+        // TODO: look into texture batching in custom sahders
+        _canBatchTextures = _currentShader is FlxBatcherShader;
+
+        if (_canBatchTextures)
+        {
+            // Only add a new texture in the pool if we didn't find it during the batching check
+            if (foundTextureSlot == -1)
+            {
+                _numTextureSlots++;
+                _currentTextureSlot = _numTextureSlots - 1;
+            }
+            else
+                _currentTextureSlot = foundTextureSlot;
+        }
+        else
+            _currentTextureSlot = 0;
+
+        _textures[_currentTextureSlot] = next.texture;
+        _texturesSmoothing[_currentTextureSlot] = next.textureSmoothing;
+        #else
+        _textures[0] = next.texture;
+        _texturesSmoothing[0] = next.textureSmoothing;
+        #end
     }
 
     // Inlined cause we're calling it once!
@@ -384,13 +424,14 @@ class FlxBatcher implements IFlxDestroyable
     // Inlined cause we're calling it once!
     inline function uploadBuffers():Void
     {
-        // TODO: upload portion of buffer?
         _renderer.context.bindGLVertexBuffer(_glVertexBuffer);
 
+        // TODO: I can't seem to figure out buffer orphaning... this all runs roughly the same?
         if (_numVertices == maxVertices)
         {
             // "orphan" (reallocate) the entire buffer to prevent stalls
-            GLHelper.bufferData(GL.ARRAY_BUFFER, _positions, GL.STREAM_DRAW);
+            // GLHelper.bufferData(GL.ARRAY_BUFFER, null, GL.STREAM_DRAW);
+            GLHelper.bufferSubData(GL.ARRAY_BUFFER, 0, _positions);
         }
         else
         {
@@ -403,7 +444,8 @@ class FlxBatcher implements IFlxDestroyable
         if (_numIndices == maxIndices)
         {
             // "orphan" (reallocate) the entire buffer to prevent stalls
-            GLHelper.bufferData(GL.ELEMENT_ARRAY_BUFFER, _indices, GL.STREAM_DRAW);
+            // GLHelper.bufferData(GL.ELEMENT_ARRAY_BUFFER, null, GL.STREAM_DRAW);
+            GLHelper.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, 0, _indices);
         }
         else
         {
@@ -420,12 +462,7 @@ class FlxBatcher implements IFlxDestroyable
         _positions[_vertexIndex++] = v;
         _colors[_vertexIndex++] = colorMult;
         _colors[_vertexIndex++] = colorOffset;
-        // _positions[_vertexIndex++] = textureSlot; // TODO ant : TEMP
-    }
-
-    inline function resolveShader(shader:FlxShader):FlxShader
-    {
-        return shader == null ? FlxGLRenderer.defaultShader : shader;
+        _positions[_vertexIndex++] = textureSlot;
     }
 }
 
@@ -433,13 +470,28 @@ class FlxBatcher implements IFlxDestroyable
 @:forward
 abstract BatchDrawCall(FlxDrawCall) from FlxDrawCall to FlxDrawCall
 {
-	public static inline function get(batcher:FlxBatcher, count:Int, offset:Int, topology:FlxTopology, shader:FlxShader, blend:BlendMode,
-			texture:FlxGraphic,
-			textureRepeat:Bool, textureSmoothing:Bool):BatchDrawCall
+    public inline static function get(batcher:FlxBatcher, count:Int, offset:Int, topology:FlxTopology, shader:FlxShader, blend:BlendMode,
+			texture:Vector<FlxTexture>, textureSmoothing:Vector<Bool>):BatchDrawCall
 	{
-		return FlxDrawCall.get()
+		var dc = FlxDrawCall.get()
 			.init(batcher._glIndexBuffer, count, offset)
-			.setState(topology, shader, blend, texture, textureRepeat, textureSmoothing);
+			.setState(topology, shader, blend, texture, textureSmoothing);
+
+        // This doesn't work because it eventually gets overwritten by the next draw call, as we don't draw immediately after setting these uniforms...
+        // #if FLX_OPENGL_BATCH_TEXTURES
+        // // 1 here because we set the main texture (0) in the setState() call above
+        // for (i in 1...texture.length)
+        // {
+        //     var tex = texture.get(i);
+        //     if (tex == null)
+        //         break; // should be bound in order, so a null in the middle means everything else is null
+
+        //     var smoothing = textureSmoothing.get(i);
+        //     shader.setTexture('flixel_uTexture$i', tex, smoothing);
+        // }
+        // #end
+
+        return dc;
 	}
 }
 #end

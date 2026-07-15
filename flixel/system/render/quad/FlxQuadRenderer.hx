@@ -29,6 +29,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 		method = DRAW_TILES;
 		textures = new FlxQuadTextureSystem();
 		renderTargets = new FlxQuadRenderTargetSystem();
+		shaders = new FlxQuadShaderSystem();
 		
 		#if FLX_OPENGL_AVAILABLE
 		if (hasGL)
@@ -142,6 +143,17 @@ class FlxQuadRenderTargetSystem implements IFlxRenderTargetSystem
 	public function destroyHandle(handle:FlxRenderTargetHandle):Void {}
 	public function resize(texture:FlxRenderTexture, width:Int, height:Int):Void {}
 	public function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
+}
+
+class FlxQuadShaderSystem implements IFlxShaderSystem
+{
+	public function new() {}
+
+	public function createHandle(data:FlxShaderData):FlxShaderHandle {return null;}
+	public function destroyHandle(handle:FlxShaderHandle):Void {}
+
+	public function getUniformLocation(handle:FlxShaderHandle, name:String):FlxShaderUniformLocation {return null;}
+	public function getAttributeLocation(handle:FlxShaderHandle, name:String):FlxShaderAttributeLocation {return null;}
 
 	public function fetchUniforms(handle:FlxShaderHandle):Array<FlxShaderUniform<Any>> {return null;}
 	public function setUniformInt(location:FlxShaderUniformLocation, v:Int):Void {}
@@ -164,4 +176,7 @@ class FlxQuadRenderTargetSystem implements IFlxRenderTargetSystem
 	public function setUniformMatrix2x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
 	public function setUniformMatrix2x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
 	public function setUniformTexture(location:FlxShaderUniformLocation, v:FlxTexture, smoothing:Bool, slot:Int):Void {}
+
+	public function getMaxTexturesInShader():Int {return 0;}
+	public function getMaxIfStatementsInShader(initialAmount:Int):Int {return 0;}
 }

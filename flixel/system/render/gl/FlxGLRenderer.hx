@@ -3,26 +3,23 @@ package flixel.system.render.gl;
 #if FLX_RENDER_OPENGL
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.shaders.FlxShader;
+import flixel.graphics.shaders.FlxDefaultShader;
+import flixel.graphics.shaders.FlxBatcherShader;
 import flixel.graphics.textures.FlxRenderTexture;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
 import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
-import flixel.system.render.FlxTopology;
 import flixel.system.render.gl.FlxDrawCall;
 import flixel.util.FlxColor;
-import lime.graphics.Image;
-import lime.graphics.ImageBuffer;
 import lime.graphics.opengl.GL;
-import lime.graphics.opengl.GLProgram;
 import lime.graphics.opengl.GLShader;
-import lime.graphics.opengl.GLTexture;
 import lime.math.Matrix4;
 import lime.utils.Float32Array;
 import lime.utils.Int32Array;
 import lime.utils.UInt8Array;
-import openfl.display.BitmapData;
-import openfl.display.Shader;
+
+using StringTools;
 
 @:access(flixel.system.render.gl)
 @:access(flixel.FlxCamera)
@@ -72,7 +69,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     /**
      * The default shader used by the renderer.
      */
-    public static var defaultShader:FlxGLShader;
+	public static var defaultShader:FlxShader;
 
     /**
      * A tiny wrapper over the GL context.
@@ -127,9 +124,15 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
         context = new GLContext();
 
-        defaultShader = new FlxGLShader();
+		defaultShader = #if FLX_OPENGL_BATCH_TEXTURES new FlxBatcherShader() #else new FlxDefaultShader() #end;
 
-        batcher = new FlxBatcher(MAX_QUADS_PER_BUFFER * VERTICES_PER_QUAD, MAX_QUADS_PER_BUFFER * INDICES_PER_QUAD, 6);
+        // The batcher uses 7 vertex attributes/components (?):
+        // The (x, y) position
+        // The (u, v) texture mapping
+        // Color multiplier
+        // Color offset
+        // Texture slot
+		batcher = new FlxBatcher(MAX_QUADS_PER_BUFFER * VERTICES_PER_QUAD, MAX_QUADS_PER_BUFFER * INDICES_PER_QUAD, 7);
     }
 
     // =============================================================================
@@ -156,25 +159,51 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
 		shader.setMatrixTypedArray("flixel_uMatrix", projection);
 
+		// if (shader.data.flash != null)
+		// {
+		//     // We cannot use our fancy API for OpenFL shaders so we have to set these manually :(
+		//     var flashShader = shader.data.flash.shader;
+		
+		//     GL.activeTexture(GL.TEXTURE0);
+		//     GL.bindTexture(GL.TEXTURE_2D, dc.texture._handle);
+		
+		//     final filter = flashShader.data.bitmap.filter == openfl.display3D.Context3DTextureFilter.LINEAR ? GL.LINEAR : GL.NEAREST;
+		//     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+		//     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+		
+		//     GL.uniform1i(flashShader.data.bitmap.index, 0);
+		// }
+		// else
+		//     shader.setTexture("flixel_uTexture", dc.texture, dc.textureSmoothing);
+		
+		// if (shader.hasUniform("flixel_uTextureSize"))
+		// 	shader.setInt2("flixel_uTextureSize", dc.texture.width, dc.texture.height);
+
         if (shader.data.flash != null)
-        {
-            // We cannot use our fancy API for OpenFL shaders so we have to set these manually :(
-            var flashShader = shader.data.flash.shader;
-
-            GL.activeTexture(0);
-            GL.bindTexture(GL.TEXTURE_2D, dc.texture.texture._handle);
-
-            final filter = flashShader.data.bitmap.filter == openfl.display3D.Context3DTextureFilter.LINEAR ? GL.LINEAR : GL.NEAREST;
-            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
-            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
-
-            GL.uniform1i(flashShader.data.bitmap.index, 0);
-        }
+		{
+		    // We cannot use our fancy API for OpenFL shaders so we have to set these manually :(
+		    var flashShader = shader.data.flash.shader;
+		
+		    GL.activeTexture(GL.TEXTURE0);
+		    GL.bindTexture(GL.TEXTURE_2D, dc.textures.get(0)._handle);
+		
+		    final filter = flashShader.data.bitmap.filter == openfl.display3D.Context3DTextureFilter.LINEAR ? GL.LINEAR : GL.NEAREST;
+		    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+		    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+		
+		    GL.uniform1i(flashShader.data.bitmap.index, 0);
+		}
         else
-            shader.setTexture("flixel_uTexture", dc.texture.texture, dc.textureSmoothing);
+        {
+            for (i in 0...dc.textures.length)
+            {
+                var texture = dc.textures.get(i);
+                if (texture == null) break;
 
-		if (shader.hasUniform("flixel_uTextureSize"))
-			shader.setInt2("flixel_uTextureSize", dc.texture.width, dc.texture.height);
+                var name = i == 0 ? 'flixel_uTexture' : 'flixel_uTexture$i';
+                shader.setTexture(name, texture, dc.texturesSmoothing.get(i));
+            }
+        }
 
         // Upload the uniforms to the GPU
         shader.updateUniforms();
@@ -439,17 +468,40 @@ class FlxGLRenderTargetSystem implements IFlxRenderTargetSystem
 
 class FlxGLShaderSystem implements IFlxShaderSystem
 {
+	inline static final FRAGMENT_BUILTIN = "
+        varying vec4 flixel_vColorMultiplier;
+        varying vec4 flixel_vColorOffset;
+        varying vec2 flixel_vTextureCoord;
+
+        uniform sampler2D flixel_uTexture;
+        uniform vec2 flixel_uTextureSize;
+
+        vec4 flixel_texture(sampler2D sampler, vec2 coord)
+        {
+            vec4 color = texture2D(sampler, coord);
+
+            color = vec4(color.rgb / color.a, color.a);
+            color = (color * flixel_vColorMultiplier) + flixel_vColorOffset;
+
+            return vec4(color.rgb * color.a, color.a);
+        }
+
+        #define flixel_texture2D flixel_texture
+        ";
+
+    var _handleCache:Map<String, FlxShaderHandle>;
+
     public var renderer:FlxGLRenderer;
 
     public function new(renderer:FlxGLRenderer)
     {
         this.renderer = renderer;
+        
+        _handleCache = new Map<String, FlxShaderHandle>();
     }
 
     public function createHandle(data:FlxShaderData):FlxShaderHandle
-    {
-        // TODO: use default shader data when certain params are null
-
+	{
         #if !flash
         if (data.flash != null)
         {
@@ -469,12 +521,42 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         }
         #end
 
+		if (data.glsl == null)
+			throw "Missing GLSL shader data";
+			
+		// Fill in non specified optional values before creating the program
+		if (data.glsl.vertex == null)
+			data.glsl.vertex = FlxDefaultShader.defaultShaderData.glsl.vertex;
+		else
+		{
+			if (data.glsl.vertex.precision == null)
+				data.glsl.vertex.precision = FlxDefaultShader.defaultShaderData.glsl.vertex.precision;
+			if (data.glsl.vertex.version == null)
+				data.glsl.vertex.version = FlxDefaultShader.defaultShaderData.glsl.vertex.version;
+		}
+		
+		if (data.glsl.fragment.injectBuiltins == null)
+			data.glsl.fragment.injectBuiltins = FlxDefaultShader.defaultShaderData.glsl.fragment.injectBuiltins;
+		if (data.glsl.fragment.precision == null)
+			data.glsl.fragment.precision = FlxDefaultShader.defaultShaderData.glsl.fragment.precision;
+		if (data.glsl.fragment.version == null)
+			data.glsl.fragment.version = FlxDefaultShader.defaultShaderData.glsl.fragment.version;
+
+        var vertexSourceProcessed = data.glsl.vertex != null ? processShaderSource(data.glsl.vertex, GL.VERTEX_SHADER) : null;
+        var fragmentSourceProcessed = data.glsl.fragment != null ? processShaderSource(data.glsl.fragment, GL.FRAGMENT_SHADER) : null;
+
+        // Check if we have this shader already compiled
+        var cacheKey:String = vertexSourceProcessed + fragmentSourceProcessed;
+        if (_handleCache.exists(cacheKey))
+            return _handleCache.get(cacheKey);
+
+        // We don't
         var program = GL.createProgram();
 
         if (data.glsl.vertex != null)
         {
-            var vs = createShader(GL.VERTEX_SHADER, data.glsl.vertex);
-            GL.attachShader(program, vs);
+            var shader = createShader(GL.VERTEX_SHADER, vertexSourceProcessed);
+            GL.attachShader(program, shader);
 
             // Before linking the shader program we want to ensure our attributes
             // will be assigned to the locations we want them to be in
@@ -488,8 +570,8 @@ class FlxGLShaderSystem implements IFlxShaderSystem
 
         if (data.glsl.fragment != null)
         {
-            var fs = createShader(GL.FRAGMENT_SHADER, data.glsl.fragment);
-            GL.attachShader(program, fs);
+            var shader = createShader(GL.FRAGMENT_SHADER, fragmentSourceProcessed);
+            GL.attachShader(program, shader);
         }
 
         GL.linkProgram(program);
@@ -497,7 +579,9 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         if (GL.getProgramParameter(program, GL.LINK_STATUS) == 0)
         {
             var error = GL.getProgramInfoLog(program);
-            trace('Error linking program:\n$error');
+
+            // TODO: port https://github.com/openfl/openfl/pull/2764 ?
+            FlxG.log.error('Error linking program:\n$error');
         }
 
         return program;
@@ -573,7 +657,7 @@ class FlxGLShaderSystem implements IFlxShaderSystem
                     case GL.FLOAT_VEC4: new FlxShaderUniform<ShaderArray<Float32Array>>(FLOAT_ARRAY, info.name, location, {data: null, dimension: VEC4});
 
                     // Booleans don't really exist, so we'll represent them as integers
-                    case GL.INT, GL.BOOL: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: new Int32Array(info.size), dimension: SCALAR});
+                    case GL.INT, GL.BOOL: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: SCALAR});
                     case GL.INT_VEC2: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC2});
                     case GL.INT_VEC3: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC3});
                     case GL.INT_VEC4: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC4});
@@ -590,8 +674,6 @@ class FlxGLShaderSystem implements IFlxShaderSystem
                 continue;
             }
 
-            // uniforms.set(info.name, u);
-            // _uniformList.push(u);
             uniforms.push(u);
         }
 
@@ -665,8 +747,6 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         }
     }
 
-    // TODO: IMPLEMENT NON-SQUARE MATRIX METHODS
-
 	public function setUniformMatrix4x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
     {
         GLHelper.uniformMatrix4fv(location, transpose, v);
@@ -674,17 +754,17 @@ class FlxGLShaderSystem implements IFlxShaderSystem
 
 	public function setUniformMatrix4x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
     {
-
+        GLHelper.uniformMatrix4x3fv(location, transpose, v);
     }
 
 	public function setUniformMatrix4x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
     {
-
+        GLHelper.uniformMatrix4x2fv(location, transpose, v);
     }
 
 	public function setUniformMatrix3x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
     {
-
+        GLHelper.uniformMatrix3x4fv(location, transpose, v);
     }
 
 	public function setUniformMatrix3x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
@@ -694,17 +774,22 @@ class FlxGLShaderSystem implements IFlxShaderSystem
 
 	public function setUniformMatrix3x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
     {
-
+        GLHelper.uniformMatrix3x2fv(location, transpose, v);
     }
 
 	public function setUniformMatrix2x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
     {
-
+        GLHelper.uniformMatrix2x4fv(location, transpose, v);
     }
 
 	public function setUniformMatrix2x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
     {
+        GLHelper.uniformMatrix2x3fv(location, transpose, v);
+    }
 
+    public function setUniformMatrix2x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    {
+        GLHelper.uniformMatrix2fv(location, transpose, v);
     }
 
     public function setUniformTexture(location:FlxShaderUniformLocation, v:FlxTexture, smoothing:Bool, slot:Int):Void
@@ -714,37 +799,90 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         renderer.context.bindTexture(v);
         
         // Apply smoothing
-        var filter = smoothing ? GL.LINEAR : GL.NEAREST;
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
-
-        // Write the texture's slot to our texture uniform
-        GL.uniform1i(location, slot);
+        if (v._smooth != smoothing)
+        {
+            var filter = smoothing ? GL.LINEAR : GL.NEAREST;
+            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
+            v._smooth = smoothing;
+        }
     }
 
-	public function setUniformMatrix2x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void
+    public function getMaxTexturesInShader():Int
     {
-        GLHelper.uniformMatrix2fv(location, transpose, v);
+        return cast GL.getParameter(GL.MAX_TEXTURE_IMAGE_UNITS);
     }
 
-    function createShader(type:Int, data:GLSLShader):GLShader 
+    public function getMaxIfStatementsInShader(initialAmount:Int):Int
+    {
+        inline function generateTestIfs(count:Int):String
+        {
+            var result:String = "";
+
+            for (i in 0...count)
+            {
+                if (i > 0)
+                    result += "\nelse ";
+                if (i < count - 1)
+                    result += 'if (test == $i.0) {}';
+            }
+
+            return result;
+        }
+
+        inline function canCompileTestShader(glsl:String):Bool
+        {
+            var shader = GL.createShader(GL.FRAGMENT_SHADER);
+            GL.shaderSource(shader, glsl);
+            GL.compileShader(shader);
+
+            var success:Bool = GL.getShaderParameter(shader, GL.COMPILE_STATUS) == 1;
+
+            GL.deleteShader(shader);
+            return success;
+        }
+
+        var glslTemplate = "
+        #ifdef GL_ES
+        precision mediump float;
+        #endif
+        void main()
+        {
+            float test = 0.1;
+            %CONDITIONS%
+            gl_FragColor = vec4(0.0);
+        }
+        ";
+
+        var maxIfs:Int = initialAmount;
+        while (maxIfs > 0) 
+        {
+            var glsl = glslTemplate.replace("%CONDITIONS%", generateTestIfs(maxIfs));
+            if (!canCompileTestShader(glsl))
+                maxIfs = Std.int(maxIfs / 2);
+            else
+                break;
+        }
+
+        return maxIfs;
+    }
+
+    function createShader(type:Int, src:String):GLShader 
     {
         var shader = GL.createShader(type);
-        var src = processShaderSource(data);
         GL.shaderSource(shader, src);
         GL.compileShader(shader);
 
         if (GL.getShaderParameter(shader, GL.COMPILE_STATUS) == 0)
         {
             var error = GL.getShaderInfoLog(shader);
-            trace('Error compiling ${type == GL.FRAGMENT_SHADER ? 'fragment' : 'vertex'} shader:\n$error');
-            trace(src);
+            FlxG.log.error('Error compiling ${type == GL.FRAGMENT_SHADER ? 'fragment' : 'vertex'} shader:\n$error');
         }
 
         return shader;
     }
 
-    function processShaderSource(shader:GLSLShader):String
+	function processShaderSource(shader:GLSLShader, type:Int):String
     {
         var prefix:StringBuf = new StringBuf();
 
@@ -755,19 +893,7 @@ class FlxGLShaderSystem implements IFlxShaderSystem
             if (!versionRegex.match(shader.source))
                 prefix.add('#version ${shader.version}\n');
             else
-                FlxG.log.warn("Can't inject shader version because the shader code already specifies it!");
-
-            // if (shader.allowConvert)
-            // {
-            //     // Based off of the implementation by EliteMasterEric (https://github.com/openfl/openfl/pull/2722)
-            //     var attributeRegex = ~/attribute ([A-Za-z0-9]+) ([A-Za-z0-9_]+)/g;
-            //     var varyingRegex = ~/varying ([A-Za-z0-9]+) ([A-Za-z0-9_]+)/g;
-
-            //     var texture2DRegex = ~/texture2D/g;
-            //     var glFragColorRegex = ~/gl_FragColor/g;
-
-            //     switch (shader.version)
-            // }
+				FlxG.log.warn("Can't inject shader version because the shader code already specifies it!");
         }
 
         var precisionRegex = ~/^precision/m;
@@ -802,7 +928,36 @@ class FlxGLShaderSystem implements IFlxShaderSystem
 
         prefix.add("\n");
 
-        return prefix.toString() + shader.source;
+        if (shader.version != null)
+        {
+		    var versionSplit = shader.version.split(" ");
+            var versionNumber = Std.parseInt(versionSplit[0]);
+            var versionExtra = versionSplit[1] != null ? versionSplit[1] : "";
+            
+            // Newer GLSL versions deprecate and remove some features, so we need to handle that if we're targeting a higher GLSL version
+            // For OpenGL ES and WebGL we only have to check if we're targeting version 300 or higher
+            // On desktop OpenGL we check if we're targeting version 130 or higher AND it's NOT a compatibility profile (which doesn't remove anything)
+            if (((GL.type == OPENGLES || GL.type == WEBGL) && versionNumber >= 300)
+                || (GL.type == OPENGL) && versionNumber >= 130 && versionExtra != "compatibility") 
+            {
+                prefix.add("#define texture2D texture\n");
+
+                // Note that varying is input in a fragment shader, but output in a vertex shader.
+                if (type == GL.FRAGMENT_SHADER)
+                {
+                    prefix.add("#define varying in\n");
+                    prefix.add("out vec4 flixel_outColor;\n");
+                    prefix.add("#define gl_FragColor flixel_outColor\n");
+                }
+                else if (type == GL.VERTEX_SHADER)
+                {
+                    prefix.add("#define attribute in\n");
+                    prefix.add("#define varying out\n");
+                }
+            }
+        }
+
+        return prefix.toString() + "\n" + (type == GL.FRAGMENT_SHADER ? FRAGMENT_BUILTIN : "") + "\n" + shader.source;
     }
 }
 #end
