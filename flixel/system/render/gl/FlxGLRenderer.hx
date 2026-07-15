@@ -302,16 +302,11 @@ class FlxGLTextureSystem implements IFlxTextureSystem
 	
 	public function createHandle():FlxTextureHandle 
     {
-        // return GL.createTexture();
         final handle = GL.createTexture();
         GL.bindTexture(GL.TEXTURE_2D, handle);
-
-        // TODO ant: remove this in v7.0.0 when texture filtering is real
-        // GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
-        // GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-
+        // I thought OpenGL would set these defaults automatically but apparently not...?
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
+        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
         return handle;
     }
 
@@ -801,6 +796,7 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         // Apply smoothing
         if (v._smooth != smoothing)
         {
+            trace('Changing smoothing: ', smoothing);
             var filter = smoothing ? GL.LINEAR : GL.NEAREST;
             GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
             GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
