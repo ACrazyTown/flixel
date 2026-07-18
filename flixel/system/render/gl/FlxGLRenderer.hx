@@ -14,6 +14,7 @@ import flixel.system.render.gl.FlxDrawCall;
 import flixel.util.FlxColor;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLShader;
+import lime.graphics.opengl.GLTexture;
 import lime.math.Matrix4;
 import lime.utils.Float32Array;
 import lime.utils.Int32Array;
@@ -143,13 +144,13 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
      * Immediately executes the passed `FlxDrawCall`.
      * @param   dc   The `FlxDrawCall` to execute.
      */
+    @:access(openfl.display)
+    @:access(openfl.display3D)
     public function draw(dc:FlxDrawCall):Void
     {
         final shader = dc.shader;
 
         // Prep the GL state for the upcoming draw
-        // if (_renderer.context.setShader(shader))
-        //     initShader(shader);
         // TODO: nicer way to handle attributes?
         if (context.setShader(shader))
             batcher.initShader(shader);
@@ -159,44 +160,42 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
 		shader.setMatrixTypedArray("flixel_uMatrix", projection);
 
-		// if (shader.data.flash != null)
-		// {
-		//     // We cannot use our fancy API for OpenFL shaders so we have to set these manually :(
-		//     var flashShader = shader.data.flash.shader;
-		
-		//     GL.activeTexture(GL.TEXTURE0);
-		//     GL.bindTexture(GL.TEXTURE_2D, dc.texture._handle);
-		
-		//     final filter = flashShader.data.bitmap.filter == openfl.display3D.Context3DTextureFilter.LINEAR ? GL.LINEAR : GL.NEAREST;
-		//     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
-		//     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
-		
-		//     GL.uniform1i(flashShader.data.bitmap.index, 0);
-		// }
-		// else
-		//     shader.setTexture("flixel_uTexture", dc.texture, dc.textureSmoothing);
-		
-		// if (shader.hasUniform("flixel_uTextureSize"))
-		// 	shader.setInt2("flixel_uTextureSize", dc.texture.width, dc.texture.height);
-
+        // For OpenFL compatibility shaders we have to handle textures differently
+        // as we're dealing with BitmapData and not FlxTexture
         if (shader.data.flash != null)
 		{
-		    // We cannot use our fancy API for OpenFL shaders so we have to set these manually :(
-		    final flashShader = shader.data.flash.shader;
-            final texture = dc.textures[0];
+            inline function setTexture(index:Int, texture:GLTexture, filter:Int, slot:Int) 
+            {
+                GL.activeTexture(GL.TEXTURE0 + slot);
+                GL.bindTexture(GL.TEXTURE_2D, texture);
 
-		    GL.activeTexture(GL.TEXTURE0);
-		    GL.bindTexture(GL.TEXTURE_2D, texture._handle);
-		
-		    final filter = flashShader.data.bitmap.filter == openfl.display3D.Context3DTextureFilter.LINEAR ? GL.LINEAR : GL.NEAREST;
-		    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
-		    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
-		
-		    GL.uniform1i(flashShader.data.bitmap.index, 0);
+                GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filter);
+                GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filter);
 
-            // This is set later by the OpenFL shader during shader.updateUniforms();
-            @:privateAccess
-            flashShader.__textureSize.value = [texture.width, texture.height];
+                GL.uniform1i(index, slot);
+            }
+
+            final flashShader = shader.data.flash.shader;
+            var slot:Int = 0;
+
+            for (input in flashShader.__inputBitmapData)
+            {
+                // "bitmap" is the main texture so we want to manually assign it a texture based on our draw
+                // and also update the texture size uniform
+                // Everything else is user specified so just use whatever was passed in
+                if (input == flashShader.__bitmap)
+                {
+                    final texture = dc.textures[0];
+                    setTexture(input.index, texture._handle, dc.texturesSmoothing[0] ? GL.LINEAR : GL.NEAREST, slot);
+                    flashShader.__textureSize.value = [texture.width, texture.height];
+                    slot++;
+                }
+                else if (input.input != null)
+                {
+                    setTexture(input.index, input.input.getTexture(FlxG.stage.context3D).__textureID, input.filter == LINEAR ? GL.LINEAR : GL.NEAREST, slot);
+                    slot++;
+                }
+            }
 		}
         else
         {
