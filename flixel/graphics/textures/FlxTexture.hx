@@ -161,10 +161,9 @@ class FlxTexture implements IFlxDestroyable
 
         _handle = FlxG.renderer.textures.createHandle();
 
-        // Invoke the setters to properly set up the texture state
-        set_wrapU(wrapU);
-        set_wrapV(wrapV);
-        // set_filter(filter);
+        // Set up initial texture state
+        FlxG.renderer.textures.setWrapU(this, wrapU);
+        FlxG.renderer.textures.setWrapV(this, wrapV);
     }
 
     /**
