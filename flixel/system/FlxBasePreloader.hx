@@ -5,7 +5,7 @@ import flixel.util.FlxStringUtil;
 import openfl.Lib;
 import openfl.Vector;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.GradientType;
 import openfl.display.GraphicsPathWinding;
 import openfl.display.Shape;
@@ -199,16 +199,16 @@ class FlxBasePreloader extends DefaultPreloader
 	}
 
 	/**
-	 * This should be used whenever you want to create a Bitmap that uses BitmapData embedded with the
+	 * This should be used whenever you want to create a Bitmap that uses FlxBitmap embedded with the
 	 * @:bitmap metadata, if you want to support both Flash and HTML5. Because the embedded data is loaded
 	 * asynchronously in HTML5, any code that depends on the pixel data or size of the bitmap should be
 	 * in the onLoad function; any such code executed before it is called will fail on the HTML5 target.
 	 *
-	 * @param	bitmapDataClass		A reference to the BitmapData child class that contains the embedded data which is to be used.
-	 * @param	onLoad				Executed once the bitmap data is finished loading in HTML5, and immediately in Flash. The new Bitmap instance is passed as an argument.
+	 * @param	bitmapDataClass		A reference to the FlxBitmap child class that contains the embedded data which is to be used.
+	 * @param	onLoad				Executed once the bitmap is finished loading in HTML5, and immediately in Flash. The new Bitmap instance is passed as an argument.
 	 * @return  The Bitmap instance that was created.
 	 */
-	function createBitmap(bitmapDataClass:Class<BitmapData>, onLoad:Bitmap->Void):Bitmap
+	function createBitmap(bitmapDataClass:Class<FlxBitmap>, onLoad:Bitmap->Void):Bitmap
 	{
 		#if html5
 		var bmp = new Bitmap();
@@ -222,17 +222,17 @@ class FlxBasePreloader extends DefaultPreloader
 	}
 
 	/**
-	 * This should be used whenever you want to create a BitmapData object from a class containing data embedded with
-	 * the @:bitmap metadata. Often, you'll want to use the BitmapData in a Bitmap object; in this case, createBitmap()
+	 * This should be used whenever you want to create a FlxBitmap object from a class containing data embedded with
+	 * the @:bitmap metadata. Often, you'll want to use the FlxBitmap in a Bitmap object; in this case, createBitmap()
 	 * can should be used instead. Because the embedded data is loaded asynchronously in HTML5, any code that depends on
 	 * the pixel data or size of the bitmap should be in the onLoad function; any such code executed before it is called
 	 * will fail on the HTML5 target.
 	 *
-	 * @param	bitmapDataClass		A reference to the BitmapData child class that contains the embedded data which is to be used.
-	 * @param	onLoad				Executed once the bitmap data is finished loading in HTML5, and immediately in Flash. The new BitmapData instance is passed as an argument.
-	 * @return  The BitmapData instance that was created.
+	 * @param	bitmapDataClass		A reference to the FlxBitmap child class that contains the embedded data which is to be used.
+	 * @param	onLoad				Executed once the bitmap is finished loading in HTML5, and immediately in Flash. The new FlxBitmap instance is passed as an argument.
+	 * @return  The FlxBitmap instance that was created.
 	 */
-	function loadBitmapData(bitmapDataClass:Class<BitmapData>, onLoad:BitmapData->Void):BitmapData
+	function loadBitmapData(bitmapDataClass:Class<FlxBitmap>, onLoad:FlxBitmap->Void):FlxBitmap
 	{
 		#if html5
 		return Type.createInstance(bitmapDataClass, [0, 0, true, 0xFFFFFFFF, onLoad]);

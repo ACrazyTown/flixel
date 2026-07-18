@@ -8,7 +8,7 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxBitmapDataUtil;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.geom.Point;
 
 /**
@@ -55,8 +55,8 @@ class FlxTileFrames extends FlxFramesCollection
 	}
 
 	/**
-	 * Gets source `BitmapData`, generates new `BitmapData` with spaces between frames
-	 * (if there is no such `BitmapData` in the cache already) and creates `FlxTileFrames` collection.
+	 * Gets source `FlxBitmap`, generates new `FlxBitmap` with spaces between frames
+	 * (if there is no such `FlxBitmap` in the cache already) and creates `FlxTileFrames` collection.
 	 *
 	 * @param   source        The source of graphic for frame collection.
 	 * @param   tileSize      The size of tiles in spritesheet.
@@ -74,11 +74,14 @@ class FlxTileFrames extends FlxFramesCollection
 		if (graphic == null)
 			return null;
 
+		if (!graphic.texture.checkReadWrite())
+			return null;
+
 		var key:String = FlxG.bitmap.getKeyWithSpacesAndBorders(graphic.key, tileSize, tileSpacing, tileBorder, region);
 		var result:FlxGraphic = FlxG.bitmap.get(key);
 		if (result == null)
 		{
-			var bitmap:BitmapData = FlxBitmapDataUtil.addSpacesAndBorders(graphic.bitmap, tileSize, tileSpacing, tileBorder, region);
+			var bitmap:FlxBitmap = FlxBitmapDataUtil.addSpacesAndBorders(graphic.texture.downloadBitmap(), tileSize, tileSpacing, tileBorder, region);
 			result = FlxG.bitmap.add(bitmap, false, key);
 		}
 
@@ -100,8 +103,8 @@ class FlxTileFrames extends FlxFramesCollection
 	}
 
 	/**
-	 * Gets `FlxFrame` object, generates new `BitmapData` with spaces between tiles in the frame
-	 * (if there is no such `BitmapData` in the cache already) and creates a `FlxTileFrames` collection.
+	 * Gets `FlxFrame` object, generates new `FlxBitmap` with spaces between tiles in the frame
+	 * (if there is no such `FlxBitmap` in the cache already) and creates a `FlxTileFrames` collection.
 	 *
 	 * @param   frame         Frame to generate tiles from.
 	 * @param   tileSize      the size of tiles in spritesheet.
@@ -112,7 +115,7 @@ class FlxTileFrames extends FlxFramesCollection
 	 */
 	public static function fromFrameAddSpacesAndBorders(frame:FlxFrame, tileSize:FlxPoint, ?tileSpacing:FlxPoint, ?tileBorder:FlxPoint):FlxTileFrames
 	{
-		var bitmap:BitmapData = frame.paint();
+		var bitmap:FlxBitmap = frame.paint();
 		return FlxTileFrames.fromBitmapAddSpacesAndBorders(bitmap, tileSize, tileSpacing, tileBorder);
 	}
 
@@ -351,7 +354,7 @@ class FlxTileFrames extends FlxFramesCollection
 	 * @param   tileSize   The size of tiles (tilesets should have tiles of the same size).
 	 * @return  Atlas frames collection, which you can load in tilemaps or sprites:
 	 */
-	public static function combineTileSets(bitmaps:Array<BitmapData>, tileSize:FlxPoint, ?spacing:FlxPoint, ?border:FlxPoint):FlxTileFrames
+	public static function combineTileSets(bitmaps:Array<FlxBitmap>, tileSize:FlxPoint, ?spacing:FlxPoint, ?border:FlxPoint):FlxTileFrames
 	{
 		var framesCollections:Array<FlxTileFrames> = [];
 
@@ -422,7 +425,7 @@ class FlxTileFrames extends FlxFramesCollection
 		var height:Int = Std.int(rows * (tileHeight + 2 * borderY)) + (rows - 1) * spaceY;
 
 		// now we'll create result atlas and will blit every tile on it.
-		var combined:BitmapData = new BitmapData(width, height, true, FlxColor.TRANSPARENT);
+		var combined:FlxBitmap = new FlxBitmap(width, height, FlxColor.TRANSPARENT);
 		var graphic:FlxGraphic = FlxG.bitmap.add(combined);
 		var result:FlxTileFrames = new FlxTileFrames(graphic);
 		var destPoint:Point = new Point(borderX, borderY);

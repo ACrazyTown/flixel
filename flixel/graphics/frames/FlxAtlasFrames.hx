@@ -37,7 +37,7 @@ class FlxAtlasFrames extends FlxFramesCollection
 	 * and Texture Packer use the same JSON format, however this method honors frames' `duration`
 	 * whereas `fromTexturePackerJson` ignores it by default (for backwards compatibility reasons).
 	 *
-	 * @param   source       The image source (can be `FlxGraphic`, `String`, or `BitmapData`).
+	 * @param   source       The image source (can be `FlxGraphic`, `String`, or `FlxBitmap`).
 	 * @param   description  Contents of JSON file with atlas description.
 	 *                       You can get it with `FlxG.assets.getText(path/to/description.json)`.
 	 *                       Or you can just pass a path to the JSON file in the assets directory.
@@ -53,7 +53,7 @@ class FlxAtlasFrames extends FlxFramesCollection
 	/**
 	 * Parsing method for TexturePacker atlases in JSON format.
 	 *
-	 * @param   source            The image source (can be `FlxGraphic`, `String`, or `BitmapData`).
+	 * @param   source            The image source (can be `FlxGraphic`, `String`, or `FlxBitmap`).
 	 * @param   description       Contents of JSON file with atlas description.
 	 *                            You can get it with `FlxG.assets.getText(path/to/description.json)`.
 	 *                            Or you can just pass a path to the JSON file in the assets directory.
@@ -129,7 +129,7 @@ class FlxAtlasFrames extends FlxFramesCollection
 	/**
 	 * Parsing method for LibGDX atlases.
 	 *
-	 * @param   source        The image source (can be `FlxGraphic`, `String` or `BitmapData`).
+	 * @param   source        The image source (can be `FlxGraphic`, `String` or `FlxBitmap`).
 	 * @param   description   Contents of the file with atlas description.
 	 *                        You can get it with `FlxG.assets.getText(path/to/description/file)`.
 	 *                        Or you can just pass path to the description file in the assets directory.
@@ -229,7 +229,7 @@ class FlxAtlasFrames extends FlxFramesCollection
 	 * Parsing method for Sparrow texture atlases
 	 * (they can be generated with Shoebox http://renderhjs.net/shoebox/ for example).
 	 *
-	 * @param   source  The image source (can be `FlxGraphic`, `String` or `BitmapData`).
+	 * @param   source  The image source (can be `FlxGraphic`, `String` or `FlxBitmap`).
 	 * @param   xml     Contents of the XML file with atlas description.
 	 *                  Can be a path to the XML asset, an XML string, or an `Xml` object.
 	 * @return  Newly created `FlxAtlasFrames` collection.
@@ -307,7 +307,7 @@ class FlxAtlasFrames extends FlxFramesCollection
 	/**
 	 * Parsing method for TexturePacker atlases in generic XML format.
 	 *
-	 * @param   source  The image source (can be `FlxGraphic`, `String` or `BitmapData`).
+	 * @param   source  The image source (can be `FlxGraphic`, `String` or `FlxBitmap`).
 	 * @param   xml     Contents of the XML file with atlas description.
 	 *                  Can be a path to the XML asset, an XML string, or an `Xml` object.
 	 * @return  Newly created `FlxAtlasFrames` collection.
@@ -355,7 +355,7 @@ class FlxAtlasFrames extends FlxFramesCollection
 	/**
 	 * Parsing method for Sprite Sheet Packer atlases (http://spritesheetpacker.codeplex.com/).
 	 *
-	 * @param   Source        The image source (can be `FlxGraphic`, `String` or `BitmapData`).
+	 * @param   Source        The image source (can be `FlxGraphic`, `String` or `FlxBitmap`).
 	 * @param   Description   Contents of the file with atlas description.
 	 *                        You can get it with `FlxG.assets.getText(path/to/description/file)`.
 	 *                        Or you can just pass a path to the description file in the assets directory.

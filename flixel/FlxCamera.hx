@@ -21,7 +21,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.Vector;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.display.DisplayObject;
 import openfl.display.DisplayObjectContainer;
@@ -1820,7 +1820,7 @@ class FlxCamera extends FlxBasic
 	
 	@:noCompletion
 	@:deprecated("camera.drawPixels() is deprecated, use camera.view.drawPixels or drawFrame instead.") // 6.2.0
-	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
+	public function drawPixels(?frame:FlxFrame, ?pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
 			?shader:FlxShader):Void
 	{
 		if (frame != null)
@@ -1833,7 +1833,7 @@ class FlxCamera extends FlxBasic
 	
 	@:noCompletion
 	@:deprecated("camera.copyPixels() is deprecated, use camera.view.copyPixels or copyFrame instead.") // 6.2.0
-	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
+	public function copyPixels(?frame:FlxFrame, ?pixels:FlxBitmap, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
 			?smoothing:Bool = false, ?shader:FlxShader):Void
 	{
 		if (frame != null)
@@ -1870,7 +1870,7 @@ class FlxCamera extends FlxBasic
 	
 	@:noCompletion
 	@:deprecated("buffer is deprecated, use camera.viewBlit.buffer, instead") // 6.2.0
-	@:isVar public var buffer(get, set):Null<BitmapData>;
+	@:isVar public var buffer(get, set):Null<FlxBitmap>;
 	function get_buffer()
 	{
 		if (viewBlit != null)
@@ -1878,7 +1878,7 @@ class FlxCamera extends FlxBasic
 		
 		return this.buffer;
 	}
-	function set_buffer(value:BitmapData)
+	function set_buffer(value:FlxBitmap)
 	{
 		return if (viewBlit != null)
 			this.buffer = viewBlit.buffer = value;
@@ -2022,15 +2022,16 @@ class FlxCamera extends FlxBasic
 	
 	@:noCompletion
 	@:deprecated("_fill is deprecated, use camera.viewBlit._fill, instead") // 6.2.0
-	@:isVar var _fill(get, set):BitmapData;
-	function get__fill():BitmapData
+	@:isVar var _fill(get, set):FlxBitmap;
+	
+	function get__fill():FlxBitmap
 	{
 		if (viewBlit != null)
 			this._fill = viewBlit._fill;
 		
 		return this._fill;
 	}
-	function set__fill(value:BitmapData):BitmapData
+	function set__fill(value:FlxBitmap):FlxBitmap
 	{
 		return if (viewBlit != null)
 			this._fill = viewBlit._fill = value;

@@ -1,24 +1,11 @@
 package flixel.system.render.blit;
 
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxFrame;
-import flixel.graphics.tile.FlxDrawTrianglesItem;
-import flixel.math.FlxMatrix;
-import flixel.math.FlxPoint;
+import lime.utils.UInt8Array;
+import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets;
 import flixel.system.render.FlxRenderer;
-import flixel.util.FlxColor;
-import flixel.util.FlxDestroyUtil;
-import flixel.util.FlxSpriteUtil;
-import openfl.Vector;
-import openfl.display.BitmapData;
-import openfl.display.BlendMode;
-import openfl.display.Graphics;
-import openfl.display.Sprite;
-import openfl.geom.ColorTransform;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
+import flixel.system.render.FlxRendererTypes;
+import flixel.graphics.FlxBitmap;
 
 @:access(flixel.FlxCamera)
 @:access(flixel.system.render.blit)
@@ -38,6 +25,7 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 	{
 		super();
 		method = BLITTING;
+		textures = new FlxBlitTextureSystem();
 	}
 	
 	override function initGlobals()
@@ -78,4 +66,19 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 	{
 		FlxG.game.removeChild(view.flashSprite);
 	}
+}
+
+class FlxBlitTextureSystem implements IFlxTextureSystem
+{
+	public function new() {}
+	
+	public function createHandle():FlxTextureHandle {return null;}
+	public function destroyHandle(handle:FlxTextureHandle):Void {}
+	public function destroyBitmap(bitmap:FlxBitmap):Void {}
+
+	public function uploadBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void {}
+	public function readPixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void {}
+
+	public function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+	public function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 }

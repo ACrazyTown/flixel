@@ -18,6 +18,7 @@ typedef DrawData<T> = openfl.Vector<T>;
 /**
  * @author Zaphod
  */
+@:access(flixel.graphics)
 class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 {
 	static inline final INDICES_PER_QUAD = 6;
@@ -57,9 +58,10 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		@:privateAccess
 		final view = camera.viewQuad;
 		
+		#if FLX_RENDER_DRAWQUADS
 		#if !flash
 		var shader = shader != null ? shader : graphics.shader;
-		shader.bitmap.input = graphics.bitmap;
+		shader.bitmap.input = graphics.texture._handle;
 		shader.bitmap.filter = (camera.view.antialiasing || antialiasing) ? LINEAR : NEAREST;
 		shader.bitmap.wrap = REPEAT; // in order to prevent breaking tiling behaviour in classes that use drawTriangles
 		shader.alpha.value = alphas;
@@ -82,7 +84,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 
 		view.canvas.graphics.beginShaderFill(shader);
 		#else
-		view.canvas.graphics.beginBitmapFill(graphics.bitmap, null, true, (camera.antialiasing || antialiasing));
+		view.canvas.graphics.beginBitmapFill(graphics.texture._handle, null, true, (camera.antialiasing || antialiasing));
 		#end
 
 		view.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);
@@ -95,6 +97,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 			gfx.lineStyle(1, FlxColor.BLUE, 0.5);
 			gfx.drawTriangles(vertices, indices, uvtData);
 		}
+		#end
 		#end
 
 		super.render(camera);

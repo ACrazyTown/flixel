@@ -9,6 +9,7 @@ import openfl.Vector;
 import openfl.display.ShaderParameter;
 import openfl.geom.ColorTransform;
 
+@:access(flixel.graphics)
 class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 {
 	static inline var VERTICES_PER_QUAD = 4;
@@ -109,7 +110,7 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		}
 	}
 
-	#if !flash
+	#if (!flash && FLX_RENDER_DRAWQUADS)
 	override public function render(camera:FlxCamera):Void
 	{
 		if (rects.length == 0)
@@ -120,8 +121,9 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 			throw 'Attempted to render an invalid FlxDrawItem, did you destroy a cached sprite?';
 		
 		final shader = shader != null ? shader : graphics.shader;
-		shader.bitmap.input = graphics.bitmap;
+		shader.bitmap.input = graphics.texture._handle;
 		shader.bitmap.filter = (camera.view.antialiasing || antialiasing) ? LINEAR : NEAREST;
+		shader.bitmap.wrap = resolveWrap(graphics.texture);
 		shader.alpha.value = alphas;
 
 		if (colored || hasColorOffsets)

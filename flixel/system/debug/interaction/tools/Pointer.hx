@@ -7,7 +7,7 @@ import flixel.system.debug.Icon;
 import flixel.system.debug.interaction.Interaction;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Graphics;
 import openfl.ui.Keyboard;
 

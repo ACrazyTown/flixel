@@ -4,7 +4,7 @@ import flixel.graphics.frames.FlxBitmapFont;
 import flixel.math.FlxPoint;
 import flixel.text.FlxBitmapText;
 import massive.munit.Assert;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 @:access(flixel.text.FlxBitmapText)
 class FlxBitmapTextTest extends FlxTest
@@ -49,7 +49,7 @@ class FlxBitmapTextTest extends FlxTest
 	@Test
 	function testWrapMono()
 	{
-		final image = new BitmapData(112, 60);
+		final image = new FlxBitmap(112, 60);
 		final monospaceLetters:String = " !\"#$%&'()*+,-.\\0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[/]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 		final charSize = FlxPoint.get(7, 10);
 		final font = FlxBitmapFont.fromMonospace(image, monospaceLetters, charSize);

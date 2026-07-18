@@ -6,7 +6,7 @@ import flixel.math.FlxMatrix;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
@@ -55,15 +55,15 @@ class FlxTilemapBuffer implements IFlxDestroyable
 
 	/**
 	 * Whether or not the coordinates should be rounded during draw(), true by default (recommended for pixel art).
-	 * Only affects tilesheet rendering and rendering using BitmapData.draw() in blitting.
+	 * Only affects tilesheet rendering and rendering using FlxBitmap.draw() in blitting.
 	 * (copyPixels() only renders on whole pixels by nature). Causes draw() to be used if false, which is more expensive.
 	 */
 	public var pixelPerfectRender:Null<Bool>;
 
 	/**
-	 * The actual buffer BitmapData. (Only used with the blitting renderer)
+	 * The actual buffer FlxBitmap. (Only used with the blitting renderer)
 	 */
-	public var pixels(default, null):BitmapData;
+	public var pixels(default, null):FlxBitmap;
 
 	public var blend:BlendMode;
 	public var antialiasing:Bool = false;
@@ -124,7 +124,7 @@ class FlxTilemapBuffer implements IFlxDestroyable
 			
 			if (pixels == null)
 			{
-				pixels = new BitmapData(newWidth, newHeight, true, 0);
+				pixels = new FlxBitmap(newWidth, newHeight, 0);
 				_flashRect = new Rectangle(0, 0, newWidth, newHeight);
 				_matrix = new FlxMatrix();
 				dirty = true;
@@ -132,7 +132,7 @@ class FlxTilemapBuffer implements IFlxDestroyable
 			else if (pixels.width != newWidth || pixels.height != newHeight)
 			{
 				FlxDestroyUtil.dispose(pixels);
-				pixels = new BitmapData(newWidth, newHeight, true, 0);
+				pixels = new FlxBitmap(newWidth, newHeight, 0);
 				_flashRect.setTo(0, 0, newWidth, newHeight);
 				dirty = true;
 			}

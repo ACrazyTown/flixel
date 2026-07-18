@@ -7,7 +7,7 @@ import flixel.system.FlxQuadTree;
 import flixel.system.debug.DebuggerUtil;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.system.System;
 import openfl.text.TextField;
 

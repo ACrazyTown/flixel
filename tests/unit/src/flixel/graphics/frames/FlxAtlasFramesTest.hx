@@ -1,12 +1,12 @@
 package flixel.graphics.frames;
 
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import haxe.Json;
 import massive.munit.Assert;
 
 class FlxAtlasFramesTest extends FlxTest
 {
-	var bmd:BitmapData;
+	var bmd:FlxBitmap;
 	var json:String;
 	var xml:String;
 	var atlasJson:FlxAtlasFrames;
@@ -15,16 +15,16 @@ class FlxAtlasFramesTest extends FlxTest
 	@Before
 	function before()
 	{
-		bmd = new BitmapData(1, 1);
+		bmd = new FlxBitmap(1, 1);
 		json = '{"frames":{"alien.png":{"frame":{"x":2,"y":2,"w":46,"h":16},"rotated":false,"trimmed":true,"spriteSourceSize":{"x":1,"y":0,"w":46,"h":16},"sourceSize":{"w":48,"h":16},"pivot":{"x":0.5,"y":0.5}},"medium.png":{"frame":{"x":2,"y":20,"w":32,"h":32},"rotated":false,"trimmed":false,"spriteSourceSize":{"x":0,"y":0,"w":32,"h":32},"sourceSize":{"w":32,"h":32},"pivot":{"x":0.5,"y":0.5}},"ship.png":{"frame":{"x":36,"y":38,"w":12,"h":8},"rotated":true,"trimmed":false,"spriteSourceSize":{"x":0,"y":0,"w":12,"h":8},"sourceSize":{"w":12,"h":8},"pivot":{"x":0.5,"y":0.5}},"small.png":{"frame":{"x":36,"y":20,"w":16,"h":16},"rotated":false,"trimmed":false,"spriteSourceSize":{"x":0,"y":0,"w":16,"h":16},"sourceSize":{"w":16,"h":16},"pivot":{"x":0.5,"y":0.5}}}}';
-		atlasJson = FlxAtlasFrames.fromTexturePackerJson(new BitmapData(1, 1), json);
+		atlasJson = FlxAtlasFrames.fromTexturePackerJson(new FlxBitmap(1, 1), json);
 		xml = '<TextureAtlas>
   <SubTexture name="hey0001" x="471" y="528" width="394" height="416" frameX="-0" frameY="-0" frameWidth="414" frameHeight="418" />
   <SubTexture name="hey0002" x="471" y="528" width="394" height="416" frameX="-0" frameY="-0" frameWidth="414" frameHeight="418" />
   <SubTexture name="hey0003" x="1887" y="514" width="413" height="410" frameX="-0" frameY="-8" frameWidth="414" frameHeight="418" />
   <SubTexture name="hey0004" x="1887" y="514" width="413" height="410" frameX="-0" frameY="-8" frameWidth="414" frameHeight="418" />
 </TextureAtlas>';
-		atlasXml = FlxAtlasFrames.fromSparrow(new BitmapData(1, 1), xml);
+		atlasXml = FlxAtlasFrames.fromSparrow(new FlxBitmap(1, 1), xml);
 	}
 
 	@Test

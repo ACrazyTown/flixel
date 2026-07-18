@@ -1,5 +1,7 @@
 package flixel.system.render.quad;
 
+import openfl.display3D.Context3DWrapMode;
+import flixel.graphics.textures.FlxTexture;
 import flixel.FlxCamera;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
@@ -80,6 +82,18 @@ class FlxDrawBaseItem<T>
 	}
 
 	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform):Void {}
+
+	function resolveWrap(texture:FlxTexture):Context3DWrapMode
+	{
+		if (texture.wrapU == REPEAT && texture.wrapV == REPEAT)
+			return REPEAT;
+		else if (texture.wrapU == REPEAT && texture.wrapV == CLAMP)
+			return REPEAT_U_CLAMP_V;
+		else if (texture.wrapU == CLAMP && texture.wrapV == REPEAT)
+			return CLAMP_U_REPEAT_V;
+
+		return CLAMP;
+	}
 
 	function get_numVertices():Int
 	{

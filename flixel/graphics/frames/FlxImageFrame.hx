@@ -8,7 +8,7 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxBitmapDataUtil;
 import flixel.util.FlxDestroyUtil;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 /**
  * Single-frame collection.
@@ -144,7 +144,7 @@ class FlxImageFrame extends FlxFramesCollection
 	}
 
 	/**
-	 * Gets source BitmapData, generates new BitmapData (if there is no such BitmapData in the cache already)
+	 * Gets source FlxBitmap, generates new FlxBitmap (if there is no such FlxBitmap in the cache already)
 	 * and creates FlxImageFrame collection.
 	 *
 	 * @param   source   The source of graphic for frame collection.
@@ -159,11 +159,14 @@ class FlxImageFrame extends FlxFramesCollection
 		if (graphic == null)
 			return null;
 
+		if (!graphic.texture.checkReadWrite())
+			return null;
+
 		var key:String = FlxG.bitmap.getKeyWithSpacesAndBorders(graphic.key, null, null, border, region);
 		var result:FlxGraphic = FlxG.bitmap.get(key);
 		if (result == null)
 		{
-			var bitmap:BitmapData = FlxBitmapDataUtil.addSpacesAndBorders(graphic.bitmap, null, null, border, region);
+			var bitmap:FlxBitmap = FlxBitmapDataUtil.addSpacesAndBorders(graphic.texture.downloadBitmap(), null, null, border, region);
 			result = FlxG.bitmap.add(bitmap, false, key);
 		}
 
@@ -172,8 +175,8 @@ class FlxImageFrame extends FlxFramesCollection
 	}
 
 	/**
-	 * Gets `FlxFrame` object, generates new `BitmapData` with border pixels around
-	 * (if there is no such BitmapData in the cache already) and creates image frame collection.
+	 * Gets `FlxFrame` object, generates new `FlxBitmap` with border pixels around
+	 * (if there is no such FlxBitmap in the cache already) and creates image frame collection.
 	 *
 	 * @param   frame    Frame to generate tiles from.
 	 * @param   border   Border to add around frame image (helps to avoid "tearing" problem).
@@ -181,7 +184,7 @@ class FlxImageFrame extends FlxFramesCollection
 	 */
 	public static function fromFrameAddSpacesAndBorders(frame:FlxFrame, border:FlxPoint):FlxImageFrame
 	{
-		var bitmap:BitmapData = frame.paint();
+		var bitmap:FlxBitmap = frame.paint();
 		return FlxImageFrame.fromBitmapAddSpacesAndBorders(bitmap, border);
 	}
 

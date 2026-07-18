@@ -1,16 +1,11 @@
 package flixel.system.render;
 
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxFrame;
-import flixel.math.FlxMatrix;
-import flixel.math.FlxPoint;
-import flixel.util.FlxColor;
+import flixel.graphics.FlxBitmap;
+import flixel.graphics.textures.FlxTexture;
+import flixel.math.FlxRect;
+import flixel.system.render.FlxRendererTypes;
 import flixel.util.FlxDestroyUtil;
-import openfl.display.BitmapData;
-import openfl.display.BlendMode;
-import openfl.geom.ColorTransform;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
+import lime.utils.UInt8Array;
 
 /**
  * `FlxRenderer` is a global, base class that handles rendering.
@@ -23,6 +18,7 @@ typedef FlxRenderer = FlxTypedRenderer<FlxCameraView>;
 /**
  * Typed Renderer, override this to handle specific backends that require specific cavera views
  */
+@:allow(flixel.graphics)
 abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 {
 	/**
@@ -98,6 +94,13 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	 */
 	public var maxTextureSize(default, null):Int = -1;
 	
+	/**
+	 * Backend texture management.
+	 * 
+	 * Must be set by extending implementations.
+	 */
+	public var textures(default, null):IFlxTextureSystem;
+
 	function new() {}
 
 	/**
@@ -125,6 +128,29 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	abstract public function removeCameraView(view:TView):Void;
 	
 	abstract function createCameraView(camera:FlxCamera):TView;
+}
+
+/**
+ * Abstracted texture management used internally by the renderer.
+ * You probably shouldn't use this!
+ */
+// TODO: how many of these can just take handles?
+interface IFlxTextureSystem
+{
+	// life cycle
+	function createHandle():FlxTextureHandle;
+	function destroyHandle(handle:FlxTextureHandle):Void;
+	function destroyBitmap(bitmap:FlxBitmap):Void;
+
+	// upload
+	function uploadBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void;
+
+	// download
+	function readPixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void;
+
+	// properties
+	function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void;
+	function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
 }
 
 /**

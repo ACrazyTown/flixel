@@ -1,11 +1,18 @@
 package flixel.system.render.quad;
 
+import flixel.math.FlxRect;
+import flixel.FlxG;
+import flixel.graphics.FlxBitmap;
+import flixel.graphics.textures.FlxTexture;
 import flixel.system.render.FlxRenderer;
+import flixel.system.render.FlxRendererTypes;
+import lime.utils.UInt8Array;
 
-using flixel.util.FlxColorTransformUtil;
 #if FLX_OPENGL_AVAILABLE
 import lime.graphics.opengl.GL;
 #end
+
+using flixel.util.FlxColorTransformUtil;
 
 @:access(flixel.FlxCamera)
 @:access(flixel.system.render.quad)
@@ -15,6 +22,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 	{
 		super();
 		method = DRAW_TILES;
+		textures = new FlxQuadTextureSystem();
 		
 		#if FLX_OPENGL_AVAILABLE
 		if (hasGL)
@@ -53,4 +61,68 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 	{
 		FlxG.game.removeChild(view.flashSprite);
 	}
+}
+
+@:access(flixel.graphics.textures.FlxTexture)
+class FlxQuadTextureSystem implements IFlxTextureSystem
+{
+	public function new() {}
+
+	// No-op, handle will get assigned at upload to avoid reallocating bitmaps
+	public function createHandle():FlxTextureHandle { return null; }
+	public function destroyHandle(handle:FlxTextureHandle):Void 
+	{
+		#if FLX_RENDER_DRAWQUADS
+		handle.destroy();
+		#end
+	}
+
+	public function destroyBitmap(bitmap:FlxBitmap):Void 
+	{
+		#if (FLX_RENDER_DRAWQUADS && !flash)
+		// Since the bitmap is the same as the handle, we don't actually want to destroy it,
+		// just get rid of the image buffer
+		bitmap.disposeImage();
+
+		// Also force the texture to get updated while we're at it
+		bitmap.getTexture(FlxG.stage.context3D);
+		#end
+	}
+
+	public function uploadBitmap(texture:FlxTexture, bitmap:FlxBitmap):Void 
+	{
+		#if FLX_RENDER_DRAWQUADS
+		texture._handle = bitmap;
+		#end
+	}
+
+	public function readPixels(texture:FlxTexture, buffer:UInt8Array, ?rect:FlxRect):Void 
+	{
+		#if (FLX_RENDER_DRAWQUADS && FLX_OPENGL_AVAILABLE)
+		final gl = FlxG.stage.window.context.webgl;
+
+		@:privateAccess
+		final glTexture = texture._handle.getTexture(FlxG.stage.context3D).__getTexture();
+		gl.bindTexture(gl.TEXTURE_2D, glTexture);
+
+        // Create dummy framebuffer we'll read from
+        var fb = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+        // Attach texture to framebuffer and read the pixels from it into the buffer
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glTexture, 0);
+        gl.readPixels(Std.int(rect.x), Std.int(rect.y), Std.int(rect.width), Std.int(rect.height), gl.RGBA, gl.UNSIGNED_BYTE, buffer);
+
+        // Delete the framebuffer
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.deleteFramebuffer(fb);
+
+		gl.bindTexture(gl.TEXTURE_2D, null);
+		#end	
+	}
+
+	// No-op, handled in the FlxDrawItems
+	public function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+	public function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+	// function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
 }

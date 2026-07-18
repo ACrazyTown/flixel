@@ -1,7 +1,7 @@
 package flixel.system.debug;
 
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.events.MouseEvent;
@@ -109,9 +109,9 @@ class Window extends Sprite
 		_closable = closable;
 		_alwaysOnTop = alwaysOnTop;
 
-		_shadow = new Bitmap(new BitmapData(1, 2, true, FlxColor.BLACK));
-		_background = new Bitmap(new BitmapData(1, 1, true, BG_COLOR));
-		_header = new Bitmap(new BitmapData(1, HEADER_HEIGHT, true, HEADER_COLOR));
+		_shadow = new Bitmap(new FlxBitmap(1, 2, FlxColor.BLACK));
+		_background = new Bitmap(new FlxBitmap(1, 1, BG_COLOR));
+		_header = new Bitmap(new FlxBitmap(1, HEADER_HEIGHT, HEADER_COLOR));
 		_background.y = _header.height;
 
 		_title = DebuggerUtil.createTextField(2, -1);

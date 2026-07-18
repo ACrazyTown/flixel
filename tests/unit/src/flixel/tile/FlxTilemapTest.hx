@@ -8,7 +8,7 @@ import flixel.util.FlxDirection;
 import flixel.util.FlxDirectionFlags;
 import haxe.PosInfos;
 import massive.munit.Assert;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.errors.ArgumentError;
 
 using StringTools;
@@ -141,13 +141,13 @@ class FlxTilemapTest extends FlxTest
 	@:haxe.warning("-WDeprecated")
 	function testLoadMapFromGraphic()
 	{
-		var map = new BitmapData(2, 2);
+		var map = new FlxBitmap(2, 2);
 		map.setPixel32(0, 0, FlxColor.WHITE);
 		map.setPixel32(1, 0, FlxColor.BLACK);
 		map.setPixel32(0, 1, FlxColor.BLUE);
 		map.setPixel32(1, 1, FlxColor.YELLOW);
 
-		tilemap.loadMapFromGraphic(map, false, 1, [FlxColor.WHITE, FlxColor.BLACK, FlxColor.BLUE, FlxColor.YELLOW], new BitmapData(4, 1));
+		tilemap.loadMapFromGraphic(map, false, 1, [FlxColor.WHITE, FlxColor.BLACK, FlxColor.BLUE, FlxColor.YELLOW], new FlxBitmap(4, 1));
 		FlxAssert.arraysEqual([0, 1, 2, 3], tilemap.getData());
 	}
 
@@ -433,7 +433,7 @@ class FlxTilemapTest extends FlxTest
 	@Test // #2024
 	function testOverlapsPointOutOfBounds()
 	{
-		tilemap.loadMapFrom2DArray([[1]], new BitmapData(2, 1));
+		tilemap.loadMapFrom2DArray([[1]], new FlxBitmap(2, 1));
 		function overlaps(x, y)
 			return tilemap.overlapsPoint(FlxPoint.get(x, y));
 		
@@ -1409,6 +1409,6 @@ class FlxTilemapTest extends FlxTest
 	
 	function getBitmapData()
 	{
-		return new BitmapData(8*16, 8);
+		return new FlxBitmap(8 * 16, 8);
 	}
 }

@@ -15,7 +15,7 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
 import openfl.Vector;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 import openfl.display.BlendMode;
 import openfl.display.Graphics;
 import openfl.display.Sprite;
@@ -36,19 +36,19 @@ class FlxBlitView extends FlxCameraView
 	public var flashSprite:Sprite = new Sprite();
 	
 	/**
-	 * Sometimes it's easier to just work with a `FlxSprite`, than it is to work directly with the `BitmapData` buffer.
+	 * Sometimes it's easier to just work with a `FlxSprite`, than it is to work directly with the `FlxBitmap` buffer.
 	 * This sprite reference will allow you to do exactly that.
-	 * Basically, this sprite's `pixels` property is the camera's `BitmapData` buffer.
+	 * Basically, this sprite's `pixels` property is the camera's `FlxBitmap` buffer.
 	 *
 	 * **NOTE:** This field is only used in blit render mode.
 	 */
 	public var screen:FlxSprite;
 	
 	/**
-	 * The actual `BitmapData` of the camera display itself.
+	 * The actual `FlxBitmap` of the camera display itself.
 	 * Used in blit render mode, where you can manipulate its pixels for achieving some visual effects.
 	 */
-	public var buffer:BitmapData;
+	public var buffer:FlxBitmap;
 	
 	#if FLX_DEBUG
 	/**
@@ -66,7 +66,7 @@ class FlxBlitView extends FlxCameraView
 	
 	/**
 	 * Internal, used in blit render mode in camera's `fill()` method for less garbage creation.
-	 * It represents the size of buffer `BitmapData`
+	 * It represents the size of buffer `FlxBitmap`
 	 * (the area of camera's buffer which should be filled with `bgColor`).
 	 * Do not modify it unless you know what are you doing.
 	 */
@@ -91,7 +91,7 @@ class FlxBlitView extends FlxCameraView
 	 * Internal helper variable for doing better wipes/fills between renders.
 	 * Used it blit render mode only (in `fill()` method).
 	 */
-	var _fill:BitmapData;
+	var _fill:FlxBitmap;
 	
 	/**
 	 * Logical flag for tracking whether to apply _blitMatrix transformation to objects or not.
@@ -120,12 +120,12 @@ class FlxBlitView extends FlxCameraView
 		_flashRect = new Rectangle(0, 0, camera.width, camera.height);
 		
 		screen = new FlxSprite();
-		buffer = new BitmapData(camera.width, camera.height, true, 0);
+		buffer = new FlxBitmap(camera.width, camera.height, 0);
 		screen.pixels = buffer;
 		screen.origin.zero();
 		_flashBitmap = new Bitmap(buffer);
 		_scrollRect.addChild(_flashBitmap);
-		_fill = new BitmapData(camera.width, camera.height, true, FlxColor.TRANSPARENT);
+		_fill = new FlxBitmap(camera.width, camera.height, FlxColor.TRANSPARENT);
 	}
 	
 	override function destroy():Void
@@ -195,7 +195,7 @@ class FlxBlitView extends FlxCameraView
 	
 	@:noCompletion
 	static final _helperMatrix = new FlxMatrix();
-	override function drawPixels(pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
+	override function drawPixels(pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
 	{
 		// super.drawPixels(pixels, matrix, transform, blend, smoothing, shader);
 		
@@ -215,7 +215,8 @@ class FlxBlitView extends FlxCameraView
 	
 	@:noCompletion
 	static final _helperPoint:Point = new Point();
-	override function copyPixels(pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader)
+	override function copyPixels(pixels:FlxBitmap, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false,
+			?shader)
 	{
 		// super.copyPixels(pixels, sourceRect, destPoint, transform, blend, smoothing);
 		
@@ -292,7 +293,7 @@ class FlxBlitView extends FlxCameraView
 		}
 		
 		_trianglesSprite.graphics.clear();
-		_trianglesSprite.graphics.beginBitmapFill(graphic.bitmap, null, repeat, smoothing);
+		_trianglesSprite.graphics.beginBitmapFill(graphic.texture.downloadBitmap(), null, repeat, smoothing);
 		_trianglesSprite.graphics.drawTriangles(drawVertices, indices, uvtData);
 		_trianglesSprite.graphics.endFill();
 		
@@ -448,14 +449,14 @@ class FlxBlitView extends FlxCameraView
 		if (camera.width != buffer.width || camera.height != buffer.height)
 		{
 			var oldBuffer:FlxGraphic = screen.graphic;
-			buffer = new BitmapData(camera.width, camera.height, true, 0);
+			buffer = new FlxBitmap(camera.width, camera.height, 0);
 			screen.pixels = buffer;
 			screen.origin.zero();
 			_flashBitmap.bitmapData = buffer;
 			_flashRect.width = camera.width;
 			_flashRect.height = camera.height;
 			_fill = FlxDestroyUtil.dispose(_fill);
-			_fill = new BitmapData(camera.width, camera.height, true, FlxColor.TRANSPARENT);
+			_fill = new FlxBitmap(camera.width, camera.height, FlxColor.TRANSPARENT);
 			FlxG.bitmap.removeIfNoUse(oldBuffer);
 		}
 		

@@ -6,7 +6,7 @@ import flixel.graphics.frames.FlxImageFrame;
 import flixel.input.IFlxInput;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton.FlxTypedButton;
-import openfl.display.BitmapData;
+import flixel.graphics.FlxBitmap;
 
 /**
  * A simple button class that calls a function when clicked by the mouse.
@@ -50,7 +50,7 @@ class FlxSpriteButton extends FlxTypedButton<FlxSprite> implements IFlxInput
 			text.setFormat(font, size, color, align);
 			text.alpha = labelAlphas[status];
 			text.drawFrame(true);
-			var labelBitmap:BitmapData = text.graphic.bitmap.clone();
+			var labelBitmap:FlxBitmap = text.graphic.texture.downloadBitmap().clone();
 			var labelKey:String = text.graphic.key;
 			text.destroy();
 
