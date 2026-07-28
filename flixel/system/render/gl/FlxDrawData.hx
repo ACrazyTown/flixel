@@ -4,15 +4,17 @@ package flixel.system.render.gl;
 import flixel.util.FlxColor;
 import flixel.system.render.FlxTopology;
 import openfl.Vector;
-import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.util.FlxPool;
 import openfl.display.BlendMode;
 import openfl.display.Shader;
 import openfl.geom.ColorTransform;
+import flixel.graphics.textures.FlxTexture;
+
+// TODO: support for SHADER ARRAY
 
 enum FlxDrawType
 {
@@ -28,11 +30,10 @@ class FlxDrawData implements IFlxDestroyable
     public var type:FlxDrawType;
 	public var topology:FlxTopology = TRIANGLE_LIST;
 
-    public var texture:FlxGraphic;
+    public var texture:FlxTexture;
     public var textureSmoothing:Bool;
-    public var textureRepeat:Bool;
 
-    public var shader:Shader;
+    public var shader:FlxShader;
     public var blend:BlendMode;
 
     public var colorOffset:FlxColor;
@@ -59,15 +60,14 @@ class FlxQuadDrawData extends FlxDrawData implements IFlxPooled
 {
     static var pool:FlxPool<FlxQuadDrawData> = new FlxPool(FlxQuadDrawData.new);
 
-    public overload extern static inline function get(frame:FlxFrame, smoothing:Bool, repeat:Bool, shader:FlxShader, blend:BlendMode, colorMultiplier:FlxColor, colorOffset:FlxColor, matrix:FlxMatrix):FlxQuadDrawData
+    public overload extern static inline function get(frame:FlxFrame, smoothing:Bool, shader:FlxShader, blend:BlendMode, colorMultiplier:FlxColor, colorOffset:FlxColor, matrix:FlxMatrix):FlxQuadDrawData
     {
         var data = pool.get();
         
         data.frame = frame;
 
-        data.texture = frame.parent;
+        data.texture = frame.parent.texture;
         data.textureSmoothing = smoothing;
-        data.textureRepeat = repeat;
         data.shader = shader;
         data.blend = blend;
         data.colorMultiplier = colorMultiplier;
@@ -79,7 +79,7 @@ class FlxQuadDrawData extends FlxDrawData implements IFlxPooled
         return data;
     }
 
-    public overload extern static inline function get(frame:FlxFrame, smoothing:Bool, repeat:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix):FlxQuadDrawData
+    public overload extern static inline function get(frame:FlxFrame, smoothing:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix):FlxQuadDrawData
     {
         var colorMultiplier = FlxColor.WHITE;
         var colorOffset = FlxColor.TRANSPARENT;
@@ -90,7 +90,7 @@ class FlxQuadDrawData extends FlxDrawData implements IFlxPooled
             colorOffset = FlxColor.fromRGB(Std.int(transform.redOffset), Std.int(transform.greenOffset), Std.int(transform.blueOffset), Std.int(transform.alphaOffset));
         }
 
-        return get(frame, smoothing, repeat, shader, blend, colorMultiplier, colorOffset, matrix);
+        return get(frame, smoothing, shader, blend, colorMultiplier, colorOffset, matrix);
     }
 
     public var frame:FlxFrame;
@@ -120,8 +120,8 @@ class FlxTrianglesDrawData extends FlxDrawData implements IFlxPooled
 {
 	static var pool:FlxPool<FlxTrianglesDrawData> = new FlxPool(FlxTrianglesDrawData.new);
 	
-	public static inline function get(vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvs:FlxVector2d<Float>, colors:FlxVector2d<Int>, texture:FlxGraphic,
-			smoothing:Bool, repeat:Bool, shader:Shader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
+	public static inline function get(vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvs:FlxVector2d<Float>, colors:FlxVector2d<Int>, texture:FlxTexture,
+			smoothing:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
     {
         var data = pool.get();
 
@@ -132,7 +132,6 @@ class FlxTrianglesDrawData extends FlxDrawData implements IFlxPooled
 
         data.texture = texture;
         data.textureSmoothing = smoothing;
-        data.textureRepeat = repeat;
         data.shader = shader;
         data.blend = blend;
 

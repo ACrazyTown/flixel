@@ -13,6 +13,7 @@ import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
+import flixel.graphics.shaders.FlxShader as FlxShaderNew;
 import flixel.util.FlxBitmapDataUtil;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -293,7 +294,10 @@ class FlxSprite extends FlxObject
 	 * GLSL shader for this sprite. Avoid changing it frequently as this is a costly operation.
 	 * @since 4.1.0
 	 */
-	public var shader:FlxShader;
+	@:deprecated("sprite.shader is deprecated, use sprite.filters instead.")
+	public var shader(default, set):FlxShader; // TODO: GETTER/SETTER
+
+	public var filters:Array<FlxShaderNew> = [];
 
 	/**
 	 * The actual frame used for sprite rendering
@@ -1034,9 +1038,9 @@ class FlxSprite extends FlxObject
 		prepareComplexMatrix(matrix, frame, camera);
 		
 		if (framePixels != null && useFramePixels)
-			camera.view.drawPixels(framePixels, matrix, colorTransform, blend, antialiasing, shader);
+			camera.view.drawPixels(framePixels, matrix, colorTransform, blend, antialiasing, filters);
 		else
-			camera.view.drawFrame(frame, matrix, colorTransform, blend, antialiasing, shader);
+			camera.view.drawFrame(frame, matrix, colorTransform, blend, antialiasing, filters);
 	}
 	
 	function prepareComplexMatrix(matrix:FlxMatrix, frame:FlxFrame, camera:FlxCamera)
@@ -1976,6 +1980,15 @@ class FlxSprite extends FlxObject
 			clipRect = null;
 
 		return rect;
+	}
+
+	@:noCompletion
+	function set_shader(value:FlxShader):FlxShader 
+	{
+		var newShader = FlxShaderNew.fromFlash(value);
+
+		filters[0] = newShader;
+		return shader = value;
 	}
 
 	/**

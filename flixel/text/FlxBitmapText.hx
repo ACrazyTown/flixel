@@ -429,7 +429,7 @@ class FlxBitmapText extends FlxSprite
 					}
 					
 					matrix.translate(screenPos.x + originX, screenPos.y + originY);
-					camera.view.drawFrame(frame, matrix, color, blend, antialiasing, shader);
+					camera.view.drawFrame(frame, matrix, color, blend, antialiasing, filters);
 				}
 				
 				borderDrawData.forEach(addQuad.bind(_, _, _, borderColorTransform));
@@ -1101,7 +1101,7 @@ class FlxBitmapText extends FlxSprite
 
 	function tileLine(line:UnicodeString, startX:Int, startY:Int)
 	{
-		if (FlxG.renderer.method != DRAW_TILES)
+		if (FlxG.renderer.method == BLITTING)
 			return;
 		
 		addLineData(line, startX, startY, textData);
@@ -1368,7 +1368,7 @@ class FlxBitmapText extends FlxSprite
 	
 	function tileText(posX:Int, posY:Int, isFront:Bool = true):Void
 	{
-		if (FlxG.renderer.method != DRAW_TILES)
+		if (FlxG.renderer.method == BLITTING)
 			return;
 		
 		final data:CharList = isFront ? textDrawData : borderDrawData;

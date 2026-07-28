@@ -7,7 +7,8 @@ import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
+import flixel.system.FlxAssets.FlxShader as FlxLegacyShader;
 import flixel.system.render.FlxCameraView;
 import flixel.system.render.quad.FlxDrawBaseItem;
 import flixel.system.render.quad.FlxDrawQuadsItem;
@@ -192,19 +193,19 @@ class FlxQuadView extends FlxCameraView
 		canvas.graphics.endFill();
 	}
 	
-	override function drawPixels(pixels, matrix, ?transform, ?blend, smoothing = false, ?shader)
+	override function drawPixels(pixels, matrix, ?transform, ?blend, smoothing = false, ?filters)
 	{
 		// super.drawPixels(frame, matrix, transform, blend, smoothing, shader);
 		throw "Not implemented";
 	}
 	
-	override function copyPixels(pixels, ?sourceRect, destPoint, ?transform, ?blend, smoothing = false, ?shader)
+	override function copyPixels(pixels, ?sourceRect, destPoint, ?transform, ?blend, smoothing = false, ?filters)
 	{
 		// super.copyPixels(pixels, sourceRect, destPoint, transform, blend, smoothing, shader);
 		throw "Not implemented";
 	}
 	
-	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader)
+	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
 	{
 		// super.drawFrame(frame, matrix, transform, blend, smoothing, shader);
 		frame.parent.texture.syncIfNeeded();
@@ -213,16 +214,16 @@ class FlxQuadView extends FlxCameraView
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 		
 		#if FLX_RENDER_TRIANGLE
-		final drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, (antialiasing || smoothing), isColored, blend, hasColorOffsets, shader);
+		final drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, (antialiasing || smoothing), isColored, blend, hasColorOffsets, resolveLegacyShader(filters));
 		#else
-		final drawItem:FlxDrawQuadsItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, (antialiasing || smoothing), shader);
+		final drawItem:FlxDrawQuadsItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, (antialiasing || smoothing), resolveLegacyShader(filters));
 		#end
 		drawItem.addQuad(frame, matrix, transform);
 	}
 	
 	@:noCompletion
 	static final _helperMatrix = new FlxMatrix();
-	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
+	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
 	{
 		// super.copyFrame(frame, destPoint, transform, blend, smoothing, shader);
 		frame.parent.texture.syncIfNeeded();
@@ -234,15 +235,15 @@ class FlxQuadView extends FlxCameraView
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 		
 		#if FLX_RENDER_TRIANGLE
-		final drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, (antialiasing || smoothing), isColored, blend, hasColorOffsets, shader);
+		final drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, (antialiasing || smoothing), isColored, blend, hasColorOffsets, resolveLegacyShader(filters));
 		#else
-		final drawItem:FlxDrawQuadsItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, (antialiasing || smoothing), shader);
+		final drawItem:FlxDrawQuadsItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, (antialiasing || smoothing), resolveLegacyShader(filters));
 		#end
 		drawItem.addQuad(frame, _helperMatrix, transform);
 	}
 	
-	override function drawTriangles(graphic:FlxGraphic, vertices:FlxVector2d<Float>, indices:Vector<Int>, uvtData:FlxVector2d<Float>, ?colors:Vector<Int>,
-			?position:FlxPoint, ?blend:BlendMode, repeat = false, smoothing = false, ?transform:ColorTransform, ?shader:FlxShader)
+	override function drawTriangles(graphic:FlxGraphic, vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvtData:FlxVector2d<Float>, ?colors:FlxVector2d<Int>,
+			?position:FlxPoint, ?blend:BlendMode, repeat = false, smoothing = false, ?transform:ColorTransform, ?filters:Array<FlxShader>)
 	{
 		// super.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, shader);
 		graphic.texture.syncIfNeeded();
@@ -252,7 +253,7 @@ class FlxQuadView extends FlxCameraView
 		final isColored = (colors != null && colors.length != 0) || (transform != null && transform.hasRGBMultipliers());
 		final hasColorOffsets = (transform != null && transform.hasRGBAOffsets());
 		
-		final drawItem = startTrianglesBatch(graphic, (antialiasing || smoothing), isColored, blend, hasColorOffsets, shader);
+		final drawItem = startTrianglesBatch(graphic, (antialiasing || smoothing), isColored, blend, hasColorOffsets, resolveLegacyShader(filters));
 		drawItem.addTriangles(vertices, indices, uvtData, colors, position, cameraBounds, transform);
 	}
 	
@@ -327,6 +328,14 @@ class FlxQuadView extends FlxCameraView
 			#end
 		}
 	}
+
+	inline function resolveLegacyShader(filters:Array<FlxShader>):FlxLegacyShader
+	{
+		if (filters == null) 
+			return null;
+
+		return cast filters[0] != null ? filters[0].data.flash.shader : null;
+	}
 	
 	override function set_color(value:FlxColor):FlxColor
 	{
@@ -389,7 +398,7 @@ class FlxQuadView extends FlxCameraView
 	 */
 	static var _storageTrianglesHead:FlxDrawTrianglesItem;
 	
-	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets = false, ?blend:BlendMode, smooth = false, ?shader:FlxShader)
+	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets = false, ?blend:BlendMode, smooth = false, ?shader:FlxLegacyShader)
 	{
 		#if FLX_RENDER_TRIANGLE
 		return startTrianglesBatch(graphic, smooth, colored, blend);
@@ -451,7 +460,7 @@ class FlxQuadView extends FlxCameraView
 	}
 	
 	public function startTrianglesBatch(graphic:FlxGraphic, smoothing = false, isColored = false, ?blend:BlendMode, ?hasColorOffsets:Bool,
-			?shader:FlxShader):FlxDrawTrianglesItem
+			?shader:FlxLegacyShader):FlxDrawTrianglesItem
 	{
 		if (_currentDrawItem != null
 			&& _currentDrawItem.type == FlxDrawItemType.TRIANGLES
@@ -469,7 +478,7 @@ class FlxQuadView extends FlxCameraView
 	}
 	
 	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smoothing = false, isColored = false, ?blend:BlendMode, ?hasColorOffsets:Bool,
-			?shader:FlxShader):FlxDrawTrianglesItem
+			?shader:FlxLegacyShader):FlxDrawTrianglesItem
 	{
 		var itemToReturn:FlxDrawTrianglesItem = null;
 		

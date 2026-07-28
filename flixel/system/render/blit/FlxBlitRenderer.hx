@@ -1,13 +1,16 @@
 package flixel.system.render.blit;
 
+import flixel.graphics.FlxBitmap;
+import flixel.graphics.shaders.FlxShader;
 import flixel.graphics.textures.FlxRenderTexture;
-import lime.utils.UInt8Array;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
 import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
 import flixel.util.FlxColor;
-import flixel.graphics.FlxBitmap;
+import lime.utils.Float32Array;
+import lime.utils.Int32Array;
+import lime.utils.UInt8Array;
 
 @:access(flixel.FlxCamera)
 @:access(flixel.system.render.blit)
@@ -29,6 +32,7 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 		method = BLITTING;
 		textures = new FlxBlitTextureSystem();
 		renderTargets = new FlxBlitRenderTargetSystem();
+		shaders = new FlxBlitShaderSystem();
 	}
 	
 	override function initGlobals()
@@ -94,4 +98,40 @@ class FlxBlitRenderTargetSystem implements IFlxRenderTargetSystem
 	public function destroyHandle(handle:FlxRenderTargetHandle):Void {}
 	public function resize(texture:FlxRenderTexture, width:Int, height:Int):Void {}
 	public function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
+}
+
+class FlxBlitShaderSystem implements IFlxShaderSystem
+{
+	public function new() {}
+
+	public function createHandle(data:FlxShaderData):FlxShaderHandle {return null;}
+	public function destroyHandle(handle:FlxShaderHandle):Void {}
+
+	public function getUniformLocation(handle:FlxShaderHandle, name:String):FlxShaderUniformLocation {return null;}
+	public function getAttributeLocation(handle:FlxShaderHandle, name:String):FlxShaderAttributeLocation {return null;}
+
+	public function fetchUniforms(handle:FlxShaderHandle):Array<FlxShaderUniform<Any>> {return null;}
+	public function setUniformInt(location:FlxShaderUniformLocation, v:Int):Void {}
+	public function setUniformInt2(location:FlxShaderUniformLocation, v1:Int, v2:Int):Void {}
+	public function setUniformInt3(location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int):Void {}
+	public function setUniformInt4(location:FlxShaderUniformLocation, v1:Int, v2:Int, v3:Int, v4:Int):Void {}
+	public function setUniformIntArray(location:FlxShaderUniformLocation, v:Int32Array, dimension:FlxShaderArrayDimension):Void {}
+	public function setUniformFloat(location:FlxShaderUniformLocation, v:Float):Void {}
+	public function setUniformFloat2(location:FlxShaderUniformLocation, v1:Float, v2:Float):Void {}
+	public function setUniformFloat3(location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float):Void {}
+	public function setUniformFloat4(location:FlxShaderUniformLocation, v1:Float, v2:Float, v3:Float, v4:Float):Void {}
+	public function setUniformFloatArray(location:FlxShaderUniformLocation, v:Float32Array, dimension:FlxShaderArrayDimension):Void {}
+	public function setUniformMatrix4x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix4x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix4x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix3x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix3x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix3x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix2x4(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix2x3(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformMatrix2x2(location:FlxShaderUniformLocation, v:Float32Array, transpose:Bool):Void {}
+	public function setUniformTexture(location:FlxShaderUniformLocation, v:FlxTexture, smoothing:Bool, slot:Int):Void {}
+
+	public function getMaxTexturesInShader():Int {return 0;}
+	public function getMaxIfStatementsInShader(initialAmount:Int):Int {return 0;}
 }

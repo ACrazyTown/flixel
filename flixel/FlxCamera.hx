@@ -9,7 +9,8 @@ import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.system.FlxAssets.FlxShader as FlxLegacyShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.system.render.FlxCameraView;
 import flixel.system.render.FlxCanvas;
 import flixel.system.render.blit.FlxBlitRenderer;
@@ -1784,21 +1785,21 @@ class FlxCamera extends FlxBasic
 	
 	@:noCompletion
 	@:deprecated("camera.startQuadBatch() is deprecated, avoid it and use the draw methods from camera.view instead.") // 6.2.0
-	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
+	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxLegacyShader)
 	{
 		return viewQuad.startQuadBatch(graphic, colored, hasColorOffsets, blend, smooth, shader);
 	}
 
 	@:noCompletion
 	@:deprecated("camera.startTrianglesBatch() is deprecated, avoid it and use the draw methods from camera.view instead.") // 6.2.0
-	public function startTrianglesBatch(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxShader):FlxDrawTrianglesItem
+	public function startTrianglesBatch(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxLegacyShader):FlxDrawTrianglesItem
 	{
 		return viewQuad.startTrianglesBatch(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
 	}
 
 	@:noCompletion
 	@:deprecated("camera.getNewDrawTrianglesItem() is deprecated, avoid it and use the draw methods from camera.view instead.") // 6.2.0
-	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxShader):FlxDrawTrianglesItem
+	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool, ?shader:FlxLegacyShader):FlxDrawTrianglesItem
 	{
 		return viewQuad.getNewDrawTrianglesItem(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
 	}
@@ -1840,12 +1841,12 @@ class FlxCamera extends FlxBasic
 	@:noCompletion
 	@:deprecated("camera.drawPixels() is deprecated, use camera.view.drawPixels or drawFrame instead.") // 6.2.0
 	public function drawPixels(?frame:FlxFrame, ?pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
-			?shader:FlxShader):Void
+			?shader:FlxLegacyShader):Void
 	{
 		if (frame != null)
-			view.drawFrame(frame, matrix, transform, blend, smoothing, shader);
+			view.drawFrame(frame, matrix, transform, blend, smoothing, [FlxShader.fromFlash(shader)]);
 		else if (pixels != null)
-			view.drawPixels(pixels, matrix, transform, blend, smoothing, shader);
+			view.drawPixels(pixels, matrix, transform, blend, smoothing, [FlxShader.fromFlash(shader)]);
 		else
 			FlxG.log.error("camera.drawPixels must have either the frame or pixels arg");
 	}
@@ -1853,12 +1854,12 @@ class FlxCamera extends FlxBasic
 	@:noCompletion
 	@:deprecated("camera.copyPixels() is deprecated, use camera.view.copyPixels or copyFrame instead.") // 6.2.0
 	public function copyPixels(?frame:FlxFrame, ?pixels:FlxBitmap, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
-			?smoothing:Bool = false, ?shader:FlxShader):Void
+			?smoothing:Bool = false, ?shader:FlxLegacyShader):Void
 	{
 		if (frame != null)
-			view.copyFrame(frame, destPoint, transform, blend, smoothing, shader);
+			view.copyFrame(frame, destPoint, transform, blend, smoothing, [FlxShader.fromFlash(shader)]);
 		else if (pixels != null)
-			view.copyPixels(pixels, sourceRect, destPoint, transform, blend, smoothing, shader);
+			view.copyPixels(pixels, sourceRect, destPoint, transform, blend, smoothing, [FlxShader.fromFlash(shader)]);
 		else
 			FlxG.log.error("camera.copyPixels must have either the frame or pixels arg");
 		
@@ -1867,9 +1868,9 @@ class FlxCamera extends FlxBasic
 	@:noCompletion
 	@:deprecated("camera.drawTriangles() is deprecated, use camera.view.drawTriangles instead.") // 6.2.0
 	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader):Void
+			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxLegacyShader):Void
 	{
-		view.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, shader);
+		view.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, [FlxShader.fromFlash(shader)]);
 	}
 	
 	@:noCompletion
