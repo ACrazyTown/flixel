@@ -84,6 +84,11 @@ private enum UserDefine
 	 * `NOTICE`, `NORMAL` or `NONE`. Ignored if `FLX_NO_DEBUG` is defined. If undefined, `NOTICE` is used.
 	 */
 	FLX_LOG_OPEN_CONSOLE;
+
+	/**
+	 * Enables the experimental OpenGL renderer
+	 */
+	FLX_RENDER_OPENGL;
 }
 
 /**
@@ -305,7 +310,17 @@ class FlxDefines
 			define(FLX_OPENGL_AVAILABLE);
 		#end
 
-		define(FLX_RENDER_DRAWQUADS);
+		if (defined(FLX_RENDER_OPENGL))
+		{
+			if (!defined(FLX_OPENGL_AVAILABLE))
+				abort("Can only define FLX_RENDER_OPENGL on a target that supports OpenGL", (macro null).pos);
+
+			// Disable OpenFL's GL context cache to avoid desync issues between
+			// The Flixel renderer and the OpenFL renderer
+			define("openfl_disable_context_cache");
+		}
+		else
+			define(FLX_RENDER_DRAWQUADS);
 		
 		defineInversion(FLX_TRACK_GRAPHICS, FLX_NO_TRACK_GRAPHICS);
 		

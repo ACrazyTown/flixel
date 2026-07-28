@@ -1,11 +1,13 @@
 package flixel.system.render.quad;
 
+import flixel.graphics.textures.FlxRenderTexture;
 import flixel.math.FlxRect;
 import flixel.FlxG;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;
 import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
+import flixel.util.FlxColor;
 import lime.utils.UInt8Array;
 
 #if FLX_OPENGL_AVAILABLE
@@ -23,6 +25,7 @@ class FlxQuadRenderer extends FlxTypedRenderer<FlxQuadView>
 		super();
 		method = DRAW_TILES;
 		textures = new FlxQuadTextureSystem();
+		renderTargets = new FlxQuadRenderTargetSystem();
 		
 		#if FLX_OPENGL_AVAILABLE
 		if (hasGL)
@@ -125,4 +128,15 @@ class FlxQuadTextureSystem implements IFlxTextureSystem
 	public function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	public function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	// function setTextureFilter(texture:FlxTexture, filter:FlxTextureFilter):Void {}
+}
+
+// No-op, FlxRenderTexture is not supported with this renderer
+class FlxQuadRenderTargetSystem implements IFlxRenderTargetSystem
+{
+	public function new() {}
+
+	public function createHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle {return null;}
+	public function destroyHandle(handle:FlxRenderTargetHandle):Void {}
+	public function resize(texture:FlxRenderTexture, width:Int, height:Int):Void {}
+	public function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
 }

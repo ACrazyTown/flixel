@@ -1,10 +1,13 @@
 package flixel.system.render;
 
+import flixel.graphics.textures.FlxRenderTexture;
+import flixel.math.FlxRect;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
 import flixel.system.render.FlxRendererTypes;
 import flixel.util.FlxDestroyUtil;
+import flixel.util.FlxColor;
 import lime.utils.UInt8Array;
 
 /**
@@ -35,7 +38,11 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 		}
 		else
 		{
+			#if FLX_RENDER_OPENGL
+			return cast new flixel.system.render.gl.FlxGLRenderer();
+			#else
 			return cast new flixel.system.render.quad.FlxQuadRenderer();
+			#end
 		}
 	}
 	
@@ -59,7 +66,7 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	 * Convenience shortcut for `FlxG.renderer.method == DRAW_TILES`
 	 */
 	public var tile(get, never):Bool;
-	inline function get_tile() return method.match(DRAW_TILES);
+	inline function get_tile() return method.match(DRAW_TILES) || method.match(OPENGL); // TODO ant: temporary? opengl follows most stuff tile does
 	
 	/**
 	 * Returns whether the current renderer is hardware accelerated.
@@ -100,6 +107,13 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	 * Must be set by extending implementations.
 	 */
 	public var textures(default, null):IFlxTextureSystem;
+
+	/**
+	 * Backend render target management.
+	 * 
+	 * Must be set by extending implementations.
+	 */
+	public var renderTargets(default, null):IFlxRenderTargetSystem;
 
 	function new() {}
 
@@ -153,11 +167,26 @@ interface IFlxTextureSystem
 	function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void;
 }
 
+interface IFlxRenderTargetSystem
+{
+	function createHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle;
+	function destroyHandle(handle:FlxRenderTargetHandle):Void;
+	function resize(texture:FlxRenderTexture, width:Int, height:Int):Void;
+	function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void;
+}
+
 /**
  * An enum representing the available rendering methods.
  */
 enum FlxRenderMethod
 {
+	/**
+	 * Uses the OpenGL graphics API to achieve hardware accelerated rendering.
+	 * 
+	 * This method is supported by all targets, except for Flash.
+	 */
+	OPENGL;
+
 	/**
 	 * Uses the `drawQuads()` method from OpenFL's Graphics API to achieve hardware accelerated rendering.
 	 * 

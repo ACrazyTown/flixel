@@ -1,10 +1,12 @@
 package flixel.system.render.blit;
 
+import flixel.graphics.textures.FlxRenderTexture;
 import lime.utils.UInt8Array;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
 import flixel.system.render.FlxRenderer;
 import flixel.system.render.FlxRendererTypes;
+import flixel.util.FlxColor;
 import flixel.graphics.FlxBitmap;
 
 @:access(flixel.FlxCamera)
@@ -26,6 +28,7 @@ class FlxBlitRenderer extends FlxTypedRenderer<FlxBlitView>
 		super();
 		method = BLITTING;
 		textures = new FlxBlitTextureSystem();
+		renderTargets = new FlxBlitRenderTargetSystem();
 	}
 	
 	override function initGlobals()
@@ -81,4 +84,14 @@ class FlxBlitTextureSystem implements IFlxTextureSystem
 
 	public function setWrapU(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
 	public function setWrapV(texture:FlxTexture, wrap:FlxTextureWrap):Void {}
+}
+
+class FlxBlitRenderTargetSystem implements IFlxRenderTargetSystem
+{
+	public function new() {}
+
+	public function createHandle(texture:FlxRenderTexture, depthStencil:Bool):FlxRenderTargetHandle {return null;}
+	public function destroyHandle(handle:FlxRenderTargetHandle):Void {}
+	public function resize(texture:FlxRenderTexture, width:Int, height:Int):Void {}
+	public function clear(texture:FlxRenderTexture, color:FlxColor, depth:Bool, stencil:Bool):Void {}
 }
