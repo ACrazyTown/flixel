@@ -959,7 +959,10 @@ class FlxSprite extends FlxObject
 			return;
 		
 		if (dirty) // rarely
+		{
 			calcFrame(useFramePixels);
+			dirty = false;
+		}
 		
 		for (camera in getCamerasLegacy())
 		{
