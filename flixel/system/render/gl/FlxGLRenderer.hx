@@ -611,6 +611,11 @@ class FlxGLShaderSystem implements IFlxShaderSystem
 
             var u:FlxShaderUniform<Any> = null;
 
+            // TODO: Look into hooking up:
+            // - sampler2DArray
+            // - matrix arrays
+            // - whatever else I might've missed
+
             // Non-array uniforms
             if (info.size == 1)
             {
@@ -623,9 +628,9 @@ class FlxGLShaderSystem implements IFlxShaderSystem
 
                     // Booleans don't really exist, so we'll represent them as integers
                     case GL.INT, GL.BOOL: new FlxShaderUniform<Int>(INT1, info.name, location, 0);
-                    case GL.INT_VEC2: new FlxShaderUniform<ShaderVec2<Int>>(INT2, info.name, location, {x: 0, y: 0});
-                    case GL.INT_VEC3: new FlxShaderUniform<ShaderVec3<Int>>(INT3, info.name, location, {x: 0, y: 0, z: 0});
-                    case GL.INT_VEC4: new FlxShaderUniform<ShaderVec4<Int>>(INT4, info.name, location, {x: 0, y: 0, z: 0, w: 0});
+                    case GL.INT_VEC2, GL.BOOL_VEC2: new FlxShaderUniform<ShaderVec2<Int>>(INT2, info.name, location, {x: 0, y: 0});
+                    case GL.INT_VEC3, GL.BOOL_VEC3: new FlxShaderUniform<ShaderVec3<Int>>(INT3, info.name, location, {x: 0, y: 0, z: 0});
+                    case GL.INT_VEC4, GL.BOOL_VEC4: new FlxShaderUniform<ShaderVec4<Int>>(INT4, info.name, location, {x: 0, y: 0, z: 0, w: 0});
 
                     case GL.FLOAT_MAT4: new FlxShaderUniform<ShaderMatrix>(MAT4X4, info.name, location, {data: null, transpose: false});
                     case GL.FLOAT_MAT4x3: new FlxShaderUniform<ShaderMatrix>(MAT4X3, info.name, location, {data: null, transpose: false});
@@ -657,11 +662,9 @@ class FlxGLShaderSystem implements IFlxShaderSystem
 
                     // Booleans don't really exist, so we'll represent them as integers
                     case GL.INT, GL.BOOL: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: SCALAR});
-                    case GL.INT_VEC2: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC2});
-                    case GL.INT_VEC3: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC3});
-                    case GL.INT_VEC4: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC4});
-
-                    // TODO: matrix array
+                    case GL.INT_VEC2, GL.BOOL_VEC2: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC2});
+                    case GL.INT_VEC3, GL.BOOL_VEC3: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC3});
+                    case GL.INT_VEC4, GL.BOOL_VEC4: new FlxShaderUniform<ShaderArray<Int32Array>>(INT_ARRAY, info.name, location, {data: null, dimension: VEC4});
 
                     default: null;
                 }
