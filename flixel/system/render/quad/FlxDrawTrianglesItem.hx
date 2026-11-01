@@ -6,7 +6,7 @@ import flixel.system.render.quad.FlxDrawBaseItem.FlxDrawItemType;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.system.render.quad.FlxGraphicsShader;
 import flixel.util.FlxColor;
 import openfl.display.Graphics;
 import openfl.display.ShaderParameter;
@@ -25,7 +25,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 	static var point:FlxPoint = FlxPoint.get();
 	static var rect:FlxRect = FlxRect.get();
 
-	public var shader:FlxShader;
+	public var shader:FlxGraphicsShader;
 	var alphas:Array<Float>;
 	var colorMultipliers:Array<Float>;
 	var colorOffsets:Array<Float>;
@@ -50,6 +50,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		alphas = [];
 	}
 
+	@:haxe.warning("-WDeprecated")
 	override public function render(camera:FlxCamera):Void
 	{
 		if (numTriangles <= 0)

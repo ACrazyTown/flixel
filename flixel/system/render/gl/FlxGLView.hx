@@ -1,13 +1,14 @@
 package flixel.system.render.gl;
 
 #if FLX_RENDER_OPENGL
+import flixel.system.FlxAssets.FlxShaderAsset;
 import lime.graphics.opengl.GL;
 import flixel.graphics.textures.FlxRenderTexture;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.system.render.gl.FlxDrawData;
 import flixel.system.render.quad.FlxDrawTrianglesItem.DrawData;
 import flixel.util.FlxColor;
@@ -73,7 +74,7 @@ class FlxGLView extends FlxCameraView
         renderTextureGraphic = new FlxGraphic(null, renderTexture);
         renderTextureFrame = renderTextureGraphic.imageFrame.frame;
 
-        renderTextureQuad = FlxQuadDrawData.get(renderTextureFrame, antialiasing, false, null, null, null, null);
+        renderTextureQuad = FlxQuadDrawData.get(renderTextureFrame, antialiasing, null, null, null, null);
     }
 
     // =============================================================================
@@ -121,10 +122,11 @@ class FlxGLView extends FlxCameraView
             return;
 
 		final frame = FlxG.bitmap.whitePixel;
-        final quad = FlxQuadDrawData.get(frame, false, false, null, null, FlxColor.fromRGB(0, 0, 0, color.alpha), color.rgb, null);
+        final quad = FlxQuadDrawData.get(frame, false, null, null, FlxColor.fromRGB(0, 0, 0, color.alpha), color.rgb, null);
 
         frame.prepareMatrix(quad.matrix);
-        quad.matrix.scale(camera.width, camera.height);
+        // Because whitePixel is actually 10x10 pixels...
+        quad.matrix.scale(camera.width / 10, camera.height / 10);
 
         _drawQueue.push(quad);
 	}
@@ -140,8 +142,8 @@ class FlxGLView extends FlxCameraView
 		// super.copyPixels(pixels, sourceRect, destPoint, transform, blend, smoothing, shader);
 		throw "Not implemented";
 	}
-	
-	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader)
+
+	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		// super.drawFrame(frame, matrix, transform, blend, smoothing, shader);
 		frame.parent.texture.syncIfNeeded();
@@ -150,17 +152,17 @@ class FlxGLView extends FlxCameraView
             matrix.concat(_renderMatrix);
 
         // Queue a quad to be drawn when the camera renders
-        var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), false, shader, blend, transform, matrix);
+		var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), shader.resolveFlxShader(), blend, transform, matrix);
         _drawQueue.push(quad);
 	}
 	
-	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShader)
+	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		// super.copyFrame(frame, destPoint, transform, blend, smoothing, shader);
 		frame.parent.texture.syncIfNeeded();
 
         // Queue a quad to be drawn when the camera renders
-        var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), false, shader, blend, transform, null);
+		var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), shader.resolveFlxShader(), blend, transform, null);
         quad.matrix.tx = destPoint.x;
         quad.matrix.ty = destPoint.y;
         if (_useRenderMatrix)
@@ -169,12 +171,16 @@ class FlxGLView extends FlxCameraView
 	}
 	
 	override function drawTriangles(graphic:FlxGraphic, vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvtData:FlxVector2d<Float>, ?colors:FlxVector2d<Int>,
-			?position:FlxPoint, ?blend:BlendMode, repeat = false, smoothing = false, ?transform:ColorTransform, ?shader:FlxShader)
+		?position:FlxPoint, ?blend:BlendMode, repeat = false, smoothing = false, ?transform:ColorTransform,
+			?shader:FlxShaderAsset)
 	{
 		// super.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, shader);
 
+        // TODO: implement repeat by changing the texture's wrap?
+
         // TODO: matrix support
-        var triangle = FlxTrianglesDrawData.get(vertices, indices, uvtData, colors, graphic, (antialiasing || smoothing), repeat, shader, blend, transform, null);
+		var triangle = FlxTrianglesDrawData.get(vertices, indices, uvtData, colors, graphic.texture, (antialiasing || smoothing), shader.resolveFlxShader(),
+			blend, transform, null);
         triangle.matrix.tx = position.x;
         triangle.matrix.ty = position.y;
         if (_useRenderMatrix)

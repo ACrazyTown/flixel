@@ -13,6 +13,7 @@ import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
+import flixel.graphics.shaders.FlxShader as FlxShaderNew;
 import flixel.util.FlxBitmapDataUtil;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -290,10 +291,10 @@ class FlxSprite extends FlxObject
 	var _lastClipRect = FlxRect.get(Math.NaN);
 
 	/**
-	 * GLSL shader for this sprite. Avoid changing it frequently as this is a costly operation.
+	 * Shader for this sprite. Avoid changing it frequently as this is a costly operation.
 	 * @since 4.1.0
 	 */
-	public var shader:FlxShader;
+	public var shader:FlxShaderAsset;
 
 	/**
 	 * The actual frame used for sprite rendering
@@ -1190,7 +1191,7 @@ class FlxSprite extends FlxObject
 	
 	/**
 	 * Sets the sprite's color transformation with control over color offsets.
-	 * With the DRAW_TILES renderer, offsets are only supported on OpenFL Next version 3.6.0 or higher.
+	 * With the `DRAW_TILES` renderer, offsets are only supported on OpenFL Next version 3.6.0 or higher.
 	 *
 	 * @param   redMultiplier     The value for the red multiplier, in the range from `0` to `1`.
 	 * @param   greenMultiplier   The value for the green multiplier, in the range from `0` to `1`.

@@ -89,6 +89,12 @@ private enum UserDefine
 	 * Enables the experimental OpenGL renderer
 	 */
 	FLX_RENDER_OPENGL;
+
+	/**
+	 * Available only with the experimental OpenGL renderer. Disables the automatic batching of sprites with different textures.
+	 * This is mainly for testing purposes, and will likely lead to a performance penalty if enabled.
+	 */
+	FLX_NO_OPENGL_BATCH_TEXTURES;
 }
 
 /**
@@ -141,6 +147,7 @@ private enum HelperDefine
 	/** Enables audio streaming related APIs */
 	FLX_STREAM_SOUND;
 	FLX_RENDER_DRAWQUADS;
+	FLX_OPENGL_BATCH_TEXTURES;
 }
 
 class FlxDefines
@@ -248,6 +255,7 @@ class FlxDefines
 			define(FLX_HEALTH_NOT_DEFINED);
 			define(FLX_HEALTH);
 		}
+		defineInversion(FLX_NO_OPENGL_BATCH_TEXTURES, FLX_OPENGL_BATCH_TEXTURES);
 	}
 
 	static function defineHelperDefine()

@@ -4,6 +4,8 @@ import haxe.io.Path;
 import haxe.macro.Expr;
 #if !macro
 import flixel.FlxG;
+import flixel.graphics.shaders.FlxShader;
+import flixel.system.render.quad.FlxGraphicsShader;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.textures.FlxTexture;
 import flixel.graphics.FlxBitmap;
@@ -138,7 +140,35 @@ abstract FlxJsonAsset<T>(OneOfTwo<T, String>) from T from String
 	}
 }
 
-typedef FlxShader = #if nme Dynamic #else flixel.system.render.quad.FlxGraphicsShader #end;
+@:deprecated("The legacy shader system is deprecated. Use the new flixel.graphics.shaders.FlxShader API instead.")
+typedef FlxShader = #if nme Dynamic #else FlxGraphicsShader #end;
+
+abstract FlxShaderAsset(OneOfTwo<flixel.graphics.shaders.FlxShader, FlxGraphicsShader>) from flixel.graphics.shaders.FlxShader from FlxGraphicsShader to FlxGraphicsShader
+{
+	public function resolveFlxShader():flixel.graphics.shaders.FlxShader
+	{
+		if (this is FlxGraphicsShader)
+		{
+			// The converted shaders are cached in FlxShader
+			var legacyShader:FlxGraphicsShader = cast this;
+			return flixel.graphics.shaders.FlxShader.fromFlash(legacyShader);
+		}
+		
+		return cast this;
+	}
+	
+	@:haxe.warning("-WDeprecated")
+	public function resolveLegacyShader():FlxGraphicsShader
+	{
+		if (this is flixel.graphics.shaders.FlxShader)
+		{
+			var shader:flixel.graphics.shaders.FlxShader = cast this;
+			return cast shader.data.flash.shader;
+		}
+		
+		return cast this;
+	}
+}
 #end
 
 class FlxAssets

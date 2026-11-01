@@ -12,6 +12,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.textures.FlxTexture;
+import flixel.system.render.quad.FlxGraphicsShader;
 
 /**
  * `FlxBitmap` wrapper which is used for rendering.
@@ -369,7 +370,8 @@ class FlxGraphic implements IFlxDestroyable
 	 * GLSL shader for this graphic. Only used if utilizing sprites do not define a shader
 	 * Avoid changing it frequently as this is a costly operation.
 	 */
-	public var shader(default, null):FlxShader;
+	@:deprecated("`shader` is deprecated, there is no replacement.")
+	public var shader(default, null):FlxGraphicsShader;
 
 	/**
 	 * Usage counter for this `FlxGraphic` object.
@@ -442,6 +444,7 @@ class FlxGraphic implements IFlxDestroyable
 	 * @param   persist   Whether or not this graphic stay in the cache after resetting it.
 	 *                    Default value is `false`, which means that this graphic will be destroyed at the cache reset.
 	 */
+	@:haxe.warning("-WDeprecated")
 	function new(key:String, texture:FlxTexture, ?persist:Bool)
 	{
 		this.key = key;
@@ -451,7 +454,7 @@ class FlxGraphic implements IFlxDestroyable
 		frameCollectionTypes = new Array<FlxFrameCollectionType>();
 		this.texture = texture;
 
-		shader = new FlxShader();
+		shader = new FlxGraphicsShader();
 	}
 
 	/**
@@ -486,6 +489,7 @@ class FlxGraphic implements IFlxDestroyable
 	/**
 	 * Trying to free the memory as much as possible
 	 */
+	@:haxe.warning("-WDeprecated")
 	public function destroy():Void
 	{
 		texture = FlxDestroyUtil.destroy(texture);
@@ -594,7 +598,8 @@ class FlxGraphic implements IFlxDestroyable
 		#end
 	}
 	
-	inline function get_isDestroyed()
+	@:haxe.warning("-WDeprecated")
+	/* inline */ function get_isDestroyed()
 	{
 		return shader == null;
 	}
