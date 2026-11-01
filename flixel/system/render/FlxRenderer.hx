@@ -125,6 +125,14 @@ abstract class FlxTypedRenderer<TView:FlxCameraView> implements IFlxDestroyable
 	 */
 	public var shaders(default, null):IFlxShaderSystem;
 
+	/**
+	 * The default shader to use when rendering sprites.
+	 * 
+	 * This is set by the renderer implementation, but you may override it
+	 * (though you must make sure the shader is compatible).
+	*/
+	public var defaultShader:FlxShader;
+
 	function new() {}
 
 	/**

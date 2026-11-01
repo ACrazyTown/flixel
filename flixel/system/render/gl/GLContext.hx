@@ -22,14 +22,14 @@ import flixel.graphics.shaders.FlxShader;
 @:access(openfl.display3D)
 class GLContext
 {
-    var _shader:FlxShader;
+	var _shader:FlxShader;
     var _curBlendMode:BlendMode;
 
     var _curGLFramebuffer:GLFramebuffer;
     var _curGLVertexBuffer:GLBuffer;
-    var _curGLIndexBuffer:GLBuffer;
-
-    public function new() {}
+	var _curGLIndexBuffer:GLBuffer; // TODO: this is per VAO, not context
+	
+	public function new() {}
 
     public function invalidate():Void
     {
@@ -104,7 +104,7 @@ class GLContext
      * @param   shader   The shader to use
      * @return  Whether the active shader was changed
      */
-    public function setShader(shader:FlxShader):Bool
+	public function setShader(shader:FlxShader):Bool
     {
         if (_shader == shader)
             return false;

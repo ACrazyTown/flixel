@@ -23,8 +23,7 @@ class GLHelper
 
     public static inline function texSubImage2D(target:Int, level:Int, xoffset:Int, yoffset:Int, width:Int, height:Int, format:Dynamic, ?type:Int,
 		?srcData:Dynamic, ?srcOffset:Int):Void
-	{
-        
+	{    
 		gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, srcData, srcOffset);
 	}
 

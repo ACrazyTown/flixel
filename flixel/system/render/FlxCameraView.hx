@@ -1,5 +1,6 @@
 package flixel.system.render;
 
+import flixel.system.FlxAssets.FlxShaderAsset;
 import flixel.FlxCamera;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.shaders.FlxShader;
@@ -108,7 +109,7 @@ abstract class FlxCameraView implements IFlxDestroyable
 	 * @param   smoothing   Whether to use smoothing (anti-aliasing) when drawing.
 	 * @param   shader      The shader to use.
 	 */
-	public function drawPixels(pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
+	public function drawPixels(pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		throw "Not implemented";
 		// Note: Abstract methods with default values are broken on cpp in haxe 4.3. https://github.com/HaxeFoundation/haxe/issues/11666
@@ -129,7 +130,8 @@ abstract class FlxCameraView implements IFlxDestroyable
 	 * @param   shader      The shader to use.
 	 */
 	public function copyPixels(pixels:FlxBitmap, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
-		smoothing:Bool = false, ?filters:Array<FlxShader>)
+	smoothing:Bool = false,
+			?shader:FlxShaderAsset)
 	{
 		throw "Not implemented";
 		// Note: Abstract methods with default values are broken on cpp in haxe 4.3. https://github.com/HaxeFoundation/haxe/issues/11666
@@ -145,7 +147,7 @@ abstract class FlxCameraView implements IFlxDestroyable
 	 * @param   smoothing   Whether to use smoothing (anti-aliasing) when drawing.
 	 * @param   shader      The shader to use.
 	 */
-	public function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false, ?filters:Array<FlxShader>)
+	public function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing:Bool = false, ?shader:FlxShaderAsset)
 	{
 		throw "Not implemented";
 		// Note: Abstract methods with default values are broken on cpp in haxe 4.3. https://github.com/HaxeFoundation/haxe/issues/11666
@@ -164,7 +166,7 @@ abstract class FlxCameraView implements IFlxDestroyable
 	 * @param   smoothing   Whether to use smoothing (anti-aliasing) when drawing.
 	 * @param   shader      The shader to use
 	 */
-	public function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
+	public function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		throw "Not implemented";
 		// Note: Abstract methods with default values are broken on cpp in haxe 4.3. https://github.com/HaxeFoundation/haxe/issues/11666
@@ -186,7 +188,8 @@ abstract class FlxCameraView implements IFlxDestroyable
 	 * @param   shader     The shader to use, optional (used only with the DRAW_TILES renderer).
 	 */
 	public function drawTriangles(graphic:FlxGraphic, vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvtData:FlxVector2d<Float>, ?colors:FlxVector2d<Int>,
-		?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?filters:Array<FlxShader>)
+		?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform,
+			?shader:FlxShaderAsset)
 	{
 		throw "Not implemented";
 		// Note: Abstract methods with default values are broken on cpp in haxe 4.3. https://github.com/HaxeFoundation/haxe/issues/11666

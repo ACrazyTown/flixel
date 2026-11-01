@@ -13,8 +13,8 @@ import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 import lime.utils.Int32Array;
 import openfl.display.BlendMode;
+import flixel.graphics.shaders.glsl.FlxMultiTextureGLSLProgram;
 import flixel.graphics.shaders.FlxShader;
-import flixel.graphics.shaders.FlxBatcherShader;
 import flixel.graphics.textures.FlxTexture;
 import flixel.util.FlxColor;
 
@@ -36,7 +36,7 @@ class FlxBatcher implements IFlxDestroyable
 
     // Render state
 	var _currentTopology:FlxTopology;
-    var _currentShader:FlxShader;
+	var _currentShader:FlxShader;
     var _currentBlendMode:BlendMode;
 
     // Texture state
@@ -73,7 +73,7 @@ class FlxBatcher implements IFlxDestroyable
         this.maxIndices = maxIndices;
         this.attributesPerVertex = attributesPerVertex;
 
-        final maxTextures = #if FLX_OPENGL_BATCH_TEXTURES FlxBatcherShader.maxTextures #else 1 #end;
+        final maxTextures = #if FLX_OPENGL_BATCH_TEXTURES FlxMultiTextureGLSLProgram.maxTextures #else 1 #end;
         _textures = new Vector<FlxTexture>(maxTextures);
         _texturesSmoothing = new Vector<Bool>(maxTextures);
 
@@ -247,7 +247,7 @@ class FlxBatcher implements IFlxDestroyable
     /**
      * Called during a draw call, when the active shader changes.
      */
-    public function initShader(shader:FlxShader):Void
+	public function initShader(shader:FlxShader):Void
     {
         final stride = attributesPerVertex * Float32Array.BYTES_PER_ELEMENT;
         var offset = 0;
@@ -278,7 +278,8 @@ class FlxBatcher implements IFlxDestroyable
 		GL.enableVertexAttribArray(shader.getAttributeLocation("flixel_aColorOffset"));
 
         #if FLX_OPENGL_BATCH_TEXTURES
-        if (shader is FlxBatcherShader)
+        // TODO: surely there's a better way to check this right
+        if (shader.data.glsl is FlxMultiTextureGLSLProgram)
         {
             offset += 4;
             
@@ -297,9 +298,9 @@ class FlxBatcher implements IFlxDestroyable
      */
     function updateRenderState(next:FlxDrawData):Void
     { 
-        inline function resolveShader(shader:FlxShader):FlxShader
+		inline function resolveShader(shader:FlxShader):FlxShader
         {
-            return shader == null ? FlxGLRenderer.defaultShader : shader;
+            return shader == null ? FlxG.renderer.defaultShader : shader;
         }
 
         #if FLX_OPENGL_BATCH_TEXTURES
@@ -385,9 +386,8 @@ class FlxBatcher implements IFlxDestroyable
         _currentShader = resolveShader(next.shader);
 
         #if FLX_OPENGL_BATCH_TEXTURES
-        // We can only batch textures with a compatible shader, which is currently ONLY FlxBatcherShader...
-        // TODO: look into texture batching in custom sahders
-        _canBatchTextures = _currentShader is FlxBatcherShader;
+        // TODO: surely there's a better way to check this right
+        _canBatchTextures = _currentShader.data.glsl is FlxMultiTextureGLSLProgram;
 
         if (_canBatchTextures)
         {
@@ -484,7 +484,7 @@ class FlxBatcher implements IFlxDestroyable
 @:forward
 abstract BatchDrawCall(FlxDrawCall) from FlxDrawCall to FlxDrawCall
 {
-    public inline static function get(batcher:FlxBatcher, count:Int, offset:Int, topology:FlxTopology, shader:FlxShader, blend:BlendMode,
+	public inline static function get(batcher:FlxBatcher, count:Int, offset:Int, topology:FlxTopology, shader:FlxShader, blend:BlendMode,
 			texture:Vector<FlxTexture>, textureSmoothing:Vector<Bool>):BatchDrawCall
 	{
 		var dc = FlxDrawCall.get()

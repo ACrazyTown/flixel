@@ -1,6 +1,6 @@
 package flixel.system.render.gl;
 
-import flixel.graphics.shaders.FlxBatcherShader;
+import flixel.graphics.shaders.glsl.FlxMultiTextureGLSLProgram;
 import haxe.ds.Vector;
 import flixel.util.FlxDestroyUtil;
 import lime.graphics.opengl.GLBuffer;
@@ -47,7 +47,7 @@ class FlxDrawCall implements IFlxDestroyable
 
     function new() 
 	{
-		final maxTextures = #if FLX_OPENGL_BATCH_TEXTURES FlxBatcherShader.maxTextures #else 1 #end;
+		final maxTextures = #if FLX_OPENGL_BATCH_TEXTURES FlxMultiTextureGLSLProgram.maxTextures #else 1 #end;
 		textures = new Vector<FlxTexture>(maxTextures);
 		texturesSmoothing = new Vector<Bool>(maxTextures);
 	}
@@ -64,7 +64,8 @@ class FlxDrawCall implements IFlxDestroyable
 	}
 	
 	// public inline function setState(topology:FlxTopology, shader:FlxShader, blend:BlendMode, texture:FlxTexture, textureSmoothing:Bool):FlxDrawCall
-	public inline function setState(topology:FlxTopology, shader:FlxShader, blend:BlendMode, textures:Vector<FlxTexture>, texturesSmoothing:Vector<Bool>):FlxDrawCall
+	public inline function setState(topology:FlxTopology, shader:FlxShader, blend:BlendMode, textures:Vector<FlxTexture>,
+			texturesSmoothing:Vector<Bool>):FlxDrawCall
 	{
 		this.topology = topology;
 		

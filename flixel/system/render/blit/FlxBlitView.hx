@@ -1,5 +1,6 @@
 package flixel.system.render.blit;
 
+import flixel.system.FlxAssets.FlxShaderAsset;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
@@ -195,7 +196,7 @@ class FlxBlitView extends FlxCameraView
 	
 	@:noCompletion
 	static final _helperMatrix = new FlxMatrix();
-	override function drawPixels(pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
+	override function drawPixels(pixels:FlxBitmap, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		// super.drawPixels(pixels, matrix, transform, blend, smoothing, shader);
 		
@@ -216,7 +217,7 @@ class FlxBlitView extends FlxCameraView
 	@:noCompletion
 	static final _helperPoint:Point = new Point();
 	override function copyPixels(pixels:FlxBitmap, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false,
-			?filters:Array<FlxShader>)
+			?shader:FlxShaderAsset)
 	{
 		// super.copyPixels(pixels, sourceRect, destPoint, transform, blend, smoothing);
 		
@@ -235,12 +236,12 @@ class FlxBlitView extends FlxCameraView
 		}
 	}
 	
-	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
+	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		throw "Not Implemented on blit";
 	}
 	
-	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
+	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		// TODO: fix this case for zoom less than initial zoom...
 		frame.paint(buffer, destPoint, true);

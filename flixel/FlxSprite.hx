@@ -291,13 +291,10 @@ class FlxSprite extends FlxObject
 	var _lastClipRect = FlxRect.get(Math.NaN);
 
 	/**
-	 * GLSL shader for this sprite. Avoid changing it frequently as this is a costly operation.
+	 * Shader for this sprite. Avoid changing it frequently as this is a costly operation.
 	 * @since 4.1.0
 	 */
-	@:deprecated("sprite.shader is deprecated, use sprite.filters instead.")
-	public var shader(default, set):FlxShader; // TODO: GETTER/SETTER
-
-	public var filters:Array<FlxShaderNew> = [];
+	public var shader:FlxShaderAsset;
 
 	/**
 	 * The actual frame used for sprite rendering
@@ -1038,9 +1035,9 @@ class FlxSprite extends FlxObject
 		prepareComplexMatrix(matrix, frame, camera);
 		
 		if (framePixels != null && useFramePixels)
-			camera.view.drawPixels(framePixels, matrix, colorTransform, blend, antialiasing, filters);
+			camera.view.drawPixels(framePixels, matrix, colorTransform, blend, antialiasing, shader);
 		else
-			camera.view.drawFrame(frame, matrix, colorTransform, blend, antialiasing, filters);
+			camera.view.drawFrame(frame, matrix, colorTransform, blend, antialiasing, shader);
 	}
 	
 	function prepareComplexMatrix(matrix:FlxMatrix, frame:FlxFrame, camera:FlxCamera)
@@ -1194,7 +1191,7 @@ class FlxSprite extends FlxObject
 	
 	/**
 	 * Sets the sprite's color transformation with control over color offsets.
-	 * With the DRAW_TILES renderer, offsets are only supported on OpenFL Next version 3.6.0 or higher.
+	 * With the `DRAW_TILES` renderer, offsets are only supported on OpenFL Next version 3.6.0 or higher.
 	 *
 	 * @param   redMultiplier     The value for the red multiplier, in the range from `0` to `1`.
 	 * @param   greenMultiplier   The value for the green multiplier, in the range from `0` to `1`.
@@ -1980,15 +1977,6 @@ class FlxSprite extends FlxObject
 			clipRect = null;
 
 		return rect;
-	}
-
-	@:noCompletion
-	function set_shader(value:FlxShader):FlxShader 
-	{
-		var newShader = FlxShaderNew.fromFlash(value);
-
-		filters[0] = newShader;
-		return shader = value;
 	}
 
 	/**

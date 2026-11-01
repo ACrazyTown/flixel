@@ -1,23 +1,43 @@
 package flixel.graphics.shaders;
 
+import flixel.graphics.shaders.glsl.FlxGLSLProgram;
+import flixel.graphics.shaders.glsl.GLSLProgram;
 import flixel.graphics.textures.FlxTexture;
 import flixel.system.FlxAssets.FlxShader as FlxLegacyShader;
 import flixel.system.render.FlxRendererTypes;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import haxe.ds.StringMap;
-import lime.graphics.opengl.GL;
 import lime.utils.Float32Array;
 import lime.utils.Int32Array;
-import openfl.display.BitmapData;
 import openfl.display.Shader;
 
 /**
- * A `FlxShader` represents a single-pass shader program used to render a sprite.
+ * `FlxShader` lets you write custom programs that run on the GPU and affect how sprites will be rendered.
+ * The `FlxShader` constructor expects you to pass in a struct that contains different shader data. The shader data you
+ * will pass in depends on the used renderer backend. If you pass in multiple, the renderer backend will try to choose
+ * the most ideal option.
+ * 
+ * Currently there's two supported shader data formats, `glsl` and `flash`:
+ * - `glsl`  - Allows you to pass in a `GLSLProgram` (or any extending classes). In most cases, you want to use `FlxGLSLProgram`
+ *             as it allows for the use of `#pragma header` and similar defines which will automatically inject some internal
+ *             Flixel GLSL code snippets that are needed for sprites to render properly.
+ *             See the documentation of the classes in the `flixel.graphics.shaders.glsl` package for more info.
+ *             There are also static helper methods such as `FlxShader.glsl()`, which let you easily create Flixel-compatible shaders
+ *             from given vertex and fragment sources, without dealing with the `GLSLProgram` API yourself.
+ * 
+ * - `flash` - Allows you to pass in an instance of a `openfl.display.Shader`. Note that this is kept only for
+ *             backwards compatibility, and should be avoided. It will be removed in a future version.
+ * 
+ * **NOTE:** An unique shader instance does not guarantee an unique backend shader program. For optimization sake, 
+ * shader programs may be reused if the shader data is the same. `FlxShader` instances mainly just store the different
+ * uniform states.
  */
+@:haxe.warning("-WDeprecated") // Needed to stop deprecation warnings from internals accessing `data.flash`
 class FlxShader implements IFlxDestroyable
 {
-    // TODO: dispose
+    // =========================================================================================================
     // These are for internal use only, and will be removed once support for OpenFL shaders is dropped in v7
+    // =========================================================================================================
     @:noCompletion
     static var flashCache:Map<FlxLegacyShader, FlxShader> = [];
 
@@ -50,9 +70,33 @@ class FlxShader implements IFlxDestroyable
         flashCache.set(legacyShader, cached);
         return cached;
     }
+    // =========================================================================================================
 
     /**
-     * The shader data provided through the constructor. 
+     * Quick and easy helper to create a Flixel-compatible shader (using `FlxGLSLProgram`) from the provided GLSL source code.
+     * 
+     * @param   fragmentSource     GLSL source code for the fragment shader.
+     * @param   vertexSource       Optional, GLSL source code for the vertex shader. If left `null`, `FlxGLSLProgram.DEFAULT_VERTEX_SOURCE` is used.
+     * @param   vertexAttributes   Optional array of vertex attribute names in the vertex shader, ordered by the vertex location.
+     *                             While it is optional, you should always strive to provide this as it lets the renderer take advantage 
+     *                             of some internal optimizations.
+     *                             If you don't modify the vertex shader attributes, you can also pass in `FlxGLSLProgram.DEFAULT_VERTEX_ATTRIBUTES`.
+     * 
+     * @return  The newly created `FlxShader`.
+     */
+    public static function glsl(fragmentSource:String, ?vertexSource:String, ?vertexAttributes:Array<String>):FlxShader
+    {
+        var program = new FlxGLSLProgram();
+        program.fragmentSource = fragmentSource;
+        program.vertexSource = vertexSource;
+        program.vertexAttributes = vertexAttributes;
+
+        return new FlxShader({glsl: program});
+    }
+
+    /**
+     * Shader data used to initialize the internal shader handle.
+     * Will be null prior to the `init()` call!
      */
     public var data(default, null):FlxShaderData;
 
@@ -61,15 +105,18 @@ class FlxShader implements IFlxDestroyable
      */
     var _handle:FlxShaderHandle;
 
+    /**
+     * Attribute location cache, keyed by the attribute name
+     */
     var _attributeLocations:StringMap<FlxShaderAttributeLocation>;
 
     /**
-     * Map of internal uniform states, keyed by the uniform name.
+     * Uniform state cache, keyed by the uniform name.
      */
     var _uniformMap:StringMap<FlxShaderUniform<Any>>;
 
     /**
-     * List of internal uniform states
+     * Uniform states but in an array.
      */
     var _uniforms:Array<FlxShaderUniform<Any>>;
 
@@ -79,17 +126,17 @@ class FlxShader implements IFlxDestroyable
      */
     var _boundTextureSlots:Bool = false;
 
-    public function new(data:FlxShaderData)
+    public function new(data:FlxShaderData) 
     {
         this.data = data;
 
         _handle = FlxG.renderer.shaders.createHandle(data);
         _uniforms = FlxG.renderer.shaders.fetchUniforms(_handle);
 
-        // To be able to modify the uniforms by name we need a fast way to fetch them so
-        // we'll also make a map
         if (_uniforms != null)
         {
+            // To be able to modify the uniforms by name we need a fast way to fetch them so
+            // we'll also make a map
             _uniformMap = new StringMap<FlxShaderUniform<Any>>();
             for (uniform in _uniforms)
                 _uniformMap.set(uniform.name, uniform);
@@ -112,12 +159,17 @@ class FlxShader implements IFlxDestroyable
             }
         }
 
-        if (_handle != null)
-            FlxG.renderer.shaders.destroyHandle(_handle);
+        // TODO ant: handles are cached internally, so destroying a shader is not ideal
+        // OpenFL handles this by just not destroying handles ever
+        // I wonder if it'd be better to ref count them or something?
+        // if (_handle != null)
+        //     FlxG.renderer.shaders.destroyHandle(_handle);
 
         _handle = null;
         _uniforms = null;
         _uniformMap = null;
+        _attributeLocations = null;
+        
         data = null;
     }
 
@@ -170,7 +222,7 @@ class FlxShader implements IFlxDestroyable
     /**
      * Returns the location of the specified attribute.
      * 
-    * If the attribute doesn't exist (not present at all, or was unused and the shader compiler removed it), the returned
+     * If the attribute doesn't exist (not present at all, or was unused and the shader compiler removed it), the returned
      * location will be `null`.
      * 
      * @param   name   The uniform's name in the shader.
@@ -658,33 +710,6 @@ class FlxShader implements IFlxDestroyable
         }
     }
 
-    // /**
-    //  * Sets the value of the specified uniform to `bitmap`.
-    //  * 
-    //  * @param   name        The uniform's name in the shader.
-    //  * @param   bitmap      The `BitmapData` to set the uniform's value to.
-    //  * @param   smoothing   Whether the bitmap should be smoothed.
-    //  */
-    // public function setBitmap(name:String, bitmap:BitmapData, smoothing:Bool)
-    // {
-    //     if (data.flash != null)
-    //     {
-    //         var input:openfl.display.ShaderInput<BitmapData> = Reflect.field(data.flash.shader.data, name);
-    //         input.filter = smoothing ? LINEAR : NEAREST;
-    //         input.input = bitmap;
-    //         return;
-    //     }
-
-    //     var uniform = cast _uniformMap.get(name);
-    //     if (uniform == null) 
-    //     {
-    //         FlxG.log.error('Can\'t set non-existant shader uniform "$name"');
-    //         return; 
-    //     }
-
-    //     uniform.value = BITMAP(bitmap, smoothing);
-    // }
-
     /**
      * Sets the value of the specified uniform to `texture`.
      * 
@@ -707,7 +732,7 @@ class FlxShader implements IFlxDestroyable
             return; 
         }
 
-        // This is intentionally always set as dirty because textures need to be rebound
+        // TODO: This is intentionally always set as dirty because textures need to be rebound
         // if the shader changes in the meantime, but it's easier to just always do it here... (for now?)
         uniform.value.texture = texture;
         uniform.value.smoothing = smoothing;
@@ -890,20 +915,32 @@ class FlxShader implements IFlxDestroyable
     }
 }
 
+/**
+ * Holds all the data describing the shader.
+ * This object doesn't store any data in itself, rather it holds multiple objects which describe the
+ * shader data for different renderer backends. You may specify multiple shader data objects, but the one that will ultimately
+ * get used depends on the renderer backend.
+ * 
+ * - `flash` - Allows you to create a shader using an already existing `openfl.display.Shader`. This way of creating shaders
+ *             is deprecated and highly discouraged, and is only left for backwards compatibilty!
+ *             It is compatible with both the `DRAW_TILES` and `OPENGL` renderers.
+ * - `glsl` - Allows you to create a shader using GLSL shader code. This is used only with the `OPENGL` renderer.
+ */
 typedef FlxShaderData =
 {
     /**
-     * Flash/OpenFL shader data. This is usable both with the DRAW_TILES and OpenGL renderers, though it is
+     * Flash/OpenFL shader data. This is usable both with the `DRAW_TILES` and `OPENGL` renderers, though it is
      * highly discouraged with the latter.
-     * This option is available mostly for backwards compatibility reasons, and will be removed in a future major version.
+     * 
+     * **This option is available mostly for backwards compatibility reasons, and will be removed in a future major version.**
      */
     @:deprecated("OpenFL shader support will be dropped in v7.0.0. Migrate your shaders to the new FlxShader API")
     @:optional var flash:FlxOpenFLShaderData;
 
     /**
-     * GLSL data for the shader. This is only used with the OpenGL renderer.
+     * GLSL data for the shader. This is only supported with the `OPENGL` renderer.
      */
-    @:optional var glsl:FlxGLSLShaderData;
+    @:optional var glsl:GLSLProgram;
 }
 
 typedef FlxOpenFLShaderData = 
@@ -913,74 +950,6 @@ typedef FlxOpenFLShaderData =
      */
     var shader:Shader;
 }
-
-typedef FlxGLSLShaderData = 
-{
-    /**
-     * Optional data for the vertex shader. If not provided, the default vertex shader data will be used.
-     */
-    @:optional var vertex:GLSLShader & 
-    {
-        /**
-         * Ordered array of vertex attribute names.
-         * If this is provided, the vertex attribute locations will be bound to their corresponding index in the array. 
-         * If your shaders share the same vertex attributes, you should bind them in the same order so the
-         * renderer can take advantage of internal optimisations.
-         */
-        var attributes:Array<String>;
-    };
-
-    /**
-     * Data for the fragment shader.
-     */
-    var fragment:GLSLShader &
-    {
-        /**
-         * 
-         */
-        @:optional var injectBuiltins:Bool;
-    };
-}
-
-typedef GLSLShader = 
-{
-    /**
-     * The GLSL source code for the shader.
-     */
-    var source:String;
-
-    /**
-     * Optional, the wanted GLSL shader version.
-     * 
-     * The default value is left unspecified, and as such will be automatically
-     * set by the GPU driver. In this case you should assume you're working with the
-     * lowest version possible (`110` on desktop and `100` on mobile/web).
-     * 
-     * Note that this will be ignored if the version is already set in the GLSL shader code.
-     */
-    @:optional var version:String;
-
-    /**
-     * Optional, the wanted floating-point precision for the shader.
-     * This only has an effect when targeting OpenGL ES (mobile) or WebGL (HTML5).
-     * 
-     * Default value is `HIGH`.
-     * 
-     * Note that this will be ignored if the precision qualifier is already
-     * set in the GLSL shader code.
-     */
-    @:optional var precision:GLSLPrecision;
-}
-
-enum abstract GLSLPrecision(String) from String to String
-{
-    var HIGH = "highp";
-    var MEDIUM = "mediump";
-    var LOW = "lowp";
-}
-
-// Under are various defines for internal shader uniform state. These have @:noCompletion instead of
-// being private classes because they need to be referenced by FlxRenderer implementations but hidden from the user!
 
 enum FlxShaderArrayDimension
 {
@@ -1005,6 +974,9 @@ enum FlxShaderArrayDimension
     VEC4;
 }
 
+// Under are various defines for internal shader uniform state. These have @:noCompletion instead of
+// being private classes because they need to be referenced by FlxRenderer implementations but hidden from the user!
+
 @:noCompletion
 class FlxShaderUniform<T> 
 {
@@ -1024,28 +996,28 @@ class FlxShaderUniform<T>
 }
 
 @:noCompletion
-enum abstract FlxUniformType(Int)
+enum FlxUniformType
 {
-    var INT1 = 0;
-    var INT2 = 1;
-    var INT3 = 2;
-    var INT4 = 3;
-    var INT_ARRAY = 4;
-    var FLOAT1 = 5;
-    var FLOAT2 = 6;
-    var FLOAT3 = 7;
-    var FLOAT4 = 8;
-    var FLOAT_ARRAY = 9;
-    var MAT4X4 = 10;
-    var MAT4X3 = 11;
-    var MAT4X2 = 12;
-    var MAT3X4 = 13;
-    var MAT3X3 = 14;
-    var MAT3X2 = 15;
-    var MAT2X4 = 16;
-    var MAT2X3 = 17;
-    var MAT2X2 = 18;
-    var TEXTURE = 19;
+    INT1;
+    INT2;
+    INT3;
+    INT4;
+    INT_ARRAY;
+    FLOAT1;
+    FLOAT2;
+    FLOAT3;
+    FLOAT4;
+    FLOAT_ARRAY;
+    MAT4X4;
+    MAT4X3;
+    MAT4X2;
+    MAT3X4;
+    MAT3X3;
+    MAT3X2;
+    MAT2X4;
+    MAT2X3;
+    MAT2X2;
+    TEXTURE;
 }
 
 @:structInit
@@ -1113,7 +1085,6 @@ class ShaderMatrix
 {
     public var data:Float32Array;
     public var transpose:Bool;
-    // public var layout:FlxShaderMatrixType;
 }
 
 @:structInit

@@ -4,7 +4,7 @@ import flixel.FlxCamera;
 import flixel.graphics.frames.FlxFrame;
 import flixel.system.render.quad.FlxDrawBaseItem.FlxDrawItemType;
 import flixel.math.FlxMatrix;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.system.render.quad.FlxGraphicsShader;
 import openfl.Vector;
 import openfl.display.ShaderParameter;
 import openfl.geom.ColorTransform;
@@ -14,7 +14,7 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 {
 	static inline var VERTICES_PER_QUAD = 4;
 
-	public var shader:FlxShader;
+	public var shader:FlxGraphicsShader;
 
 	var rects:Vector<Float>;
 	var transforms:Vector<Float>;
@@ -111,6 +111,7 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 	}
 
 	#if (!flash && FLX_RENDER_DRAWQUADS)
+	@:haxe.warning("-WDeprecated")
 	override public function render(camera:FlxCamera):Void
 	{
 		if (rects.length == 0)

@@ -1,5 +1,6 @@
 package flixel.tile;
 
+import flixel.system.FlxAssets.FlxShaderAsset;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -14,7 +15,6 @@ import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.shaders.FlxShader as FlxShaderNew;
 import flixel.system.FlxAssets.FlxTilemapGraphicAsset;
 import flixel.system.render.quad.FlxQuadView;
@@ -241,14 +241,11 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 	public var scaledHeight(get, never):Float;
 
 	/**
-	 * GLSL shader for this tilemap. Only works with OpenFL Next or WebGL.
+	 * Shader for this tilemap.
 	 * Avoid changing it frequently as this is a costly operation.
 	 * @since 4.1.0
 	 */
-	@:deprecated("shader is deprecated, use filters instead")
-	public var shader:FlxShader; // TODO: hook up to filters
-
-	public var filters:Array<FlxShaderNew> = [];
+	public var shader:FlxShaderAsset;
 
 	/**
 	 * Rendering helper, minimize new object instantiation on repetitive methods.
@@ -1133,7 +1130,7 @@ class FlxTypedTilemap<Tile:FlxTile> extends FlxBaseTilemap<Tile>
 						_matrix.scale(scaleX, scaleY);
 						_matrix.translate(drawX, drawY);
 
-						camera.view.drawFrame(frame, _matrix, colorTransform, blend, antialiasing, filters);
+						camera.view.drawFrame(frame, _matrix, colorTransform, blend, antialiasing, shader);
 					}
 				}
 

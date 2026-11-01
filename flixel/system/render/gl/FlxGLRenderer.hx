@@ -3,8 +3,9 @@ package flixel.system.render.gl;
 #if FLX_RENDER_OPENGL
 import flixel.graphics.FlxBitmap;
 import flixel.graphics.shaders.FlxShader;
-import flixel.graphics.shaders.FlxDefaultShader;
-import flixel.graphics.shaders.FlxBatcherShader;
+import flixel.graphics.shaders.glsl.GLSLProgram;
+import flixel.graphics.shaders.glsl.GLSLProgram.GLSLShaderType;
+import flixel.graphics.shaders.glsl.FlxGLSLProgram;
 import flixel.graphics.textures.FlxRenderTexture;
 import flixel.graphics.textures.FlxTexture;
 import flixel.math.FlxRect;
@@ -32,24 +33,9 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
     public static inline final VERTICES_PER_QUAD:Int = 4;
 
     /**
-     * The amount of vertices needed for a single triangle.
-     */
-    public static inline final VERTICES_PER_TRIANGLE:Int = 3;
-
-    /**
      * The amount of indices needed for a single quad.
      */
     public static inline final INDICES_PER_QUAD:Int = 6;
-
-    /**
-     * The amount of vertices needed for a signel triangle.
-     */
-    public static inline final INDICES_PER_TRIANGLE:Int = 3;
-
-    /**
-     * The maximum amount of vertices that can fit in a index buffer.
-     */
-    public static inline final MAX_VERTICES_PER_BUFFER:Int = 65535;
 
     /**
      * The maximum amount of quads that can fit in an index buffer.
@@ -65,12 +51,8 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
      * an extension will be tried to be used instead. 
      * If VAOs are not supported in any form, they will be emulated.
      */
+	// TODO: move to GLContext
     public static var supportsVAO:Null<Bool>;
-
-    /**
-     * The default shader used by the renderer.
-     */
-	public static var defaultShader:FlxShader;
 
     /**
      * A tiny wrapper over the GL context.
@@ -125,7 +107,8 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
 
         context = new GLContext();
 
-		defaultShader = #if FLX_OPENGL_BATCH_TEXTURES new FlxBatcherShader() #else new FlxDefaultShader() #end;
+        var program:FlxGLSLProgram = #if FLX_OPENGL_BATCH_TEXTURES new flixel.graphics.shaders.glsl.FlxMultiTextureGLSLProgram() #else new FlxGLSLProgram() #end;
+		defaultShader = new FlxShader({glsl: program});
 
         // The batcher uses 7 vertex attributes/components (?):
         // The (x, y) position
@@ -146,6 +129,7 @@ class FlxGLRenderer extends FlxTypedRenderer<FlxGLView>
      */
     @:access(openfl.display)
     @:access(openfl.display3D)
+    @:haxe.warning("-WDeprecated")
     public function draw(dc:FlxDrawCall):Void
     {
         final shader = dc.shader;
@@ -467,28 +451,8 @@ class FlxGLRenderTargetSystem implements IFlxRenderTargetSystem
 
 class FlxGLShaderSystem implements IFlxShaderSystem
 {
-	inline static final FRAGMENT_BUILTIN = "
-        varying vec4 flixel_vColorMultiplier;
-        varying vec4 flixel_vColorOffset;
-        varying vec2 flixel_vTextureCoord;
-
-        uniform sampler2D flixel_uTexture;
-        uniform vec2 flixel_uTextureSize;
-
-        vec4 flixel_texture(sampler2D sampler, vec2 coord)
-        {
-            vec4 color = texture2D(sampler, coord);
-
-            color = vec4(color.rgb / color.a, color.a);
-            color = (color * flixel_vColorMultiplier) + flixel_vColorOffset;
-
-            return vec4(color.rgb * color.a, color.a);
-        }
-
-        #define flixel_texture2D flixel_texture
-        ";
-
     var _handleCache:Map<String, FlxShaderHandle>;
+	// var _handleRefCount:Map<FlxShaderHandle, Int>;
 
     public var renderer:FlxGLRenderer;
 
@@ -497,8 +461,10 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         this.renderer = renderer;
         
         _handleCache = new Map<String, FlxShaderHandle>();
+		// _handleRefCount = new Map<FlxShaderHandle, Int>();
     }
 
+    @:haxe.warning("-WDeprecated")
     public function createHandle(data:FlxShaderData):FlxShaderHandle
 	{
         #if !flash
@@ -520,70 +486,57 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         }
         #end
 
-		if (data.glsl == null)
-			throw "Missing GLSL shader data";
-			
-		// Fill in non specified optional values before creating the program
-		if (data.glsl.vertex == null)
-			data.glsl.vertex = FlxDefaultShader.defaultShaderData.glsl.vertex;
-		else
-		{
-			if (data.glsl.vertex.precision == null)
-				data.glsl.vertex.precision = FlxDefaultShader.defaultShaderData.glsl.vertex.precision;
-			if (data.glsl.vertex.version == null)
-				data.glsl.vertex.version = FlxDefaultShader.defaultShaderData.glsl.vertex.version;
-		}
-		
-		if (data.glsl.fragment.injectBuiltins == null)
-			data.glsl.fragment.injectBuiltins = FlxDefaultShader.defaultShaderData.glsl.fragment.injectBuiltins;
-		if (data.glsl.fragment.precision == null)
-			data.glsl.fragment.precision = FlxDefaultShader.defaultShaderData.glsl.fragment.precision;
-		if (data.glsl.fragment.version == null)
-			data.glsl.fragment.version = FlxDefaultShader.defaultShaderData.glsl.fragment.version;
+        if (data == null || data.glsl == null)
+            throw "Invalid (or incompatible) shader data!";
 
-        var vertexSourceProcessed = data.glsl.vertex != null ? processShaderSource(data.glsl.vertex, GL.VERTEX_SHADER) : null;
-        var fragmentSourceProcessed = data.glsl.fragment != null ? processShaderSource(data.glsl.fragment, GL.FRAGMENT_SHADER) : null;
+        final glsl = data.glsl;
+        glsl.prepare();
+
+        // TODO: If support for more shader types is added, this should be reworked to only throw
+        // in specific combinations as not all shader types are mandatory.
+        // For now assume vertex and fragment are both needed.
+        if (glsl.vertexSource == null) 
+            throw "Missing GLSL vertex source!";
+        if (glsl.fragmentSource == null)
+            throw "Missing GLSL fragment source!";
 
         // Check if we have this shader already compiled
-        var cacheKey:String = vertexSourceProcessed + fragmentSourceProcessed;
-        if (_handleCache.exists(cacheKey))
-            return _handleCache.get(cacheKey);
+        var cacheKey:String = glsl.vertexSource + glsl.fragmentSource;
+		if (_handleCache.exists(cacheKey))
+		    return _handleCache.get(cacheKey);
 
-        // We don't
-        var program = GL.createProgram();
+        // We don't, time to compile!
 
-        if (data.glsl.vertex != null)
+        var glProgram = GL.createProgram();
+        
+        var glVertexShader = compileGLShader(glsl.vertexSource, VERTEX);
+        GL.attachShader(glProgram, glVertexShader);
+
+        if (glsl.vertexAttributes != null)
         {
-            var shader = createShader(GL.VERTEX_SHADER, vertexSourceProcessed);
-            GL.attachShader(program, shader);
-
-            // Before linking the shader program we want to ensure our attributes
-            // will be assigned to the locations we want them to be in
-            // This is so that we can take advantage of VAOs properly
-            if (data.glsl.vertex.attributes != null)
-            {
-                for (i in 0...data.glsl.vertex.attributes.length)
-                    GL.bindAttribLocation(program, i, data.glsl.vertex.attributes[i]);
-            }
+            for (i in 0...glsl.vertexAttributes.length)
+                GL.bindAttribLocation(glProgram, i, glsl.vertexAttributes[i]);
         }
 
-        if (data.glsl.fragment != null)
-        {
-            var shader = createShader(GL.FRAGMENT_SHADER, fragmentSourceProcessed);
-            GL.attachShader(program, shader);
-        }
+        var glFragmentShader = compileGLShader(glsl.fragmentSource, FRAGMENT);
+        GL.attachShader(glProgram, glFragmentShader);
 
-        GL.linkProgram(program);
+        GL.linkProgram(glProgram);
 
-        if (GL.getProgramParameter(program, GL.LINK_STATUS) == 0)
+        if (GL.getProgramParameter(glProgram, GL.LINK_STATUS) == 0)
         {
-            var error = GL.getProgramInfoLog(program);
+            var error = GL.getProgramInfoLog(glProgram);
 
             // TODO: port https://github.com/openfl/openfl/pull/2764 ?
             FlxG.log.error('Error linking program:\n$error');
+			trace("Epic Compile Fail");
+            trace(glsl.vertexSource);
+            trace(glsl.fragmentSource);
         }
 
-        return program;
+        _handleCache.set(cacheKey, glProgram);
+
+        return glProgram;
     }
 
     public function destroyHandle(handle:FlxShaderHandle):Void
@@ -844,23 +797,21 @@ class FlxGLShaderSystem implements IFlxShaderSystem
             return success;
         }
 
-        var glslTemplate = "
-        #ifdef GL_ES
-        precision mediump float;
-        #endif
-        void main()
-        {
-            float test = 0.1;
-            %CONDITIONS%
-            gl_FragColor = vec4(0.0);
-        }
-        ";
+        var templateProgram = new GLSLProgram();
+        final glslTemplate = "void main()
+{
+    float test = 0.1;
+    %CONDITIONS%
+    gl_FragColor = vec4(0.0);
+}";
 
         var maxIfs:Int = initialAmount;
         while (maxIfs > 0) 
         {
-            var glsl = glslTemplate.replace("%CONDITIONS%", generateTestIfs(maxIfs));
-            if (!canCompileTestShader(glsl))
+            templateProgram.fragmentSource = glslTemplate.replace("%CONDITIONS%", generateTestIfs(maxIfs));
+            templateProgram.prepare();
+
+            if (!canCompileTestShader(templateProgram.fragmentSource))
                 maxIfs = Std.int(maxIfs / 2);
             else
                 break;
@@ -869,97 +820,25 @@ class FlxGLShaderSystem implements IFlxShaderSystem
         return maxIfs;
     }
 
-    function createShader(type:Int, src:String):GLShader 
+    function compileGLShader(source:String, type:GLSLShaderType):GLShader
     {
-        var shader = GL.createShader(type);
-        GL.shaderSource(shader, src);
-        GL.compileShader(shader);
-
-        if (GL.getShaderParameter(shader, GL.COMPILE_STATUS) == 0)
+        var glShaderType = switch type
         {
-            var error = GL.getShaderInfoLog(shader);
-            FlxG.log.error('Error compiling ${type == GL.FRAGMENT_SHADER ? 'fragment' : 'vertex'} shader:\n$error');
+            case FRAGMENT: GL.FRAGMENT_SHADER;
+            case VERTEX: GL.VERTEX_SHADER;
         }
 
-        return shader;
-    }
+        var glShader = GL.createShader(glShaderType);
+        GL.shaderSource(glShader, source);
+        GL.compileShader(glShader);
 
-	function processShaderSource(shader:GLSLShader, type:Int):String
-    {
-        var prefix:StringBuf = new StringBuf();
-
-        var versionRegex = ~/^#version/m;
-
-        if (shader.version != null)
+        if (GL.getShaderParameter(glShader, GL.COMPILE_STATUS) == 0)
         {
-            if (!versionRegex.match(shader.source))
-                prefix.add('#version ${shader.version}\n');
-            else
-				FlxG.log.warn("Can't inject shader version because the shader code already specifies it!");
+            var error = GL.getShaderInfoLog(glShader);
+            FlxG.log.error('Error compiling $type shader:\n$error');
         }
 
-        var precisionRegex = ~/^precision/m;
-
-        // Precision qualifiers are only supported on OpenGL ES and WebGL
-        if (GL.type != OPENGL && shader.precision != null)
-        {
-            if (!precisionRegex.match(shader.source))
-            {
-                prefix.add("#ifdef GL_ES\n");
-
-                // Not all GPUs support high precision so we have to see if its available
-                // and fallback to medium if it's not
-                if (shader.precision == HIGH)
-                {
-                    prefix.add("#ifdef GL_FRAGMENT_PRECISION_HIGH\n");
-                    prefix.add("precision highp float;\n");
-                    prefix.add("#else\n");
-                    prefix.add("precision mediump float;\n");
-                    prefix.add("#endif\n");
-                }
-                else
-                {
-                    prefix.add('precision ${shader.precision} float;\n');
-                }
-
-                prefix.add("#endif\n");
-            }
-            else
-                FlxG.log.warn("Can't inject shader precision qualifier because the shader code already specifies it!");
-        }
-
-        prefix.add("\n");
-
-        if (shader.version != null)
-        {
-		    var versionSplit = shader.version.split(" ");
-            var versionNumber = Std.parseInt(versionSplit[0]);
-            var versionExtra = versionSplit[1] != null ? versionSplit[1] : "";
-            
-            // Newer GLSL versions deprecate and remove some features, so we need to handle that if we're targeting a higher GLSL version
-            // For OpenGL ES and WebGL we only have to check if we're targeting version 300 or higher
-            // On desktop OpenGL we check if we're targeting version 130 or higher AND it's NOT a compatibility profile (which doesn't remove anything)
-            if (((GL.type == OPENGLES || GL.type == WEBGL) && versionNumber >= 300)
-                || (GL.type == OPENGL) && versionNumber >= 130 && versionExtra != "compatibility") 
-            {
-                prefix.add("#define texture2D texture\n");
-
-                // Note that varying is input in a fragment shader, but output in a vertex shader.
-                if (type == GL.FRAGMENT_SHADER)
-                {
-                    prefix.add("#define varying in\n");
-                    prefix.add("out vec4 flixel_outColor;\n");
-                    prefix.add("#define gl_FragColor flixel_outColor\n");
-                }
-                else if (type == GL.VERTEX_SHADER)
-                {
-                    prefix.add("#define attribute in\n");
-                    prefix.add("#define varying out\n");
-                }
-            }
-        }
-
-        return prefix.toString() + "\n" + (type == GL.FRAGMENT_SHADER ? FRAGMENT_BUILTIN : "") + "\n" + shader.source;
+        return glShader;
     }
 }
 #end

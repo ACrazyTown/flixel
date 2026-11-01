@@ -1,6 +1,7 @@
 package flixel.system.render.gl;
 
 #if FLX_RENDER_OPENGL
+import flixel.system.FlxAssets.FlxShaderAsset;
 import lime.graphics.opengl.GL;
 import flixel.graphics.textures.FlxRenderTexture;
 import flixel.graphics.FlxGraphic;
@@ -142,7 +143,7 @@ class FlxGLView extends FlxCameraView
 		throw "Not implemented";
 	}
 
-	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
+	override function drawFrame(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		// super.drawFrame(frame, matrix, transform, blend, smoothing, shader);
 		frame.parent.texture.syncIfNeeded();
@@ -151,17 +152,17 @@ class FlxGLView extends FlxCameraView
             matrix.concat(_renderMatrix);
 
         // Queue a quad to be drawn when the camera renders
-        var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), resolveShader(filters), blend, transform, matrix);
+		var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), shader.resolveFlxShader(), blend, transform, matrix);
         _drawQueue.push(quad);
 	}
 	
-	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?filters:Array<FlxShader>)
+	override function copyFrame(frame:FlxFrame, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode, smoothing = false, ?shader:FlxShaderAsset)
 	{
 		// super.copyFrame(frame, destPoint, transform, blend, smoothing, shader);
 		frame.parent.texture.syncIfNeeded();
 
         // Queue a quad to be drawn when the camera renders
-        var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), resolveShader(filters), blend, transform, null);
+		var quad = FlxQuadDrawData.get(frame, (antialiasing || smoothing), shader.resolveFlxShader(), blend, transform, null);
         quad.matrix.tx = destPoint.x;
         quad.matrix.ty = destPoint.y;
         if (_useRenderMatrix)
@@ -170,29 +171,21 @@ class FlxGLView extends FlxCameraView
 	}
 	
 	override function drawTriangles(graphic:FlxGraphic, vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvtData:FlxVector2d<Float>, ?colors:FlxVector2d<Int>,
-			?position:FlxPoint, ?blend:BlendMode, repeat = false, smoothing = false, ?transform:ColorTransform, ?filters:Array<FlxShader>)
+		?position:FlxPoint, ?blend:BlendMode, repeat = false, smoothing = false, ?transform:ColorTransform,
+			?shader:FlxShaderAsset)
 	{
 		// super.drawTriangles(graphic, vertices, indices, uvtData, colors, position, blend, repeat, smoothing, transform, shader);
 
         // TODO: implement repeat by changing the texture's wrap?
 
         // TODO: matrix support
-        var triangle = FlxTrianglesDrawData.get(vertices, indices, uvtData, colors, graphic.texture, (antialiasing || smoothing), resolveShader(filters), blend, transform, null);
+		var triangle = FlxTrianglesDrawData.get(vertices, indices, uvtData, colors, graphic.texture, (antialiasing || smoothing), shader.resolveFlxShader(),
+			blend, transform, null);
         triangle.matrix.tx = position.x;
         triangle.matrix.ty = position.y;
         if (_useRenderMatrix)
             triangle.matrix.concat(_renderMatrix);
         _drawQueue.push(triangle);
-	}
-
-    // TODO: temp
-    @:deprecated("to be killed")
-    inline function resolveShader(filters:Array<FlxShader>):FlxShader
-	{
-		if (filters == null) 
-			return null;
-
-		return cast filters[0] != null ? filters[0] : null;
 	}
 
     // =============================================================================

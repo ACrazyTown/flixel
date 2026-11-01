@@ -28,7 +28,7 @@ enum FlxDrawType
 class FlxDrawData implements IFlxDestroyable
 {
     public var type:FlxDrawType;
-	public var topology:FlxTopology = TRIANGLE_LIST;
+    public var topology:FlxTopology = TRIANGLE_LIST;
 
     public var texture:FlxTexture;
     public var textureSmoothing:Bool;
@@ -60,7 +60,8 @@ class FlxQuadDrawData extends FlxDrawData implements IFlxPooled
 {
     static var pool:FlxPool<FlxQuadDrawData> = new FlxPool(FlxQuadDrawData.new);
 
-    public overload extern static inline function get(frame:FlxFrame, smoothing:Bool, shader:FlxShader, blend:BlendMode, colorMultiplier:FlxColor, colorOffset:FlxColor, matrix:FlxMatrix):FlxQuadDrawData
+    public overload extern static inline function get(frame:FlxFrame, smoothing:Bool, shader:FlxShader, blend:BlendMode, colorMultiplier:FlxColor,
+            colorOffset:FlxColor, matrix:FlxMatrix):FlxQuadDrawData
     {
         var data = pool.get();
         
@@ -79,7 +80,8 @@ class FlxQuadDrawData extends FlxDrawData implements IFlxPooled
         return data;
     }
 
-    public overload extern static inline function get(frame:FlxFrame, smoothing:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix):FlxQuadDrawData
+    public overload extern static inline function get(frame:FlxFrame, smoothing:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform,
+            matrix:FlxMatrix):FlxQuadDrawData
     {
         var colorMultiplier = FlxColor.WHITE;
         var colorOffset = FlxColor.TRANSPARENT;
@@ -118,10 +120,10 @@ class FlxQuadDrawData extends FlxDrawData implements IFlxPooled
 
 class FlxTrianglesDrawData extends FlxDrawData implements IFlxPooled
 {
-	static var pool:FlxPool<FlxTrianglesDrawData> = new FlxPool(FlxTrianglesDrawData.new);
-	
-	public static inline function get(vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvs:FlxVector2d<Float>, colors:FlxVector2d<Int>, texture:FlxTexture,
-			smoothing:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
+    static var pool:FlxPool<FlxTrianglesDrawData> = new FlxPool(FlxTrianglesDrawData.new);
+    
+    public static inline function get(vertices:FlxVector2d<Float>, indices:FlxVector2d<Int>, uvs:FlxVector2d<Float>, colors:FlxVector2d<Int>, texture:FlxTexture,
+        smoothing:Bool, shader:FlxShader, blend:BlendMode, transform:ColorTransform, matrix:FlxMatrix)
     {
         var data = pool.get();
 
@@ -153,12 +155,12 @@ class FlxTrianglesDrawData extends FlxDrawData implements IFlxPooled
 
         return data;
     }
-			
+            
     // TODO: typed array
-	public var vertices:FlxVector2d<Float>;
-	public var indices:Vector<Int>;
-	public var uvs:FlxVector2d<Float>;
-	public var colors:Vector<Int>;
+    public var vertices:FlxVector2d<Float>;
+    public var indices:Vector<Int>;
+    public var uvs:FlxVector2d<Float>;
+    public var colors:Vector<Int>;
 
     public function new()
     {

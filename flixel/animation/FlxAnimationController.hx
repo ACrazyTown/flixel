@@ -801,6 +801,7 @@ class FlxAnimationController implements IFlxDestroyable
 		#end
 	}
 	
+	@:haxe.warning("-WDeprecated")
 	function removeInvalidFrames(frames:Array<FlxFrame>)
 	{
 		final invalid:Array<FlxFrame> = [];

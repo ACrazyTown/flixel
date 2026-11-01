@@ -1,7 +1,7 @@
 package flixel.system.render.gl;
 
-import flixel.graphics.textures.FlxRenderTexture;
 #if FLX_RENDER_OPENGL
+import flixel.graphics.textures.FlxRenderTexture;
 import lime.graphics.opengl.GLRenderbuffer;
 import lime.graphics.opengl.GLFramebuffer;
 
